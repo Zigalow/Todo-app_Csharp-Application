@@ -7,6 +7,8 @@ Todo application made in the DTU Course 62413 - Advanced object oriented program
 
 @Zigalow
 
+@ZeeDiaz
+
 @zahe0026
 
 @AliTheBoss03

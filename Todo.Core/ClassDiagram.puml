@@ -1,0 +1,147 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+
+class User {
+    -int Id
+    -string Name
+    -string Email
+    -string PasswordHash
+    -List<TodoList> TodoLists
+    -List<Project> Projects
+}
+
+class TodoList {
+    -int Id
+    -string Name
+    -List<TodoItem> Items
+    -List<User> SharedUsers
+    +void AddItem()
+    +void RemoveItem()
+    +void ShareWithUser(User user)
+}
+
+class TodoItem {
+    -int Id
+    -string Name
+    -string Description
+    -DateTime? DueDate
+    -Priority Priority
+    -bool IsDone
+    -List<Label> labels
+    +void AddLabel()
+    +void RemoveLabel()
+    +void ToggleCompletion()
+}
+
+class Project {
+    -int Id
+    -string Name
+    -List<TodoList> TodoLists   
+}
+
+
+enum Priority {
+    VeryLow,
+    Low,
+    Medium,
+    High,
+    VeryHigh,
+}
+
+class Label {
+    -int id
+    -string Name
+    -string Color
+}
+
+
+
+
+User "1" -- "*" TodoList : Has >
+User "1" -- "*" Project : Has >
+User "1" -- "*" TodoItem : Has >
+TodoList "1" -- "*" TodoItem : Has >
+Project "1" -- "*" TodoList : Has >
+TodoItem "*" -- "*" Label : contains
+
+
+interface ISpecification<T> {
+    +IsSatisfiedBy(T item) : bool
+    +And(ISpecification<T> other) : ISpecification<T>
+    +Or(ISpecification<T> other) : ISpecification<T>
+    +Not() : ISpecification<T>
+}
+
+class DateRangeSpecification {
+    -DateTime StartDate
+    -DateTime EndDate
+    +IsSatisfiedBy(TodoItem item) : bool 
+}
+
+class PrioritySpecification {
+    -Priority Priority
+    +IsSatisfiedBy(TodoItem item) : bool 
+}
+class LabelSpecification {
+    -int LabelId
+    +IsSatisfiedBy(TodoItem item) : bool 
+}
+class CompletionStatusSpecification {
+    -bool IsCompleted
+    +IsSatisfiedBy(TodoItem item) : bool 
+}
+
+class SharedUserSpecification {
+    -int UserId
+    +IsSatisfiedBy(TodoItem item) : bool 
+}
+
+
+ISpecification <|.. DateRangeSpecification: implements < 
+ISpecification <|.. PrioritySpecification: implements <
+ISpecification <|.. LabelSpecification: implements <
+ISpecification <|.. CompletionStatusSpecification: implements <
+ISpecification <|.. UserSpecification: implements <
+
+interface IRepository<t> {
+    +Task<T> GetByIdAsync(int id)
+    +Task<T> AddAsync(T entity)
+    +Task<T> UpdateAsync(T entity)
+    +Task<T> DeleteAsync(T entity)
+}
+
+IRepository -- ISpecification : uses
+
+
+interface IUnitOfWork {
+    +IRepository~User~ Users
+    +IRepository~TodoItem~ TodoItems
+    +IRepository~TodoList~ TodoLists
+    +IRepository~Project~ Projects
+    +IRepository~Label~ Labels
+    +Task SaveChangesAsync()
+}
+
+
+
+IUnitOfWork -- IRepository : contains
+
+
+class Role {
+    -int id
+    -string Name
+    -List<Permission> permissions
+}
+
+class Permission {
+    -int id
+    -string Name
+}
+
+class Calendar {
+    -List<Task> tasks
+    +displayTasks()
+    +filter()
+}
+@enduml

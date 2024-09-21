@@ -7,7 +7,6 @@ class User {
     -string Name
     -string Email
     -string PasswordHash
-    -List<TodoList> TodoLists
     -List<Project> Projects
 }
 
@@ -18,7 +17,6 @@ class TodoList {
     -List<User> SharedUsers
     +void AddItem()
     +void RemoveItem()
-    +void ShareWithUser(User user)
 }
 
 class TodoItem {
@@ -37,7 +35,13 @@ class TodoItem {
 class Project {
     -int Id
     -string Name
-    -List<TodoList> TodoLists   
+    -List<TodoList> TodoLists
+    -User Owner
+    -List<UserProjectRole> UserRoles
+    +void AddTodoList(TodoList list)
+    +void RemoveTodoList(TodoList list)
+    +void ShareWithUser(User user)
+    +void RemoveUser(User user)
 }
 
 
@@ -56,15 +60,44 @@ class Label {
 }
 
 
+class Role {
+    -int id
+    -string Name
+    -List<Permission> permissions
+}
+
+class Permission {
+    -int id
+    -string Name
+}
+
+class UserProjectRole {
+    -int UserId
+    -int ProjectId
+    -Role Role
+}
+
+class Calendar {
+    +List<TodoItem> GetItemsForDate(DateTime date)
+    +List<TodoItem> GetItemsForDateRange(DateTime start, DateTime end)
+    +FilterItems(ISpecification<TodoItem> spec)
+}
 
 
-User "1" -- "*" TodoList : Has >
-User "1" -- "*" Project : Has >
-User "1" -- "*" TodoItem : Has >
-TodoList "1" -- "*" TodoItem : Has >
+User "1" -- "*" Project : participates in >
+User "1" -- "*" Project : owns >
+User "*" -- "*" Role : Has >
+User "1" -- "*" UserProjectRole : Has <
+TodoItem "*" -- "*" Label : Contains
+TodoItem --  Calendar : manages
+TodoItem "1" -- "*" Priority : 1 >
+Role "*" -- "*" Permission : Has >
+Role "1" -- "*" UserProjectRole : assigned to >
+Project "1" -- "*" UserProjectRole : Has >
+
+
+TodoList "1" -- "*" TodoItem : contains >
 Project "1" -- "*" TodoList : Has >
-TodoItem "*" -- "*" Label : contains
-
 
 interface ISpecification<T> {
     +IsSatisfiedBy(T item) : bool
@@ -92,7 +125,7 @@ class CompletionStatusSpecification {
     +IsSatisfiedBy(TodoItem item) : bool 
 }
 
-class SharedUserSpecification {
+class UserSpecification {
     -int UserId
     +IsSatisfiedBy(TodoItem item) : bool 
 }
@@ -104,44 +137,5 @@ ISpecification <|.. LabelSpecification: implements <
 ISpecification <|.. CompletionStatusSpecification: implements <
 ISpecification <|.. UserSpecification: implements <
 
-interface IRepository<t> {
-    +Task<T> GetByIdAsync(int id)
-    +Task<T> AddAsync(T entity)
-    +Task<T> UpdateAsync(T entity)
-    +Task<T> DeleteAsync(T entity)
-}
 
-IRepository -- ISpecification : uses
-
-
-interface IUnitOfWork {
-    +IRepository~User~ Users
-    +IRepository~TodoItem~ TodoItems
-    +IRepository~TodoList~ TodoLists
-    +IRepository~Project~ Projects
-    +IRepository~Label~ Labels
-    +Task SaveChangesAsync()
-}
-
-
-
-IUnitOfWork -- IRepository : contains
-
-
-class Role {
-    -int id
-    -string Name
-    -List<Permission> permissions
-}
-
-class Permission {
-    -int id
-    -string Name
-}
-
-class Calendar {
-    -List<Task> tasks
-    +displayTasks()
-    +filter()
-}
 @enduml

@@ -86,7 +86,6 @@ class Calendar {
 
 User "1" -- "*" Project : participates in >
 User "1" -- "*" Project : owns >
-User "*" -- "*" Role : Has >
 User "1" -- "*" UserProjectRole : Has <
 TodoItem "*" -- "*" Label : Contains
 TodoItem --  Calendar : manages

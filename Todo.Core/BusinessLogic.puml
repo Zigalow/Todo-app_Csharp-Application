@@ -37,7 +37,7 @@ class Project {
     -string Name
     -List<TodoList> TodoLists
     -User Admin
-    -List<UserProjectRole> UserRoles
+    -List<UserProjectAssignment> UserRoles
     +void AddTodoList(TodoList list)
     +void RemoveTodoList(TodoList list)
     +void ShareWithUser(User user)
@@ -67,7 +67,7 @@ class Role {
 }
 
 
-class UserProjectRole {
+class UserProjectAssignment {
     -int UserId
     -int ProjectId
     -Role Role
@@ -82,13 +82,13 @@ class Calendar {
 
 User "1" -- "*" Project : participates in >
 User "1" -- "*" Project : owns >
-User "1" -- "*" UserProjectRole : Has <
+User "1" -- "*" UserProjectAssignment : Has <
 TodoItem "*" -- "*" Label : Contains
 TodoItem --  Calendar : manages
 TodoItem "1" -- "*" Priority : 1 >
 Role "*" -- "*" PermissionType : Has >
-Role "1" -- "*" UserProjectRole : assigned to >
-Project "1" -- "*" UserProjectRole : Has >
+Role "1" -- "*" UserProjectAssignment : assigned to >
+Project "1" -- "*" UserProjectAssignment : Has >
 
 
 TodoList "1" -- "*" TodoItem : contains >

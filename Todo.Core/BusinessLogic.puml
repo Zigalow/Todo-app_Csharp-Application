@@ -36,7 +36,7 @@ class Project {
     -int Id
     -string Name
     -List<TodoList> TodoLists
-    -User Owner
+    -User Admin
     -List<UserProjectRole> UserRoles
     +void AddTodoList(TodoList list)
     +void RemoveTodoList(TodoList list)

@@ -1,0 +1,29 @@
+.todo-lists-container {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 2%;
+    padding: 20px;
+    background-color: #b2b2b2;
+}
+
+.todo-list-container {
+    border: 1px solid #000000; 
+    border-radius: 5px;
+    padding: 15px;
+    background-color: #636363;/*just for for now*/
+}
+
+.task-container {
+    padding: 10px;
+    width: auto;
+    border-bottom: 1px solid #53ff78;
+}
+
+.todo-date {
+    font-style: italic;
+    color: #ec0000;
+}
+
+.new-List {
+    background-color: #28a745;
+}

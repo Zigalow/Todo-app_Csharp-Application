@@ -1,5 +1,19 @@
+
+.todo-list-title{
+    display: grid;
+    grid-template-columns: 80% 20%;
+}
+
 h5{
     font-weight: bold;
+    grid-column: 1;
+}
+
+.todo-list-title img {
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    grid-column: 2;
 }
 
 .todo-lists-container {

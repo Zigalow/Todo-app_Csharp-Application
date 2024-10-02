@@ -11,12 +11,16 @@
         @foreach (var todoList in CurrentProject.TodoLists)
         {
             <div class="todo-list-container">
-                <h5>@todoList.Name</h5>
-                @if(todoList.Tasks != null){
-                    <ul>    
+
+                <div class="todo-list-title">
+                    <h5>@todoList.Name</h5>
+                    <img src="images/menu.png"/>
+                </div>
+
+                @if(todoList.Tasks != null){  
                         @foreach (var task in todoList.Tasks)
                         {
-                            <li class = "task-container">@task.Name
+                            <div class = "task-container">@task.Name
                                 <p>Duration: @task.Duration</p>
                                 <p>Time: @task.TimeStart - @task.TimeEnd</p>
                                 <div class = "todo-date">
@@ -27,9 +31,8 @@
                                     }
                                 </div>
                                 <button onclick="() => ModifiyTask(task)">Modifiy</button>
-                            </li>
+                            </div>
                         }
-                    </ul>
                 }
                 <button>Add Task</button>
             </div>
@@ -71,6 +74,39 @@
                     Tasks = new List<TodoTask>
                     {
                         new TodoTask { Name = "Code front page for C#", Duration = 60, TimeStart="5:15 PM", TimeEnd="6:15 PM", StartDate="01-10-24", EndDate="02-10-24", Description="This is a description"}
+                    }
+                },
+                new TodoList
+                {
+                    Name = "Reading",
+                    Tasks = new List<TodoTask>
+                    {
+                        new TodoTask { Name = "Read 140 pages of Never finished", Duration = 120, TimeStart="5:15 PM", TimeEnd="7:15 PM", StartDate="02-10-24", EndDate="02-10-24", Description="This is a description of the task!"}
+                    }
+                },
+                // Just for the horizontal scoll
+                new TodoList
+                {
+                    Name = "TEST",
+                    Tasks = new List<TodoTask>
+                    {
+                        new TodoTask { Name = "Testy test", Duration = 120, TimeStart="5:15 PM", TimeEnd="7:15 PM", StartDate="02-10-24", EndDate="02-10-24", Description="This is a description of the task!"}
+                    }
+                },
+                new TodoList
+                {
+                    Name = "TEST 02",
+                    Tasks = new List<TodoTask>
+                    {
+                        new TodoTask { Name = "Testy test", Duration = 120, TimeStart="5:15 PM", TimeEnd="7:15 PM", StartDate="02-10-24", EndDate="02-10-24", Description="This is a description of the task!"}
+                    }
+                },
+                new TodoList
+                {
+                    Name = "TEST 03",
+                    Tasks = new List<TodoTask>
+                    {
+                        new TodoTask { Name = "Testy test", Duration = 120, TimeStart="5:15 PM", TimeEnd="7:15 PM", StartDate="02-10-24", EndDate="02-10-24", Description="This is a description of the task!"}
                     }
                 }
             }

@@ -20,17 +20,20 @@
                 @if(todoList.Tasks != null){  
                         @foreach (var task in todoList.Tasks)
                         {
-                            <div class = "task-container">@task.Name
+                            <div class = "task-container">
+                                <p><span>@task.Name</span></p>
                                 <p>Duration: @task.Duration</p>
                                 <p>Time: @task.TimeStart - @task.TimeEnd</p>
-                                <div class = "todo-date">
-                                    @if(task.StartDate == "" && task.EndDate != ""){
-                                        <p>@task.EndDate</p>
-                                    } else if (task.StartDate != "" && task.EndDate != "") {
-                                        <p>@task.StartDate - @task.EndDate</p>
-                                    }
+                                <div class="task-lower-part">
+                                    <div class = "todo-date">
+                                        @if(task.StartDate == "" && task.EndDate != ""){
+                                            <p>@task.EndDate</p>
+                                        } else if (task.StartDate != "" && task.EndDate != "") {
+                                            <p>@task.StartDate - @task.EndDate</p>
+                                        }
+                                    </div>
+                                    <button onclick="() => ModifiyTask(task)">Modifiy</button>
                                 </div>
-                                <button onclick="() => ModifiyTask(task)">Modifiy</button>
                             </div>
                         }
                 }
@@ -38,7 +41,7 @@
             </div>
         }
     }
-    <div class="new-List">
+    <div class="todo-list-container">
         <button>Create new List</button>
     </div>
 </div>
@@ -106,7 +109,9 @@
                     Name = "TEST 03",
                     Tasks = new List<TodoTask>
                     {
-                        new TodoTask { Name = "Testy test", Duration = 120, TimeStart="5:15 PM", TimeEnd="7:15 PM", StartDate="02-10-24", EndDate="02-10-24", Description="This is a description of the task!"}
+                        new TodoTask { Name = "Testy test", Duration = 120, TimeStart="5:15 PM", TimeEnd="7:15 PM", StartDate="02-10-24", EndDate="02-10-24", Description="This is a description of the task!"},
+                        new TodoTask { Name = "Testy test 2", Duration = 120, TimeStart="5:15 PM", TimeEnd="7:15 PM", StartDate="", EndDate="", Description="This is a description of the task!"}
+                    
                     }
                 }
             }

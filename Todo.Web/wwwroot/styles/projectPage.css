@@ -16,6 +16,10 @@ h5{
     grid-column: 2;
 }
 
+span{
+    font-weight: bold;
+}
+
 .todo-lists-container {
     display: flex;
     gap: 2%;
@@ -24,8 +28,7 @@ h5{
     /*background-color: #b2b2b2;*/
     /*Scroll machenism*/
     overflow-x: auto;
-    vertical-align: middle;
-    max-width: max-content;
+    width: 100%;
 }
 
 .todo-list-container {
@@ -43,7 +46,7 @@ h5{
     width: auto;
     background-color: #C5CB6B;
     border-radius: 5px;
-    margin-bottom: 2%;
+    margin-bottom: 5%;
 }
 
 .todo-date {
@@ -54,4 +57,16 @@ h5{
 .new-List {
     background-color: #28a745;
     width: auto;
+}
+
+.task-lower-part{
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+.task-lower-part p {
+    grid-column: 1;
+}
+.task-lower-part button{
+    grid-column: 2;
 }

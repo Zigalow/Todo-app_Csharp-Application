@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Todo.Api.Configuration;
 using Todo.Core.Entities;
 using Label = Microsoft.Data.SqlClient.DataClassification.Label;
 
@@ -21,6 +22,7 @@ public class TodoDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(TodoDbContext).Assembly);
+        modelBuilder.ApplyConfiguration(new RoleConfiguration());
+        modelBuilder.ApplyConfiguration(new TodoItemConfiguration());
     }
 }

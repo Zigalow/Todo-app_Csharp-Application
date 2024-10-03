@@ -11,8 +11,8 @@ public interface IUnitOfWork
     IRepository<Project> Projects { get; }
     IRepository<Label> Labels { get; }
     IRepository<Role> Roles { get; }
-    IRepository<PermissionManager.PermissionType> Permissions { get; }
-    IRepository<UserProjectAssignment> UserProjectAssignments { get; }
+    IRepository<PermissionType> Permissions { get; }
+    IRepository<ProjectCollaborators> UserProjectAssignments { get; }
 
     Task SaveChangesAsync();
 }

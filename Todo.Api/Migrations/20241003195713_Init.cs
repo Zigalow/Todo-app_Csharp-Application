@@ -133,7 +133,7 @@ namespace Todo.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserProjectAssignments",
+                name: "Collaborators",
                 columns: table => new
                 {
                     UserId = table.Column<int>(type: "int", nullable: false),
@@ -190,12 +190,12 @@ namespace Todo.Api.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserProjectAssignments_ProjectId",
-                table: "UserProjectAssignments",
+                table: "Collaborators",
                 column: "ProjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserProjectAssignments_RoleId",
-                table: "UserProjectAssignments",
+                table: "Collaborators",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
@@ -241,7 +241,7 @@ namespace Todo.Api.Migrations
                 name: "Labels");
 
             migrationBuilder.DropTable(
-                name: "UserProjectAssignments");
+                name: "Collaborators");
 
             migrationBuilder.DropTable(
                 name: "Roles");

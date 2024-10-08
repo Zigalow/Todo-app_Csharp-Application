@@ -108,7 +108,7 @@ namespace Todo.Api.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("UserProjectAssignments");
+                    b.ToTable("Collaborators");
                 });
 
             modelBuilder.Entity("Todo.Core.Entities.Role", b =>

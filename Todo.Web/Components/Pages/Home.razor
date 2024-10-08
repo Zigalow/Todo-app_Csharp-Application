@@ -11,15 +11,6 @@
 <div class="projects-container">
     @foreach (var project in Projects)
     {
-        /*<div class="project">
-            <h4><a href="/project/@project.Id" class="project-name">@project.Name</a></h4>
-        </div>*/
-        /*<NavLink href="@GetProjectLink(project.Id)">
-            <div class="project">
-                <p class="project-name">@project.Name</p>
-            </div>
-        </NavLink>*/
-
         <div class="project" @onclick="() => NavigateToProject(project.Id)">
             <p class="project-name">@project.Name</p>
         </div>

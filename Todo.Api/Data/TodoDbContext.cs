@@ -16,7 +16,7 @@ public class TodoDbContext : DbContext
     public DbSet<TodoList> TodoLists { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Project> Projects { get; set; }
-    public DbSet<ProjectCollaborators> UserProjectAssignments { get; set; }
+    public DbSet<ProjectCollaborators> Collaborators { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Label> Labels { get; set; }
 

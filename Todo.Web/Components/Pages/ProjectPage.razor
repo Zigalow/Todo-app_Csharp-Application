@@ -1,5 +1,6 @@
 @page "/project/{projectId:int}"
 @using Todo.Web.Components.TodoComponent
+@rendermode InteractiveServer
 
 
 <title>@CurrentProject.Name</title
@@ -32,7 +33,7 @@
                                             <p>@task.StartDate - @task.EndDate</p>
                                         }
                                     </div>
-                                    <button onclick="() => ModifiyTask(task)">Modifiy</button>
+                                    <button @onclick="() => ModifiyTask(task)">Modifiy</button>
                                 </div>
                             </div>
                         }
@@ -118,7 +119,7 @@
         };
     }
 
-    private void ModifyTask(Task task) {
+    private void ModifiyTask(TodoTask task) {
         Console.WriteLine("Modified Task Done");
     }
 

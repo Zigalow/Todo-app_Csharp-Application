@@ -1,12 +1,27 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 @using Todo.Web.Components.TodoComponent
+@inject NavigationManager NavigationManager
+
 
 <title>Projects</title>
-<div class="projects">
+
+<h1>My Projects</h1>
+
+<div class="projects-container">
     @foreach (var project in Projects)
     {
-        <div class="project">
-            <h4><a href="/project/@project.Id">@project.Name</a></h4>
+        /*<div class="project">
+            <h4><a href="/project/@project.Id" class="project-name">@project.Name</a></h4>
+        </div>*/
+        /*<NavLink href="@GetProjectLink(project.Id)">
+            <div class="project">
+                <p class="project-name">@project.Name</p>
+            </div>
+        </NavLink>*/
+
+        <div class="project" @onclick="() => NavigateToProject(project.Id)">
+            <p class="project-name">@project.Name</p>
         </div>
     }
     <button class="new-project" @onclick="() => AddProject()">Create new project</button>
@@ -16,10 +31,24 @@
     public List<Project> Projects { get; set; } = new List<Project>
     {
         new Project { Id = 0, Name = "Default" },
-        new Project { Id = 1, Name = "Test" }
+        new Project { Id = 1, Name = "Test" },
+        new Project { Id = 2, Name = "CSharp Course" },
+        new Project { Id = 3, Name = "Test 2" },
+        new Project { Id = 4, Name = "Test 3" }
     };
 
     private void AddProject(){
         Console.WriteLine("Add a new project");
     }
+
+    private string GetProjectLink(int projectId)
+    {
+        return $"/project/{projectId}";
+    }
+    private void NavigateToProject(int projectId)
+    {
+        Console.WriteLine($"Navigating to project {projectId}");
+        NavigationManager.NavigateTo($"/project/{projectId}");
+    }
+
 }

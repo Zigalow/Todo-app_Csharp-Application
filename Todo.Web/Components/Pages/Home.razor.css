@@ -1,0 +1,41 @@
+﻿.projects-container{
+    display: flex;
+    /*flex-wrap: wrap;*/
+    gap: 10px;
+    row-gap: 10px;
+    justify-content: flex-start;
+    /*margin: auto;*/
+}
+
+.project .new-project{
+    /*display: flex;*/
+    width: 250px;
+    height: 150px;
+    background: linear-gradient(180deg, #0C2364, #3A0647);
+    /*background-color:#0C2364;*/
+    color:white;
+    border-radius: 5%;
+    /*justify-content: space-between;*/
+    /*align-items: center;
+    justify-content: center;*/
+}
+
+.project-name {
+    color: white;
+}
+
+p {
+    text-decoration: none;
+}
+
+a .project-name {
+    text-decoration: none;
+}
+
+/*Hover effects:*/
+.project:hover{
+    background-color: #05163D;
+}
+.new-project:hover{
+    background-color: #05163D;
+}

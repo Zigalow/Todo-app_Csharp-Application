@@ -1,27 +1,46 @@
 ﻿.projects-container{
     display: flex;
-    /*flex-wrap: wrap;*/
+    flex-wrap: wrap;
     gap: 10px;
     row-gap: 10px;
     justify-content: flex-start;
     /*margin: auto;*/
 }
 
-.project .new-project{
-    /*display: flex;*/
+.project{
+    display: flex;
     width: 250px;
     height: 150px;
-    background: linear-gradient(180deg, #0C2364, #3A0647);
-    /*background-color:#0C2364;*/
+    background: linear-gradient(#0C2364, #3A0647);
+    background-color:#0C2364;
     color:white;
     border-radius: 5%;
     /*justify-content: space-between;*/
     /*align-items: center;
     justify-content: center;*/
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+}
+
+.new-project{
+    /*display: flex;*/
+    width: 250px;
+    height: 150px;
+    background: linear-gradient(#0C2364, #3A0647);
+    background-color:#0C2364;
+    color:white;
+    border-radius: 5%;
+    /*align-items: center;
+    justify-content: center;*/
+    cursor: pointer;
 }
 
 .project-name {
     color: white;
+    text-align: center;
+    margin: 0;
+
 }
 
 p {

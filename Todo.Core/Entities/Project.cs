@@ -13,7 +13,7 @@ public class Project
     public string Name { get; set; } = null!;
 
     [Required]
-    public int AdminId { get; set; }
+    public string AdminId { get; set; } = null!;
 
     [ForeignKey(nameof(AdminId))]
     public ApplicationUser Admin { get; set; } = null!;

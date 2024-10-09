@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
 
 namespace Todo.Core.Entities;
@@ -7,12 +8,12 @@ namespace Todo.Core.Entities;
 [PrimaryKey(nameof(UserId), nameof(ProjectId))]
 public class ProjectCollaborators
 {
-    public int UserId { get; set; }
+    public string UserId { get; set; }
 
     public int ProjectId { get; set; }
 
     [Required]
-    public int RoleId { get; set; }
+    public string RoleId { get; set; } = null!;
 
     [ForeignKey(nameof(UserId))]
     public ApplicationUser ApplicationUser { get; set; } = null!;

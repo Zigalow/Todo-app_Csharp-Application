@@ -41,7 +41,7 @@ p{
 .circular-button {
     width: 50px;
     height: 50px;
-    background-color: #5f6c79;
+    background-color:white;
     border-radius: 50%;
     border: none;
     color: white;
@@ -54,7 +54,7 @@ p{
 }
 
 .circular-button img {
-    width: 70%; 
+    width: 200%; 
 }
 
 .auth-button {

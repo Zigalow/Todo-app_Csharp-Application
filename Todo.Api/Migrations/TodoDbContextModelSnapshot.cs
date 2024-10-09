@@ -111,7 +111,7 @@ namespace Todo.Api.Migrations
                     b.ToTable("Collaborators");
                 });
 
-            modelBuilder.Entity("Todo.Core.Entities.Role", b =>
+            modelBuilder.Entity("Todo.Core.Entities.ApplicationRole", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -194,7 +194,7 @@ namespace Todo.Api.Migrations
                     b.ToTable("TodoLists");
                 });
 
-            modelBuilder.Entity("Todo.Core.Entities.User", b =>
+            modelBuilder.Entity("Todo.Core.Entities.ApplicationUser", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -243,7 +243,7 @@ namespace Todo.Api.Migrations
 
             modelBuilder.Entity("Todo.Core.Entities.Project", b =>
                 {
-                    b.HasOne("Todo.Core.Entities.User", "Admin")
+                    b.HasOne("Todo.Core.Entities.ApplicationUser", "Admin")
                         .WithMany()
                         .HasForeignKey("AdminId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -260,13 +260,13 @@ namespace Todo.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Todo.Core.Entities.Role", "Role")
+                    b.HasOne("Todo.Core.Entities.ApplicationRole", "ApplicationRole")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Todo.Core.Entities.User", "User")
+                    b.HasOne("Todo.Core.Entities.ApplicationUser", "ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -274,9 +274,9 @@ namespace Todo.Api.Migrations
 
                     b.Navigation("Project");
 
-                    b.Navigation("Role");
+                    b.Navigation("ApplicationRole");
 
-                    b.Navigation("User");
+                    b.Navigation("ApplicationUser");
                 });
 
             modelBuilder.Entity("Todo.Core.Entities.TodoItem", b =>
@@ -301,7 +301,7 @@ namespace Todo.Api.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("Todo.Core.Entities.User", b =>
+            modelBuilder.Entity("Todo.Core.Entities.ApplicationUser", b =>
                 {
                     b.HasOne("Todo.Core.Entities.TodoItem", null)
                         .WithMany("Assignees")

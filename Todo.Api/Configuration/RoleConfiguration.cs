@@ -5,9 +5,9 @@ using Todo.Core.Entities;
 
 namespace Todo.Api.Configuration;
 
-public class RoleConfiguration : IEntityTypeConfiguration<Role>
+public class RoleConfiguration : IEntityTypeConfiguration<ApplicationRole>
 {
-    public void Configure(EntityTypeBuilder<Role> builder)
+    public void Configure(EntityTypeBuilder<ApplicationRole> builder)
     {
         var permissionTypeComparer = new ValueComparer<HashSet<PermissionType>>(
             (c1, c2) => c1.SetEquals(c2),

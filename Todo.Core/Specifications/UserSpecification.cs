@@ -2,24 +2,24 @@ using Todo.Core.Entities;
 
 namespace Todo.Core.Specifications;
 
-public class UserSpecification : ISpecification<User>
+public class UserSpecification : ISpecification<ApplicationUser>
 {
-    public bool IsSatisfiedBy(User item)
+    public bool IsSatisfiedBy(ApplicationUser item)
     {
         throw new NotImplementedException();
     }
 
-    public ISpecification<User> And(ISpecification<User> specification)
+    public ISpecification<ApplicationUser> And(ISpecification<ApplicationUser> specification)
     {
         throw new NotImplementedException();
     }
 
-    public ISpecification<User> Or(ISpecification<User> specification)
+    public ISpecification<ApplicationUser> Or(ISpecification<ApplicationUser> specification)
     {
         throw new NotImplementedException();
     }
 
-    public ISpecification<User> Not()
+    public ISpecification<ApplicationUser> Not()
     {
         throw new NotImplementedException();
     }

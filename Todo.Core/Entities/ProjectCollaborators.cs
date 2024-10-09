@@ -15,11 +15,11 @@ public class ProjectCollaborators
     public int RoleId { get; set; }
 
     [ForeignKey(nameof(UserId))]
-    public User User { get; set; } = null!;
+    public ApplicationUser ApplicationUser { get; set; } = null!;
 
     [ForeignKey(nameof(ProjectId))]
     public Project Project { get; set; } = null!;
 
     [ForeignKey(nameof(RoleId))]
-    public Role Role { get; set; } = null!;
+    public ApplicationRole ApplicationRole { get; set; } = null!;
 }

@@ -1,7 +1,7 @@
 using Todo.Core.Entities;
-using Label = System.Reflection.Emit.Label;
+using Todo.Core.Repositories;
 
-namespace Todo.Core.Repositories;
+namespace Todo.Core.Interfaces;
 
 public interface IUnitOfWork
 {

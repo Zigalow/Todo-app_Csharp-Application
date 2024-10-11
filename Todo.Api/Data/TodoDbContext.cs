@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Todo.Api.Configuration;
 using Todo.Core.Entities;
-using Label = Microsoft.Data.SqlClient.DataClassification.Label;
 
 namespace Todo.Api.Data;
 

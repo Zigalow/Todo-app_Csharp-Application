@@ -1,5 +1,4 @@
 using Todo.Core.Entities;
-using Todo.Core.Repositories;
 
 namespace Todo.Core.Interfaces;
 

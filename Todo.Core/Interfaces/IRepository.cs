@@ -1,4 +1,4 @@
-namespace Todo.Core.Repositories;
+namespace Todo.Core.Interfaces;
 
 public interface IRepository<T>
 {

@@ -1,0 +1,126 @@
+@page "/project/{projectId:int}"
+@using Todo.Web.Components.TodoComponent
+@rendermode InteractiveServer
+
+
+<title>@CurrentProject.Name</title
+
+<h1>@CurrentProject.Name</h1>
+
+<div class="todo-lists-container">
+    @if(CurrentProject.TodoLists != null){
+        @foreach (var todoList in CurrentProject.TodoLists)
+        {
+            <div class="todo-list-container">
+
+                <div class="todo-list-title">
+                    <h5>@todoList.Name</h5>
+                    <img src="images/menu.png"/>
+                </div>
+
+                @if(todoList.Tasks != null){  
+                        @foreach (var task in todoList.Tasks)
+                        {
+                            <div class = "task-container">
+                                <p><span>@task.Name</span></p>
+                                <p>Duration: @task.Duration</p>
+                                <p>Time: @task.TimeStart - @task.TimeEnd</p>
+                                <div class="task-lower-part">
+                                    <div class = "todo-date">
+                                        @if(task.StartDate == "" && task.EndDate != ""){
+                                            <p>@task.EndDate</p>
+                                        } else if (task.StartDate != "" && task.EndDate != "") {
+                                            <p>@task.StartDate - @task.EndDate</p>
+                                        }
+                                    </div>
+                                    <button @onclick="() => ModifiyTask(task)">Modifiy</button>
+                                </div>
+                            </div>
+                        }
+                }
+                <button>Add Task</button>
+            </div>
+        }
+    }
+    <div class="todo-list-container">
+        <button>Create new List</button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int ProjectId { get; set; }
+    public required Project CurrentProject { get; set; }
+
+    //hardcoded TODO List
+    private List<TodoTask> hobbyTasks = new List<TodoTask>{
+        new TodoTask { Name = "Play football with friends", Duration = 90, TimeStart="5:15 AM", TimeEnd="6:45 AM", StartDate="30-09-24", EndDate="30-09-24", Description="This is a very good description"},
+        new TodoTask { Name = "Watch one piece", Duration = 20, TimeStart="19:30 PM", TimeEnd="19:50 PM", StartDate="30-09-24", EndDate="30-09-24", Description="This is also a very good description"},   
+        new TodoTask { Name = "Run a marathon", Duration = 20, TimeStart = "5:15 AM", TimeEnd = "7:45 AM" ,  StartDate="30-09-24", EndDate="30-09-24", Description="This is also a very nice description"}   
+    };
+
+    //Shouldn't actually create a new project (fetch the given project)
+    protected override void OnInitialized() {
+        CurrentProject = new Project
+        {
+            Id = ProjectId,
+            Name = "Default-Project",
+            TodoLists = new List<TodoList>
+            {
+                new TodoList
+                {
+                    Name = "Hobby",
+                    Tasks = hobbyTasks
+                },
+                new TodoList
+                {
+                    Name = "School",
+                    Tasks = new List<TodoTask>
+                    {
+                        new TodoTask { Name = "Code front page for C#", Duration = 60, TimeStart="5:15 PM", TimeEnd="6:15 PM", StartDate="01-10-24", EndDate="02-10-24", Description="This is a description"}
+                    }
+                },
+                new TodoList
+                {
+                    Name = "Reading",
+                    Tasks = new List<TodoTask>
+                    {
+                        new TodoTask { Name = "Read 140 pages of Never finished", Duration = 120, TimeStart="5:15 PM", TimeEnd="7:15 PM", StartDate="02-10-24", EndDate="02-10-24", Description="This is a description of the task!"}
+                    }
+                },
+                // Just for the horizontal scoll
+                new TodoList
+                {
+                    Name = "TEST",
+                    Tasks = new List<TodoTask>
+                    {
+                        new TodoTask { Name = "Testy test", Duration = 120, TimeStart="5:15 PM", TimeEnd="7:15 PM", StartDate="02-10-24", EndDate="02-10-24", Description="This is a description of the task!"}
+                    }
+                },
+                new TodoList
+                {
+                    Name = "TEST 02",
+                    Tasks = new List<TodoTask>
+                    {
+                        new TodoTask { Name = "Testy test", Duration = 120, TimeStart="5:15 PM", TimeEnd="7:15 PM", StartDate="02-10-24", EndDate="02-10-24", Description="This is a description of the task!"}
+                    }
+                },
+                new TodoList
+                {
+                    Name = "TEST 03",
+                    Tasks = new List<TodoTask>
+                    {
+                        new TodoTask { Name = "Testy test", Duration = 120, TimeStart="5:15 PM", TimeEnd="7:15 PM", StartDate="02-10-24", EndDate="02-10-24", Description="This is a description of the task!"},
+                        new TodoTask { Name = "Testy test 2", Duration = 120, TimeStart="5:15 PM", TimeEnd="7:15 PM", StartDate="", EndDate="", Description="This is a description of the task!"}
+                    
+                    }
+                }
+            }
+        };
+    }
+
+    private void ModifiyTask(TodoTask task) {
+        Console.WriteLine("Modified Task Done");
+    }
+
+}

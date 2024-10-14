@@ -1,7 +1,45 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@using Todo.Web.Components.TodoComponent
+@inject NavigationManager NavigationManager
 
-<PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<title>Projects</title>
 
-Welcome to your new app.
+<h1>My Projects</h1>
+
+<div class="projects-container">
+    @foreach (var project in Projects)
+    {
+        <div class="project" @onclick="() => NavigateToProject(project.Id)">
+            <p class="project-name">@project.Name</p>
+        </div>
+    }
+    <button class="new-project" @onclick="() => AddProject()">Create new project</button>
+</div>
+
+@code {
+    public List<Project> Projects { get; set; } = new List<Project>
+    {
+        new Project { Id = 0, Name = "Default" },
+        new Project { Id = 1, Name = "Test" },
+        new Project { Id = 2, Name = "CSharp Course" },
+        new Project { Id = 3, Name = "Test 2" },
+        new Project { Id = 4, Name = "Test 3" }
+    };
+
+    private void AddProject(){
+        Console.WriteLine("Add a new project");
+    }
+
+    private string GetProjectLink(int projectId)
+    {
+        return $"/project/{projectId}";
+    }
+    private void NavigateToProject(int projectId)
+    {
+        Console.WriteLine($"Navigating to project {projectId}");
+        NavigationManager.NavigateTo($"/project/{projectId}");
+    }
+
+}

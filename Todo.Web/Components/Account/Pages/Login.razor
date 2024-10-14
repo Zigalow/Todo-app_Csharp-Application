@@ -12,15 +12,15 @@
 
 <PageTitle>Log in</PageTitle>
 
-<h1>Log in</h1>
-<div class="row">
-    <div class="col-md-4">
+<div class="container">
+    @*<div class="col-md-4">*@
+    <h2>Log in</h2>
         <section>
             <StatusMessage Message="@errorMessage"/>
             <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
                 <DataAnnotationsValidator/>
-                <h2>Use a local account to log in.</h2>
-                <hr/>
+                @*<h2>Use a local account to log in.</h2>
+                <hr/>*@
                 <ValidationSummary class="text-danger" role="alert"/>
                 <div class="form-floating mb-3">
                     <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com"/>
@@ -37,10 +37,24 @@
                         <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input"/>
                         Remember me
                     </label>
-                </div>
-                <div>
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
+</div>          
+           <div>
+    <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
+    <h3>Or signup with</h3>
+</div>
+
+<div class="button-container">
+    <!-- Google Button -->
+    <button class="circular-button">
+        <img src="./Images/google.png" alt="Google Logo"/>
+    </button>
+    
+    <!-- Facebook Button -->
+    <button class="circular-button">
+        <img src="./Images/facebook_logo.svg" alt="Facebook Logo"/>
+    </button>
+</div>
+                
                 <div>
                     <p>
                         <a href="Account/ForgotPassword">Forgot your password?</a>
@@ -54,14 +68,14 @@
                 </div>
             </EditForm>
         </section>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
+    @*</div>*@
+    @*<div class="col-md-6 col-md-offset-2">
         <section>
             <h3>Use another service to log in.</h3>
             <hr/>
             <ExternalLoginPicker/>
         </section>
-    </div>
+    </div>*@
 </div>
 
 @code {

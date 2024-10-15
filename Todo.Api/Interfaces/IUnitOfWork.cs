@@ -6,7 +6,7 @@ namespace Todo.Api.Interfaces;
 public interface IUnitOfWork
 {
     IRepository<ApplicationUser> Users { get; }
-    IRepository<TodoItem> TodoItems { get; }
+    ITodoItemRepository TodoItems { get; }
     ITodoListRepository TodoLists { get; }
     IProjectRepository Projects { get; }
     IRepository<Label> Labels { get; }

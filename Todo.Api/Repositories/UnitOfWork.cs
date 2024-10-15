@@ -11,7 +11,7 @@ public class UnitOfWork : IUnitOfWork
     private readonly TodoDbContext _dbContext;
 
     public IRepository<ApplicationUser> Users { get; }
-    public IRepository<TodoItem> TodoItems { get; }
+    public ITodoItemRepository TodoItems { get; }
     public ITodoListRepository TodoLists { get; }
     public IProjectRepository Projects { get; }
     public IRepository<Label> Labels { get; }
@@ -23,7 +23,7 @@ public class UnitOfWork : IUnitOfWork
     {
         _dbContext = dbContext;
         Users = new GenericRepository<ApplicationUser>(_dbContext);
-        TodoItems = new GenericRepository<TodoItem>(_dbContext);
+        TodoItems = new TodoItemRepository(_dbContext);
         TodoLists = new TodoListRepository(_dbContext);
         Projects = new ProjectRepository(_dbContext);
         Labels = new GenericRepository<Label>(_dbContext);

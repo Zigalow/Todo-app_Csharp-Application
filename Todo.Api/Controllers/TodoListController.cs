@@ -47,7 +47,7 @@ public class TodoListController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateTodoList(int projectId, CreateTodoListDto createTodoListDto)
     {
-        var projectExists = await _unitOfWork.Projects.ProjectExists(projectId);
+        var projectExists = await _unitOfWork.Projects.ExistsAsync(projectId);
 
         if (!projectExists)
         {

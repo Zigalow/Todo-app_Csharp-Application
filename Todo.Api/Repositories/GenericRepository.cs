@@ -42,4 +42,9 @@ public class GenericRepository<T> : IRepository<T> where T : class
         DbSet.Remove(entity);
         return Task.CompletedTask;
     }
+
+    public Task<bool> ExistsAsync(int id)
+    {
+        return DbSet.AnyAsync(e => EF.Property<int>(e, "Id") == id);
+    }
 }

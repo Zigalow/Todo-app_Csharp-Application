@@ -10,5 +10,4 @@ public interface IProjectRepository : IRepository<Project>
     Task AddCollaboratorAsync(int projectId, string userId, string roleId);
     Task RemoveCollaboratorAsync(int projectId, int userId);
     Task<Project?> UpdateAsyncRequest(int id, UpdateProjectDto updateProjectDto);
-    Task<bool> ProjectExists(int id);
 }

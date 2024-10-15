@@ -26,7 +26,7 @@ public class ProjectsController : ControllerBase
 
         var projects = await _unitOfWork.Projects.GetAllAsync();
 
-        return Ok(projects);
+        return Ok(projects.ToListedProjectDtos());
     }
 
     [HttpGet("{id:int}")]
@@ -38,7 +38,7 @@ public class ProjectsController : ControllerBase
         }
 
         var project = await _unitOfWork.Projects.GetByIdAsync(id);
-        return project == null ? NotFound() : Ok(project);
+        return project == null ? NotFound() : Ok(project.ToProjectDto());
     }
 
     [HttpPost]

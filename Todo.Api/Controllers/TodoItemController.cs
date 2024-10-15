@@ -19,6 +19,11 @@ public class TodoItemController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllTodoItems()
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var todoItems = await _unitOfWork.TodoItems.GetAllAsync();
         return Ok(todoItems);
     }
@@ -27,6 +32,11 @@ public class TodoItemController : ControllerBase
     [Route("project/{projectId:int}")]
     public async Task<IActionResult> GetAllTodoItemsForProject(int projectId)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var todoItems = await _unitOfWork.TodoItems.GetAllTodoItemsForProject(projectId);
 
         if (todoItems == null)
@@ -41,6 +51,11 @@ public class TodoItemController : ControllerBase
     [Route("todo-list/{todoListId:int}")]
     public async Task<IActionResult> GetAllTodoItemsForTodoList(int todoListId)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var todoItems = await _unitOfWork.TodoItems.GetAllTodoItemsForTodoList(todoListId);
 
         if (todoItems == null)
@@ -54,6 +69,11 @@ public class TodoItemController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetTodoItemById(int id)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var todoItem = await _unitOfWork.TodoItems.GetByIdAsync(id);
         return todoItem == null ? NotFound() : Ok(todoItem);
     }
@@ -61,6 +81,11 @@ public class TodoItemController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateTodoItem(int todoListId, CreateTodoItemDto createTodoItemDto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var todoListExists = await _unitOfWork.TodoLists.ExistsAsync(todoListId);
 
         if (!todoListExists)
@@ -79,6 +104,11 @@ public class TodoItemController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateTodoItem(int id, UpdateTodoItemDto updateTodoItemDto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var todoItem = await _unitOfWork.TodoItems.UpdateAsyncRequest(id, updateTodoItemDto);
 
         if (todoItem == null)
@@ -95,6 +125,11 @@ public class TodoItemController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteTodoItem(int id)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var todoItem = await _unitOfWork.TodoItems.GetByIdAsync(id);
 
         if (todoItem == null)

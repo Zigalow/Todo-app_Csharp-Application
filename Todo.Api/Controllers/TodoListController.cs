@@ -19,6 +19,10 @@ public class TodoListController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllTodoLists()
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         var todoLists = await _unitOfWork.TodoLists.GetAllAsync();
         return Ok(todoLists);
     }
@@ -27,6 +31,10 @@ public class TodoListController : ControllerBase
     [Route("project/{projectId:int}")]
     public async Task<IActionResult> GetAllTodoListsForProject(int projectId)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         var todoLists = await _unitOfWork.TodoLists.GetAllTodoListsForProject(projectId);
 
         if (todoLists == null)
@@ -81,6 +89,11 @@ public class TodoListController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteTodoList(int id)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var todoList = await _unitOfWork.TodoLists.GetByIdAsync(id);
         if (todoList == null)
         {

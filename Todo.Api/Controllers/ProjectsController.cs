@@ -19,6 +19,11 @@ public class ProjectsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllProjects()
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var projects = await _unitOfWork.Projects.GetAllAsync();
 
         return Ok(projects);
@@ -27,6 +32,11 @@ public class ProjectsController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetProjectById(int id)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var project = await _unitOfWork.Projects.GetByIdAsync(id);
         return project == null ? NotFound() : Ok(project);
     }
@@ -34,6 +44,11 @@ public class ProjectsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateProject(CreateProjectDto createProjectDto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var createdProject = createProjectDto.ToProjectFromCreateDto();
         await _unitOfWork.Projects.AddAsync(createdProject);
 
@@ -45,6 +60,11 @@ public class ProjectsController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateProject(int id, UpdateProjectDto updateProjectDto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var project = await _unitOfWork.Projects.UpdateAsyncRequest(id, updateProjectDto);
 
         if (project == null)
@@ -54,13 +74,18 @@ public class ProjectsController : ControllerBase
 
         await _unitOfWork.Projects.UpdateAsync(project);
         await _unitOfWork.SaveChangesAsync();
-        
+
         return Ok(project.ToProjectDto());
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteProject(int id)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var project = await _unitOfWork.Projects.GetByIdAsync(id);
         if (project == null)
         {

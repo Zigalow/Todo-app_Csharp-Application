@@ -59,4 +59,9 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
 
         return existingProject;
     }
+
+    public Task<bool> ProjectExists(int id)
+    {
+        return _dbContext.Projects.AnyAsync(p => p.Id == id);
+    }
 }

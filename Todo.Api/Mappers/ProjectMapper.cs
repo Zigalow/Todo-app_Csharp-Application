@@ -11,7 +11,10 @@ public static class ProjectMapper
         {
             Id = project.Id,
             Name = project.Name,
-            AdminName = project.Owner != null ? project.Owner.UserName : "No user" 
+            AdminId = project.AdminId,
+            AdminName = project.Owner.UserName,
+            TodoListsCount = project.TodoLists.Count,
+            TodoItemsCount = project.TodoLists.Sum(tl => tl.Items.Count)
         };
     }
 

@@ -75,4 +75,35 @@ public class TodoItemController : ControllerBase
 
         return CreatedAtAction(nameof(GetTodoItemById), new { id = todoItem.Id }, todoItem);
     }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> UpdateTodoItem(int id, UpdateTodoItemDto updateTodoItemDto)
+    {
+        var todoItem = await _unitOfWork.TodoItems.UpdateAsyncRequest(id, updateTodoItemDto);
+
+        if (todoItem == null)
+        {
+            return NotFound("Todo item not found");
+        }
+
+        await _unitOfWork.TodoItems.UpdateAsync(todoItem);
+        await _unitOfWork.SaveChangesAsync();
+
+        return Ok(todoItem);
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteTodoItem(int id)
+    {
+        var todoItem = await _unitOfWork.TodoItems.GetByIdAsync(id);
+
+        if (todoItem == null)
+        {
+            return NotFound("Todo item not found");
+        }
+
+        await _unitOfWork.TodoItems.DeleteAsync(todoItem);
+        await _unitOfWork.SaveChangesAsync();
+        return NoContent();
+    }
 }

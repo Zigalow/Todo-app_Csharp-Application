@@ -16,7 +16,7 @@ public class Project
     public string AdminId { get; set; } = null!;
 
     [ForeignKey(nameof(AdminId))]
-    public ApplicationUser Admin { get; set; } = null!;
+    public ApplicationUser Owner { get; set; } = null!;
 
     [Required]
     public ICollection<TodoList> TodoLists { get; set; } = new List<TodoList>();

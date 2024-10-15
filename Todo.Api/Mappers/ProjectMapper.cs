@@ -26,4 +26,9 @@ public static class ProjectMapper
             AdminId = "12345" // Hardcoded for now so they are all linked to the same aspnet user
         };
     }
+
+    public static IEnumerable<ProjectDto> ToListedProjectDtos(this IEnumerable<Project> projects)
+    {
+        return projects.Select(project => project.ToProjectDto());
+    }
 }

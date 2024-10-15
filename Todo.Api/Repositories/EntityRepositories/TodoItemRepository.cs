@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Todo.Api.Data;
+using Todo.Api.Dtos.TodoItemDtos;
 using Todo.Api.Interfaces.EntityInterfaces;
 using Todo.Core.Entities;
 
@@ -33,5 +34,23 @@ public class TodoItemRepository : GenericRepository<TodoItem>, ITodoItemReposito
             .FirstOrDefaultAsync();
 
         return todoItemsFromProject?.Items.ToList();
+    }
+
+    public async Task<TodoItem?> UpdateAsyncRequest(int id, UpdateTodoItemDto todoItemDto)
+    {
+        var existingTodoItem = await _dbContext.TodoItems.FindAsync(id);
+
+        if (existingTodoItem == null)
+        {
+            return null;
+        }
+
+        existingTodoItem.Title = todoItemDto.Title;
+        existingTodoItem.Description = todoItemDto.Description;
+        existingTodoItem.DueDate = todoItemDto.DueDate;
+        existingTodoItem.Priority = todoItemDto.Priority;
+        existingTodoItem.IsDone = todoItemDto.IsDone;
+
+        return existingTodoItem;
     }
 }

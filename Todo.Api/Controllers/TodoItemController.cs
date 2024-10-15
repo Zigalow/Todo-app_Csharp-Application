@@ -25,7 +25,10 @@ public class TodoItemController : ControllerBase
         }
 
         var todoItems = await _unitOfWork.TodoItems.GetAllAsync();
-        return Ok(todoItems);
+
+        var todoItemsDto = todoItems.Select(todoItem => todoItem.ToTodoItemDto());
+
+        return Ok(todoItems.ToListedTodoItemsDtos());
     }
 
     [HttpGet]
@@ -44,7 +47,7 @@ public class TodoItemController : ControllerBase
             return NotFound("Project not found");
         }
 
-        return Ok(todoItems);
+        return Ok(todoItems.ToListedTodoItemsDtos());
     }
 
     [HttpGet]
@@ -63,7 +66,7 @@ public class TodoItemController : ControllerBase
             return NotFound("TodoList not found");
         }
 
-        return Ok(todoItems);
+        return Ok(todoItems.ToListedTodoItemsDtos());
     }
 
     [HttpGet("{id:int}")]
@@ -75,7 +78,7 @@ public class TodoItemController : ControllerBase
         }
 
         var todoItem = await _unitOfWork.TodoItems.GetByIdAsync(id);
-        return todoItem == null ? NotFound() : Ok(todoItem);
+        return todoItem == null ? NotFound() : Ok(todoItem.ToTodoItemDto());
     }
 
     [HttpPost]
@@ -98,7 +101,7 @@ public class TodoItemController : ControllerBase
         await _unitOfWork.TodoItems.AddAsync(todoItem);
         await _unitOfWork.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetTodoItemById), new { id = todoItem.Id }, todoItem);
+        return CreatedAtAction(nameof(GetTodoItemById), new { id = todoItem.Id }, todoItem.ToTodoItemDto());
     }
 
     [HttpPut("{id:int}")]
@@ -119,7 +122,7 @@ public class TodoItemController : ControllerBase
         await _unitOfWork.TodoItems.UpdateAsync(todoItem);
         await _unitOfWork.SaveChangesAsync();
 
-        return Ok(todoItem);
+        return Ok(todoItem.ToTodoItemDto());
     }
 
     [HttpDelete("{id:int}")]

@@ -32,4 +32,9 @@ public static class TodoItemMapper
             TodoListId = todoListId,
         };
     }
+    
+    public static IEnumerable<TodoItemDto> ToListedTodoItemsDtos(this IEnumerable<TodoItem> todoItems)
+    {
+        return todoItems.Select(todoItem => todoItem.ToTodoItemDto());
+    }
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Todo.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class IdentitySetup : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -99,7 +99,6 @@ namespace Todo.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     TodoItemId = table.Column<int>(type: "int", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -162,7 +161,7 @@ namespace Todo.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Collaborators",
+                name: "ProjectCollaborators",
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -171,21 +170,21 @@ namespace Todo.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Collaborators", x => new { x.UserId, x.ProjectId });
+                    table.PrimaryKey("PK_ProjectCollaborators", x => new { x.UserId, x.ProjectId });
                     table.ForeignKey(
-                        name: "FK_Collaborators_AspNetRoles_RoleId",
+                        name: "FK_ProjectCollaborators_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Collaborators_AspNetUsers_UserId",
+                        name: "FK_ProjectCollaborators_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Collaborators_Projects_ProjectId",
+                        name: "FK_ProjectCollaborators_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "Id",
@@ -308,16 +307,6 @@ namespace Todo.Api.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Collaborators_ProjectId",
-                table: "Collaborators",
-                column: "ProjectId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Collaborators_RoleId",
-                table: "Collaborators",
-                column: "RoleId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Labels_ProjectId",
                 table: "Labels",
                 column: "ProjectId");
@@ -326,6 +315,16 @@ namespace Todo.Api.Migrations
                 name: "IX_Labels_TodoItemId",
                 table: "Labels",
                 column: "TodoItemId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectCollaborators_ProjectId",
+                table: "ProjectCollaborators",
+                column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectCollaborators_RoleId",
+                table: "ProjectCollaborators",
+                column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Projects_AdminId",
@@ -397,10 +396,10 @@ namespace Todo.Api.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Collaborators");
+                name: "Labels");
 
             migrationBuilder.DropTable(
-                name: "Labels");
+                name: "ProjectCollaborators");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

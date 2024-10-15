@@ -12,8 +12,8 @@ using Todo.Api.Data;
 namespace Todo.Api.Migrations
 {
     [DbContext(typeof(TodoDbContext))]
-    [Migration("20241011190641_IdentitySetup")]
-    partial class IdentitySetup
+    [Migration("20241013150749_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -187,11 +187,6 @@ namespace Todo.Api.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -312,7 +307,7 @@ namespace Todo.Api.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Collaborators");
+                    b.ToTable("ProjectCollaborators");
                 });
 
             modelBuilder.Entity("Todo.Core.Entities.TodoItem", b =>
@@ -451,13 +446,13 @@ namespace Todo.Api.Migrations
 
             modelBuilder.Entity("Todo.Core.Entities.Project", b =>
                 {
-                    b.HasOne("Todo.Core.Entities.ApplicationUser", "Admin")
+                    b.HasOne("Todo.Core.Entities.ApplicationUser", "Owner")
                         .WithMany("Projects")
                         .HasForeignKey("AdminId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Admin");
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("Todo.Core.Entities.ProjectCollaborators", b =>

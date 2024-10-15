@@ -46,9 +46,27 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
         }
     }
 
+    public new async Task<List<Project>> GetAllAsync()
+    {
+        return await _dbContext.Projects
+            .Include(p => p.Owner)
+            .Include(p => p.TodoLists)
+            .ThenInclude(tl => tl.Items)
+            .ToListAsync();
+    }
+
+    public new async Task<Project?> GetByIdAsync(int id)
+    {
+        return await _dbContext.Projects
+            .Include(p => p.Owner)
+            .Include(p => p.TodoLists)
+            .ThenInclude(tl => tl.Items)
+            .FirstOrDefaultAsync(p => p.Id == id);
+    }
+
     public async Task<Project?> UpdateAsyncRequest(int id, UpdateProjectDto projectDto)
     {
-        var existingProject = await _dbContext.Projects.FirstOrDefaultAsync(project => project.Id == id);
+        var existingProject = await GetByIdAsync(id);
 
         if (existingProject == null)
         {

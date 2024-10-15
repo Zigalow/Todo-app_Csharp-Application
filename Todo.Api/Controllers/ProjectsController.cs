@@ -54,7 +54,9 @@ public class ProjectsController : ControllerBase
 
         await _unitOfWork.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetProjectById), new { id = createdProject.Id }, createdProject);
+        var newProject = await _unitOfWork.Projects.GetByIdAsync(createdProject.Id);
+
+        return CreatedAtAction(nameof(GetProjectById), new { id = newProject!.Id }, newProject.ToProjectDto());
     }
 
     [HttpPut("{id:int}")]

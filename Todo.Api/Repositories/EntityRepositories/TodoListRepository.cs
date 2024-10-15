@@ -32,10 +32,9 @@ public class TodoListRepository : GenericRepository<TodoList>, ITodoListReposito
     public async Task<List<TodoList>?> GetAllTodoListsForProject(int projectId)
     {
         var projectWithTodoLists = await _dbContext.Projects
-            .Where(p => p.Id == projectId)
             .Include(p => p.TodoLists)
             .ThenInclude(tl => tl.Items)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(p => p.Id == projectId);
 
         return projectWithTodoLists?.TodoLists.ToList();
     }

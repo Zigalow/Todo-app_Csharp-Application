@@ -15,16 +15,16 @@ public class TodoListRepository : GenericRepository<TodoList>, ITodoListReposito
         _dbContext = dbContext;
     }
 
-    public new Task<List<TodoList>> GetAllAsync()
+    public new async Task<List<TodoList>> GetAllAsync()
     {
-        return _dbContext.TodoLists
+        return await _dbContext.TodoLists
             .Include(tl => tl.Items)
             .ToListAsync();
     }
 
-    public new Task<TodoList?> GetByIdAsync(int id)
+    public new async Task<TodoList?> GetByIdAsync(int id)
     {
-        return _dbContext.TodoLists
+        return await _dbContext.TodoLists
             .Include(tl => tl.Items)
             .FirstOrDefaultAsync(tl => tl.Id == id);
     }

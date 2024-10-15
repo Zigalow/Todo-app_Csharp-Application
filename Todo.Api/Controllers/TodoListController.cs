@@ -23,8 +23,9 @@ public class TodoListController : ControllerBase
         {
             return BadRequest(ModelState);
         }
+
         var todoLists = await _unitOfWork.TodoLists.GetAllAsync();
-        return Ok(todoLists);
+        return Ok(todoLists.ToListedTodoListDtos());
     }
 
     [HttpGet]
@@ -35,6 +36,7 @@ public class TodoListController : ControllerBase
         {
             return BadRequest(ModelState);
         }
+
         var todoLists = await _unitOfWork.TodoLists.GetAllTodoListsForProject(projectId);
 
         if (todoLists == null)
@@ -42,14 +44,14 @@ public class TodoListController : ControllerBase
             return NotFound("Project not found");
         }
 
-        return Ok(todoLists);
+        return Ok(todoLists.ToListedTodoListDtos());
     }
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetTodoListById(int id)
     {
         var todoList = await _unitOfWork.TodoLists.GetByIdAsync(id);
-        return todoList == null ? NotFound() : Ok(todoList);
+        return todoList == null ? NotFound() : Ok(todoList.ToTodoListDto());
     }
 
     [HttpPost]
@@ -67,7 +69,7 @@ public class TodoListController : ControllerBase
         await _unitOfWork.TodoLists.AddAsync(todoList);
         await _unitOfWork.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetTodoListById), new { id = todoList.Id }, todoList);
+        return CreatedAtAction(nameof(GetTodoListById), new { id = todoList.Id }, todoList.ToTodoListDto());
     }
 
     [HttpPut("{id:int}")]
@@ -83,7 +85,7 @@ public class TodoListController : ControllerBase
         await _unitOfWork.TodoLists.UpdateAsync(todoList);
         await _unitOfWork.SaveChangesAsync();
 
-        return Ok(todoList);
+        return Ok(todoList.ToTodoListDto());
     }
 
     [HttpDelete("{id:int}")]

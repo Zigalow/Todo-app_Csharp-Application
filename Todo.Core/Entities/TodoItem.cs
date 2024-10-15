@@ -29,5 +29,5 @@ public class TodoItem
     public TodoList TodoList { get; set; } = null!;
 
     public ICollection<Label> Labels { get; set; } = new List<Label>();
-    public ICollection<ApplicationUser> Assignees { get; set; } = new List<ApplicationUser>();
+    // public ICollection<ApplicationUser> Assignees { get; set; } = new List<ApplicationUser>();
 }

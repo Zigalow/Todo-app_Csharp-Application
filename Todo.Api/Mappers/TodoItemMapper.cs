@@ -1,3 +1,4 @@
+using Microsoft.OpenApi.Extensions;
 using Todo.Api.Dtos.TodoItemDtos;
 using Todo.Core.Entities;
 
@@ -13,7 +14,7 @@ public static class TodoItemMapper
             Title = todoItem.Title,
             Description = todoItem.Description,
             DueDate = todoItem.DueDate,
-            Priority = todoItem.Priority,
+            Priority = todoItem.Priority.GetDisplayName(),
             IsDone = todoItem.IsDone,
             TodoListId = todoItem.TodoListId,
             Labels = todoItem.Labels.ToList()

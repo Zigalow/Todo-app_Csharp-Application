@@ -8,7 +8,7 @@ public class TodoItemDto
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public DateTime? DueDate { get; set; }
-    public Priority Priority { get; set; } = Priority.VeryLow;
+    public string Priority { get; set; } = "VeryLow";
     public bool IsDone { get; set; } = false;
     public int TodoListId { get; set; }
     public List<Label> Labels { get; set; } = new();

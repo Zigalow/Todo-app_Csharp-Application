@@ -22,11 +22,19 @@ public class TodoListRepository : GenericRepository<TodoList>, ITodoListReposito
             .ToListAsync();
     }
 
+    public new Task<TodoList?> GetByIdAsync(int id)
+    {
+        return _dbContext.TodoLists
+            .Include(tl => tl.Items)
+            .FirstOrDefaultAsync(tl => tl.Id == id);
+    }
+
     public async Task<List<TodoList>?> GetAllTodoListsForProject(int projectId)
     {
         var projectWithTodoLists = await _dbContext.Projects
             .Where(p => p.Id == projectId)
-            .Select(p => new { p.TodoLists })
+            .Include(p => p.TodoLists)
+            .ThenInclude(tl => tl.Items)
             .FirstOrDefaultAsync();
 
         return projectWithTodoLists?.TodoLists.ToList();
@@ -34,7 +42,7 @@ public class TodoListRepository : GenericRepository<TodoList>, ITodoListReposito
 
     public async Task<TodoList?> UpdateAsyncRequest(int id, UpdateTodoListDto todoListDto)
     {
-        var existingTodoList = await _dbContext.TodoLists.FindAsync(id);
+        var existingTodoList = await GetByIdAsync(id);
 
         if (existingTodoList == null)
         {

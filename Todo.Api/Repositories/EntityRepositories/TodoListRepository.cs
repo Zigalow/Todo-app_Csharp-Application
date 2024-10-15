@@ -15,6 +15,13 @@ public class TodoListRepository : GenericRepository<TodoList>, ITodoListReposito
         _dbContext = dbContext;
     }
 
+    public new Task<List<TodoList>> GetAllAsync()
+    {
+        return _dbContext.TodoLists
+            .Include(tl => tl.Items)
+            .ToListAsync();
+    }
+
     public async Task<List<TodoList>?> GetAllTodoListsForProject(int projectId)
     {
         var projectWithTodoLists = await _dbContext.Projects
@@ -38,5 +45,4 @@ public class TodoListRepository : GenericRepository<TodoList>, ITodoListReposito
 
         return existingTodoList;
     }
-   
 }

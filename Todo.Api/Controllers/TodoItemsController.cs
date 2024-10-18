@@ -7,11 +7,11 @@ namespace Todo.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class TodoItemController : ControllerBase
+public class TodoItemsController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
 
-    public TodoItemController(IUnitOfWork unitOfWork)
+    public TodoItemsController(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
     }

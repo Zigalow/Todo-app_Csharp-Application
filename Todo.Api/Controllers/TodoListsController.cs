@@ -7,11 +7,11 @@ namespace Todo.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class TodoListController : ControllerBase
+public class TodoListsController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
 
-    public TodoListController(IUnitOfWork unitOfWork)
+    public TodoListsController(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
     }
@@ -29,7 +29,7 @@ public class TodoListController : ControllerBase
     }
 
     [HttpGet]
-    [Route("project/{projectId:int}")]
+    [Route("{projectId:int}/project/TodoLists")]
     public async Task<IActionResult> GetAllTodoListsForProject(int projectId)
     {
         if (!ModelState.IsValid)

@@ -5,7 +5,7 @@ using Todo.Api.Mappers;
 
 namespace Todo.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/projects")]
 [ApiController]
 public class ProjectsController : ControllerBase
 {

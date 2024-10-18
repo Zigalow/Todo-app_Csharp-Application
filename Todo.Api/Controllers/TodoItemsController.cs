@@ -5,7 +5,7 @@ using Todo.Api.Mappers;
 
 namespace Todo.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/todo-items")]
 [ApiController]
 public class TodoItemsController : ControllerBase
 {
@@ -31,8 +31,7 @@ public class TodoItemsController : ControllerBase
         return Ok(todoItems.ToListedTodoItemsDtos());
     }
 
-    [HttpGet]
-    [Route("project/{projectId:int}")]
+    [HttpGet("by-project/{projectId:int}")]
     public async Task<IActionResult> GetAllTodoItemsForProject(int projectId)
     {
         if (!ModelState.IsValid)
@@ -50,8 +49,7 @@ public class TodoItemsController : ControllerBase
         return Ok(todoItems.ToListedTodoItemsDtos());
     }
 
-    [HttpGet]
-    [Route("todo-list/{todoListId:int}")]
+    [HttpGet("by-list/{todoListId:int}")]
     public async Task<IActionResult> GetAllTodoItemsForTodoList(int todoListId)
     {
         if (!ModelState.IsValid)
@@ -81,7 +79,7 @@ public class TodoItemsController : ControllerBase
         return todoItem == null ? NotFound() : Ok(todoItem.ToTodoItemDto());
     }
 
-    [HttpPost]
+    [HttpPost("for-list/{todoListId:int}")]
     public async Task<IActionResult> CreateTodoItem(int todoListId, CreateTodoItemDto createTodoItemDto)
     {
         if (!ModelState.IsValid)

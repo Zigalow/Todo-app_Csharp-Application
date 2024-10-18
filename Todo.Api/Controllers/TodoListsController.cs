@@ -5,7 +5,7 @@ using Todo.Api.Mappers;
 
 namespace Todo.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/todo-lists")]
 [ApiController]
 public class TodoListsController : ControllerBase
 {
@@ -28,8 +28,7 @@ public class TodoListsController : ControllerBase
         return Ok(todoLists.ToListedTodoListDtos());
     }
 
-    [HttpGet]
-    [Route("{projectId:int}/project/TodoLists")]
+    [HttpGet("by-project/{projectId:int}")]
     public async Task<IActionResult> GetAllTodoListsForProject(int projectId)
     {
         if (!ModelState.IsValid)
@@ -54,7 +53,7 @@ public class TodoListsController : ControllerBase
         return todoList == null ? NotFound() : Ok(todoList.ToTodoListDto());
     }
 
-    [HttpPost]
+    [HttpPost("for-project/{projectId:int}")]
     public async Task<IActionResult> CreateTodoList(int projectId, CreateTodoListDto createTodoListDto)
     {
         var projectExists = await _unitOfWork.Projects.ExistsAsync(projectId);

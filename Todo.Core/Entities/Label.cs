@@ -20,4 +20,5 @@ public class Label
 
     [ForeignKey(nameof(ProjectId))]
     public Project Project { get; set; } = null!;
+    public ICollection<TodoItem> TodoItems { get; set; } = new List<TodoItem>();
 }

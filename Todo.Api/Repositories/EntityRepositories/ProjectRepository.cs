@@ -62,9 +62,4 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
             .ThenInclude(tl => tl.Items)
             .FirstOrDefaultAsync(p => p.Id == id);
     }
-
-    public Task<bool> ProjectExists(int id)
-    {
-        return _dbContext.Projects.AnyAsync(p => p.Id == id);
-    }
 }

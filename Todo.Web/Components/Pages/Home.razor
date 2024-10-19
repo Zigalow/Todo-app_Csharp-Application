@@ -15,10 +15,22 @@
             <p class="project-name">@project.Name</p>
         </div>
     }
-    <button class="new-project" @onclick="() => AddProject()">Create new project</button>
+    @if(IsAddingProject){
+        <div class="new-project">
+            <input type="text" @bind="NewProjectName" placeholder="Project Name"/>
+            <button @onclick="() => CreateProject()">Create Project</button>
+            <button @onclick="() => IsAddingProject = false">Cancel</button>
+        </div>
+    } else {
+        <button class="new-project" @onclick="() => ShowInputProject()">Create new project</button>
+    }
+
 </div>
 
 @code {
+    [Parameter]
+    public bool IsAddingProject {get; set;} = false;
+    private string NewProjectName = "";
     public List<Project> Projects { get; set; } = new List<Project>
     {
         new Project { Id = 0, Name = "Default" },
@@ -28,8 +40,15 @@
         new Project { Id = 4, Name = "Test 3" }
     };
 
-    private void AddProject(){
-        Console.WriteLine("Add a new project");
+    private void CreateProject(){
+        if(string.IsNullOrEmpty(NewProjectName) || string.IsNullOrWhiteSpace(NewProjectName)){
+            return;
+        }
+        Projects.Add(
+            new Project {Id =6 ,Name = NewProjectName}
+        );
+        NewProjectName = "";
+        Console.WriteLine("Added a new project");
     }
 
     private string GetProjectLink(int projectId)
@@ -41,5 +60,11 @@
         Console.WriteLine($"Navigating to project {projectId}");
         NavigationManager.NavigateTo($"/project/{projectId}");
     }
+    private void ShowInputProject(){
+        IsAddingProject = true;
+    }
 
+    private int generateProjectId(){
+        return 12;
+    }
 }

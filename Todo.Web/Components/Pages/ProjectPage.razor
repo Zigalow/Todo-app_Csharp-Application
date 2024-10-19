@@ -21,10 +21,14 @@
                 @if(todoList.Tasks != null){  
                         @foreach (var task in todoList.Tasks)
                         {
-                            <div class = "task-container">
+                            <div class = "task-container" @onclick="() => ViewTask=true">
                                 <p><span>@task.Name</span></p>
-                                <p>Duration: @task.Duration</p>
+                                @if(task.Duration > 0){
+                                    <p>Duration: @task.Duration</p>
+                                }
+                                @if(task.TimeStart!="" || task.TimeEnd!=""){
                                 <p>Time: @task.TimeStart - @task.TimeEnd</p>
+                                }
                                 <div class="task-lower-part">
                                     <div class = "todo-date">
                                         @if(task.StartDate == "" && task.EndDate != ""){
@@ -38,7 +42,15 @@
                             </div>
                         }
                 }
-                <button>Add Task</button>
+                @if (IsAddingTask && CurrentListAddingTask == todoList)
+                {
+                    <input type="text" @bind="TextValue" placeholder="Enter task name..." />
+                    <button @onclick="() => CreateTask(todoList)">Create Task</button>
+                }
+                else
+                {
+                    <button @onclick="() => ShowInputField(todoList)">Add Task</button>
+                }
             </div>
         }
     }
@@ -51,6 +63,12 @@
     [Parameter]
     public int ProjectId { get; set; }
     public required Project CurrentProject { get; set; }
+    
+    private bool IsAddingTask { get; set; } = false;
+    private TodoList CurrentListAddingTask { get; set; } = null;
+    private string TextValue = "";
+
+    private bool ViewTask {get; set; } = false;
 
     //hardcoded TODO List
     private List<TodoTask> hobbyTasks = new List<TodoTask>{
@@ -122,5 +140,24 @@
     private void ModifiyTask(TodoTask task) {
         Console.WriteLine("Modified Task Done");
     }
+
+    private void ShowInputField(TodoList todoList){
+        IsAddingTask = true;
+        CurrentListAddingTask = todoList;
+    }
+
+    private void CreateTask(TodoList todoList){
+        if (string.IsNullOrEmpty(TextValue))
+        {
+            return;
+        }
+        todoList.Tasks.Add (
+            new TodoTask {Name = TextValue, TimeStart="", TimeEnd="", StartDate="", EndDate="", Description=""}
+        );
+        TextValue = "";
+        IsAddingTask = false;
+        CurrentListAddingTask = null;
+    }
+
 
 }

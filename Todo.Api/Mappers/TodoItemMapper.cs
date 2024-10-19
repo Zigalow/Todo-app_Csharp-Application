@@ -32,7 +32,16 @@ public static class TodoItemMapper
             TodoListId = todoListId,
         };
     }
-    
+
+    public static void UpdateTodoItemFromUpdateDto(this TodoItem todoItem, UpdateTodoItemDto updateTodoItemDto)
+    {
+        todoItem.Title = updateTodoItemDto.Title;
+        todoItem.Description = updateTodoItemDto.Description;
+        todoItem.DueDate = updateTodoItemDto.DueDate;
+        todoItem.Priority = updateTodoItemDto.Priority;
+        todoItem.IsDone = updateTodoItemDto.IsDone;
+    }
+
     public static IEnumerable<TodoItemDto> ToListedTodoItemsDtos(this IEnumerable<TodoItem> todoItems)
     {
         return todoItems.Select(todoItem => todoItem.ToTodoItemDto());

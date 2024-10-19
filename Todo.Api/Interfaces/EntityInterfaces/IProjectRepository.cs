@@ -1,4 +1,3 @@
-using Todo.Api.Dtos.ProjectDtos;
 using Todo.Core.Entities;
 
 namespace Todo.Api.Interfaces.EntityInterfaces;
@@ -9,5 +8,4 @@ public interface IProjectRepository : IRepository<Project>
     Task<IEnumerable<ApplicationUser>> GetProjectCollaboratorsAsync(int projectId);
     Task AddCollaboratorAsync(int projectId, string userId, string roleId);
     Task RemoveCollaboratorAsync(int projectId, int userId);
-    Task<Project?> UpdateAsyncRequest(int id, UpdateProjectDto updateProjectDto);
 }

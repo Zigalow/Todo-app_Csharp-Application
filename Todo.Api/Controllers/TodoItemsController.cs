@@ -110,12 +110,14 @@ public class TodoItemsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var todoItem = await _unitOfWork.TodoItems.UpdateAsyncRequest(id, updateTodoItemDto);
+        var todoItem = await _unitOfWork.TodoItems.GetByIdAsync(id);
 
         if (todoItem == null)
         {
             return NotFound("Todo item not found");
         }
+
+        todoItem.UpdateTodoItemFromUpdateDto(updateTodoItemDto);
 
         await _unitOfWork.TodoItems.UpdateAsync(todoItem);
         await _unitOfWork.SaveChangesAsync();

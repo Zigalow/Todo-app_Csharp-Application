@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Todo.Api.Data;
-using Todo.Api.Dtos.TodoListDtos;
 using Todo.Api.Interfaces.EntityInterfaces;
 using Todo.Core.Entities;
 
@@ -37,19 +36,5 @@ public class TodoListRepository : GenericRepository<TodoList>, ITodoListReposito
             .FirstOrDefaultAsync(p => p.Id == projectId);
 
         return projectWithTodoLists?.TodoLists.ToList();
-    }
-
-    public async Task<TodoList?> UpdateAsyncRequest(int id, UpdateTodoListDto todoListDto)
-    {
-        var existingTodoList = await GetByIdAsync(id);
-
-        if (existingTodoList == null)
-        {
-            return null;
-        }
-
-        existingTodoList.Name = todoListDto.Name;
-
-        return existingTodoList;
     }
 }

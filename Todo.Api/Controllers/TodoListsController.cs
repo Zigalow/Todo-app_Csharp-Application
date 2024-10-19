@@ -74,12 +74,14 @@ public class TodoListsController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateTodoList(int id, UpdateTodoListDto updateTodoListDto)
     {
-        var todoList = await _unitOfWork.TodoLists.UpdateAsyncRequest(id, updateTodoListDto);
+        var todoList = await _unitOfWork.TodoLists.GetByIdAsync(id);
 
         if (todoList == null)
         {
             return NotFound("Todo list not found");
         }
+
+        todoList.UpdateTodoListFromUpdateDto(updateTodoListDto);
 
         await _unitOfWork.TodoLists.UpdateAsync(todoList);
         await _unitOfWork.SaveChangesAsync();

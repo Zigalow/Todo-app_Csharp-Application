@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Todo.Api.Data;
-using Todo.Api.Dtos.ProjectDtos;
 using Todo.Api.Interfaces.EntityInterfaces;
 using Todo.Core.Entities;
 
@@ -62,20 +61,6 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
             .Include(p => p.TodoLists)
             .ThenInclude(tl => tl.Items)
             .FirstOrDefaultAsync(p => p.Id == id);
-    }
-
-    public async Task<Project?> UpdateAsyncRequest(int id, UpdateProjectDto projectDto)
-    {
-        var existingProject = await GetByIdAsync(id);
-
-        if (existingProject == null)
-        {
-            return null;
-        }
-
-        existingProject.Name = projectDto.Name;
-
-        return existingProject;
     }
 
     public Task<bool> ProjectExists(int id)

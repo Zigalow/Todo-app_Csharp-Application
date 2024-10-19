@@ -25,6 +25,11 @@ public static class TodoListMapper
         };
     }
 
+    public static void UpdateTodoListFromUpdateDto(this TodoList todoList, UpdateTodoListDto updateTodoListDto)
+    {
+        todoList.Name = updateTodoListDto.Name;
+    }
+
     public static IEnumerable<TodoListDto> ToListedTodoListDtos(this IEnumerable<TodoList> todoLists)
     {
         return todoLists.Select(todoList => todoList.ToTodoListDto());

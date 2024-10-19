@@ -67,12 +67,14 @@ public class ProjectsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var project = await _unitOfWork.Projects.UpdateAsyncRequest(id, updateProjectDto);
+        var project = await _unitOfWork.Projects.GetByIdAsync(id);
 
         if (project == null)
         {
             return NotFound();
         }
+
+        project.UpdateProjectFromUpdateDto(updateProjectDto);
 
         await _unitOfWork.Projects.UpdateAsync(project);
         await _unitOfWork.SaveChangesAsync();

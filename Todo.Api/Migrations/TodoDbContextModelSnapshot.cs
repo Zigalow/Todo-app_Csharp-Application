@@ -22,6 +22,21 @@ namespace Todo.Api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("LabelTodoItem", b =>
+                {
+                    b.Property<int>("LabelsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TodoItemsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("LabelsId", "TodoItemsId");
+
+                    b.HasIndex("TodoItemsId");
+
+                    b.ToTable("LabelTodoItem");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.Property<int>("Id")
@@ -245,14 +260,9 @@ namespace Todo.Api.Migrations
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TodoItemId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
-
-                    b.HasIndex("TodoItemId");
 
                     b.ToTable("Labels");
                 });
@@ -363,6 +373,21 @@ namespace Todo.Api.Migrations
                     b.ToTable("TodoLists");
                 });
 
+            modelBuilder.Entity("LabelTodoItem", b =>
+                {
+                    b.HasOne("Todo.Core.Entities.Label", null)
+                        .WithMany()
+                        .HasForeignKey("LabelsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Todo.Core.Entities.TodoItem", null)
+                        .WithMany()
+                        .HasForeignKey("TodoItemsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Todo.Core.Entities.ApplicationRole", null)
@@ -421,10 +446,6 @@ namespace Todo.Api.Migrations
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Todo.Core.Entities.TodoItem", null)
-                        .WithMany("Labels")
-                        .HasForeignKey("TodoItemId");
 
                     b.Navigation("Project");
                 });
@@ -499,11 +520,6 @@ namespace Todo.Api.Migrations
                     b.Navigation("Collaborators");
 
                     b.Navigation("TodoLists");
-                });
-
-            modelBuilder.Entity("Todo.Core.Entities.TodoItem", b =>
-                {
-                    b.Navigation("Labels");
                 });
 
             modelBuilder.Entity("Todo.Core.Entities.TodoList", b =>

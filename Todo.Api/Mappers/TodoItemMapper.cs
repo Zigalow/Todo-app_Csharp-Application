@@ -17,7 +17,7 @@ public static class TodoItemMapper
             Priority = todoItem.Priority.GetDisplayName(),
             IsDone = todoItem.IsDone,
             TodoListId = todoItem.TodoListId,
-            Labels = todoItem.Labels.ToList()
+            Labels = todoItem.Labels.Select(l => l.Name).ToList()
         };
     }
 

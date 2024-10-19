@@ -1,5 +1,3 @@
-using Todo.Core.Entities;
-
 namespace Todo.Api.Dtos.TodoItemDtos;
 
 public class TodoItemDto
@@ -11,5 +9,5 @@ public class TodoItemDto
     public string Priority { get; set; } = "VeryLow";
     public bool IsDone { get; set; } = false;
     public int TodoListId { get; set; }
-    public List<Label> Labels { get; set; } = new();
+    public List<String> Labels { get; set; } = new();
 }

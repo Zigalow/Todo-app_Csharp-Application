@@ -4,7 +4,7 @@ namespace Todo.Api.Dtos.TodoListDtos;
 
 public class UpdateTodoListDto
 {
-    [Required]
+
     [StringLength(100)]
-    public string Name { get; set; } = null!;
+    public string? Name { get; set; } = null;
 }

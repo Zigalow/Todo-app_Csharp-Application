@@ -27,6 +27,7 @@ public static class TodoListMapper
 
     public static void UpdateTodoListFromUpdateDto(this TodoList todoList, UpdateTodoListDto updateTodoListDto)
     {
+        if (updateTodoListDto.Name is not null)
         todoList.Name = updateTodoListDto.Name;
     }
 

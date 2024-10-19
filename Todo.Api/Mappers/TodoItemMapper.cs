@@ -35,11 +35,16 @@ public static class TodoItemMapper
 
     public static void UpdateTodoItemFromUpdateDto(this TodoItem todoItem, UpdateTodoItemDto updateTodoItemDto)
     {
-        todoItem.Title = updateTodoItemDto.Title;
-        todoItem.Description = updateTodoItemDto.Description;
-        todoItem.DueDate = updateTodoItemDto.DueDate;
-        todoItem.Priority = updateTodoItemDto.Priority;
-        todoItem.IsDone = updateTodoItemDto.IsDone;
+        if (updateTodoItemDto.Title is not null)
+            todoItem.Title = updateTodoItemDto.Title;
+        if (updateTodoItemDto.Description is not null)
+            todoItem.Description = updateTodoItemDto.Description;
+        if (updateTodoItemDto.DueDate is not null)
+            todoItem.DueDate = updateTodoItemDto.DueDate;
+        if (updateTodoItemDto.Priority is not null)
+            todoItem.Priority = updateTodoItemDto.Priority ?? todoItem.Priority;
+        if (updateTodoItemDto.IsDone is not null)
+            todoItem.IsDone = updateTodoItemDto.IsDone ?? todoItem.IsDone;
     }
 
     public static IEnumerable<TodoItemDto> ToListedTodoItemsDtos(this IEnumerable<TodoItem> todoItems)

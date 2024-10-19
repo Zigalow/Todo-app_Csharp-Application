@@ -4,7 +4,7 @@ namespace Todo.Api.Dtos.LabelDto;
 
 public class UpdateLabelDto
 {
-    public string Name { get; set; } = string.Empty;
+    public string? Name { get; set; } = null;
 
     [StringLength(7)]
     [RegularExpression("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",

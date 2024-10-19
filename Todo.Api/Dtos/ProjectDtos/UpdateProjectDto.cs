@@ -6,5 +6,5 @@ public class UpdateProjectDto
 {
     [Required]
     [StringLength(100)]
-    public string Name { get; set; } = null!;
+    public string? Name { get; set; } = null;
 }

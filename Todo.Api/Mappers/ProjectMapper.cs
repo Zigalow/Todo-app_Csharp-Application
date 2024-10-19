@@ -29,7 +29,8 @@ public static class ProjectMapper
 
     public static void UpdateProjectFromUpdateDto(this Project project, UpdateProjectDto updateProjectDto)
     {
-        project.Name = updateProjectDto.Name;
+        if (updateProjectDto.Name is not null)
+            project.Name = updateProjectDto.Name;
     }
 
     public static IEnumerable<ProjectDto> ToListedProjectDtos(this IEnumerable<Project> projects)

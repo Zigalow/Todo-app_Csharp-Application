@@ -9,7 +9,7 @@ public interface IUnitOfWork
     ITodoItemRepository TodoItems { get; }
     ITodoListRepository TodoLists { get; }
     IProjectRepository Projects { get; }
-    IRepository<Label> Labels { get; }
+    ILabelRepository Labels { get; }
     IRepository<ApplicationRole> Roles { get; }
     IRepository<PermissionType> Permissions { get; }
     IRepository<ProjectCollaborators> UserProjectAssignments { get; }

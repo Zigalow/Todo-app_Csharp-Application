@@ -14,7 +14,7 @@ public class UnitOfWork : IUnitOfWork
     public ITodoItemRepository TodoItems { get; }
     public ITodoListRepository TodoLists { get; }
     public IProjectRepository Projects { get; }
-    public IRepository<Label> Labels { get; }
+    public ILabelRepository Labels { get; }
     public IRepository<ApplicationRole> Roles { get; }
     public IRepository<PermissionType> Permissions { get; }
     public IRepository<ProjectCollaborators> UserProjectAssignments { get; }
@@ -26,7 +26,7 @@ public class UnitOfWork : IUnitOfWork
         TodoItems = new TodoItemRepository(_dbContext);
         TodoLists = new TodoListRepository(_dbContext);
         Projects = new ProjectRepository(_dbContext);
-        Labels = new GenericRepository<Label>(_dbContext);
+        Labels = new LabelRepository(_dbContext);
         Roles = new GenericRepository<ApplicationRole>(_dbContext);
         // Permissions = new GenericRepository<PermissionType>(_dbContext);
         UserProjectAssignments = new GenericRepository<ProjectCollaborators>(_dbContext);

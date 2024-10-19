@@ -144,4 +144,32 @@ public class TodoItemsController : ControllerBase
         await _unitOfWork.SaveChangesAsync();
         return NoContent();
     }
+
+    [HttpPut("{todoItemId:int}/attach-label/{labelId:int}")]
+    public async Task<IActionResult> AttachLabelToItem(int todoItemId, int labelId)
+    {
+        var result = await _unitOfWork.TodoItems.AttachLabelToItem(todoItemId, labelId);
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(result.Error);
+        }
+
+        await _unitOfWork.SaveChangesAsync();
+        return Ok(result.Value!.ToTodoItemDto());
+    }
+
+    [HttpPut("{todoItemId:int}/detach-label/{labelId:int}")]
+    public async Task<IActionResult> DetachLabelFromItem(int todoItemId, int labelId)
+    {
+        var result = await _unitOfWork.TodoItems.DetachLabelFromItem(todoItemId, labelId);
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(result.Error);
+        }
+
+        await _unitOfWork.SaveChangesAsync();
+        return Ok(result.Value!.ToTodoItemDto());
+    }
 }

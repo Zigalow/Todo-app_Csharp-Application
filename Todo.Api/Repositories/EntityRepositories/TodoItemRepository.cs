@@ -48,5 +48,67 @@ public class TodoItemRepository : GenericRepository<TodoItem>, ITodoItemReposito
         return todoItemsFromProject?.Items.ToList();
     }
 
- 
+    public new async Task<TodoItem?> GetByIdAsync(int id)
+    {
+        return await _dbContext.TodoItems
+            .Include(i => i.Labels)
+            .FirstOrDefaultAsync(i => i.Id == id);
+    }
+
+    public async Task<Result<TodoItem>> AttachLabelToItem(int todoItemId, int labelId)
+    {
+        var todoItem = await GetByIdAsync(todoItemId);
+
+        if (todoItem == null)
+        {
+            return Result<TodoItem>.Failure("Todo item not found");
+        }
+
+        var label = await _dbContext.Labels.FindAsync(labelId);
+
+        if (label == null)
+        {
+            return Result<TodoItem>.Failure("Label not found");
+        }
+
+        if (label.ProjectId != todoItem.TodoList.ProjectId)
+        {
+            return Result<TodoItem>.Failure("Label not from the same project as the todo item");
+        }
+
+        if (todoItem.Labels.Contains(label))
+        {
+            return Result<TodoItem>.Failure("Label already attached to the todo item");
+        }
+
+        todoItem.Labels.Add(label);
+
+        return Result<TodoItem>.Success(todoItem);
+    }
+
+    public async Task<Result<TodoItem>> DetachLabelFromItem(int todoItemId, int labelId)
+    {
+        var todoItem = await GetByIdAsync(todoItemId);
+
+        if (todoItem == null)
+        {
+            return Result<TodoItem>.Failure("Todo item not found");
+        }
+
+        var label = await _dbContext.Labels.FindAsync(labelId);
+
+        if (label == null)
+        {
+            return Result<TodoItem>.Failure("Label not found");
+        }
+
+        if (!todoItem.Labels.Contains(label))
+        {
+            return Result<TodoItem>.Failure("Label not attached to the todo item");
+        }
+
+        todoItem.Labels.Remove(label);
+
+        return Result<TodoItem>.Success(todoItem);
+    }
 }

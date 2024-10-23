@@ -52,6 +52,7 @@ public class TodoItemRepository : GenericRepository<TodoItem>, ITodoItemReposito
     {
         return await _dbContext.TodoItems
             .Include(i => i.Labels)
+            .Include(i => i.TodoList)
             .FirstOrDefaultAsync(i => i.Id == id);
     }
 

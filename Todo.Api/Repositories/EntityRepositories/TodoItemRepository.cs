@@ -103,6 +103,11 @@ public class TodoItemRepository : GenericRepository<TodoItem>, ITodoItemReposito
             return Result<TodoItem>.Failure("Label not found");
         }
 
+        if (label.ProjectId != todoItem.TodoList.ProjectId)
+        {
+            return Result<TodoItem>.Failure("Label not from the same project as the todo item");
+        }
+        
         if (!todoItem.Labels.Contains(label))
         {
             return Result<TodoItem>.Failure("Label not attached to the todo item");

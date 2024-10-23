@@ -148,6 +148,10 @@ public class TodoItemsController : ControllerBase
     [HttpPut("{todoItemId:int}/attach-label/{labelId:int}")]
     public async Task<IActionResult> AttachLabelToItem(int todoItemId, int labelId)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         var result = await _unitOfWork.TodoItems.AttachLabelToItem(todoItemId, labelId);
 
         if (!result.IsSuccess)
@@ -162,6 +166,10 @@ public class TodoItemsController : ControllerBase
     [HttpPut("{todoItemId:int}/detach-label/{labelId:int}")]
     public async Task<IActionResult> DetachLabelFromItem(int todoItemId, int labelId)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         var result = await _unitOfWork.TodoItems.DetachLabelFromItem(todoItemId, labelId);
 
         if (!result.IsSuccess)

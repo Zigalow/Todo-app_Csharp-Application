@@ -18,4 +18,9 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Todo.Api\Todo.Api.csproj" />
+      <ProjectReference Include="..\Todo.Core\Todo.Core.csproj" />
+    </ItemGroup>
+
 </Project>

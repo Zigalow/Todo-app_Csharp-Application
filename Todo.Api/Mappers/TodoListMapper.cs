@@ -12,7 +12,8 @@ public static class TodoListMapper
             Id = todoList.Id,
             Name = todoList.Name,
             ProjectId = todoList.ProjectId,
-            TodoCount = todoList.Items.Count
+            TodoCount = todoList.Items.Count,
+            TodoItems = todoList.Items.ToListedTodoItemsDtos().ToList()
         };
     }
 
@@ -28,7 +29,7 @@ public static class TodoListMapper
     public static void UpdateTodoListFromUpdateDto(this TodoList todoList, UpdateTodoListDto updateTodoListDto)
     {
         if (updateTodoListDto.Name is not null)
-        todoList.Name = updateTodoListDto.Name;
+            todoList.Name = updateTodoListDto.Name;
     }
 
     public static IEnumerable<TodoListDto> ToListedTodoListDtos(this IEnumerable<TodoList> todoLists)

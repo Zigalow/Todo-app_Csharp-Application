@@ -1,3 +1,5 @@
+using Todo.Api.Dtos.TodoItemDtos;
+
 namespace Todo.Api.Dtos.TodoListDtos;
 
 public class TodoListDto
@@ -6,4 +8,6 @@ public class TodoListDto
     public string Name { get; set; } = string.Empty;
     public int TodoCount { get; set; }
     public int ProjectId { get; set; }
+    
+    public List<TodoItemDto> TodoItems { get; set; } = new();
 }

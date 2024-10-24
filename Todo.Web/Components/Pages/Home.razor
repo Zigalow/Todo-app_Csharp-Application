@@ -1,10 +1,10 @@
 ﻿@page "/"
 @rendermode InteractiveServer
-@using Todo.Web.Components.TodoComponent
 @inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.Authorization
+@using Todo.Api.Dtos.ProjectDtos
 
-@attribute [Authorize]
+@*@attribute [Authorize]*@
 
 <title>Projects</title>
 
@@ -33,13 +33,14 @@
     [Parameter]
     public bool IsAddingProject {get; set;} = false;
     private string NewProjectName = "";
-    public List<Project> Projects { get; set; } = new List<Project>
+
+    public List<ProjectDto> Projects { get; set; } = new()
     {
-        new Project { Id = 0, Name = "Default" },
-        new Project { Id = 1, Name = "Test" },
-        new Project { Id = 2, Name = "CSharp Course" },
-        new Project { Id = 3, Name = "Test 2" },
-        new Project { Id = 4, Name = "Test 3" }
+        new ProjectDto { Id = 0, Name = "Default" },
+        new ProjectDto { Id = 1, Name = "Test" },
+        new ProjectDto { Id = 2, Name = "CSharp Course" },
+        new ProjectDto { Id = 3, Name = "Test 2" },
+        new ProjectDto { Id = 4, Name = "Test 3" }
     };
 
     private void CreateProject(){
@@ -47,9 +48,19 @@
             return;
         }
         Projects.Add(
-            new Project {Id =6 ,Name = NewProjectName}
+            new ProjectDto {Id =6 ,Name = NewProjectName}
         );
+        
+        var createProjectDto = new CreateProjectDto();
+
+        createProjectDto.Name = NewProjectName;
+
+        /*
+         * TODO: Use ProjectsController
+         */
+        
         NewProjectName = "";
+        IsAddingProject = false;
         Console.WriteLine("Added a new project");
     }
 
@@ -57,6 +68,7 @@
     {
         return $"/project/{projectId}";
     }
+    
     private void NavigateToProject(int projectId)
     {
         Console.WriteLine($"Navigating to project {projectId}");
@@ -64,9 +76,5 @@
     }
     private void ShowInputProject(){
         IsAddingProject = true;
-    }
-
-    private int generateProjectId(){
-        return 12;
     }
 }

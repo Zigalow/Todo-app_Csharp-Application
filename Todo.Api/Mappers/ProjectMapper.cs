@@ -14,7 +14,8 @@ public static class ProjectMapper
             AdminId = project.AdminId,
             AdminName = project.Owner.UserName,
             TodoListsCount = project.TodoLists.Count,
-            TodoItemsCount = project.TodoLists.Sum(tl => tl.Items.Count)
+            TodoItemsCount = project.TodoLists.Sum(tl => tl.Items.Count),
+            TodoLists = project.TodoLists.ToListedTodoListDtos().ToList()
         };
     }
 

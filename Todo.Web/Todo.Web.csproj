@@ -19,6 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Todo.Api\Todo.Api.csproj" />
       <ProjectReference Include="..\Todo.Core\Todo.Core.csproj" />
     </ItemGroup>
 

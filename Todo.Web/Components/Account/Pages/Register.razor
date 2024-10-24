@@ -26,7 +26,12 @@
                 <hr/>
                 <ValidationSummary class="text-danger" role="alert"/>
                 <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com"/>
+                    <InputText @bind-Value="Input.UserName" class="form-control" autocomplete="username" aria-required="true" placeholder="Ali Zaid"/>
+                    <label for="text">Name</label>
+                    <ValidationMessage For="() => Input.Email" class="text-danger"/>
+                </div>
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="usermail" aria-required="true" placeholder="name@example.com"/>
                     <label for="email">Email</label>
                     <ValidationMessage For="() => Input.Email" class="text-danger"/>
                 </div>
@@ -42,7 +47,6 @@
                 </div>
                 <button type="submit" class="auth-button">Register</button>
             </EditForm>
-            <p>or</p>
 
         @*<div class="col-md-6 col-md-offset-2">
             <section>
@@ -66,7 +70,12 @@
 
     public async Task RegisterUser(EditContext editContext)
     {
-        var user = CreateUser();
+        //var user = CreateUser();
+        var user = new ApplicationUser{
+            Name = Input.UserName,
+            Email = Input.Email,
+        };
+    
 
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
         var emailStore = GetEmailStore();
@@ -101,7 +110,7 @@
         RedirectManager.RedirectTo(ReturnUrl);
     }
 
-    private ApplicationUser CreateUser()
+    /*private ApplicationUser CreateUser()
     {
         try
         {
@@ -112,7 +121,7 @@
             throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
                                                 $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor.");
         }
-    }
+    }*/
 
     private IUserEmailStore<ApplicationUser> GetEmailStore()
     {
@@ -141,6 +150,10 @@
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = "";
+
+        [Required]
+        [Display(Name = "Name")]
+        public string UserName { get; set; } = "";
     }
 
 }

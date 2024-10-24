@@ -1,15 +1,15 @@
+using Todo.Api.Interfaces.EntityInterfaces;
 using Todo.Core.Entities;
-using Todo.Core.Repositories;
 
-namespace Todo.Core.Interfaces;
+namespace Todo.Api.Interfaces;
 
 public interface IUnitOfWork
 {
     IRepository<ApplicationUser> Users { get; }
-    IRepository<TodoItem> TodoItems { get; }
-    IRepository<TodoList> TodoLists { get; }
-    IRepository<Project> Projects { get; }
-    IRepository<Label> Labels { get; }
+    ITodoItemRepository TodoItems { get; }
+    ITodoListRepository TodoLists { get; }
+    IProjectRepository Projects { get; }
+    ILabelRepository Labels { get; }
     IRepository<ApplicationRole> Roles { get; }
     IRepository<PermissionType> Permissions { get; }
     IRepository<ProjectCollaborators> UserProjectAssignments { get; }

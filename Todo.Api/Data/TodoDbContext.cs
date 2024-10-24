@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Todo.Api.Configuration;
@@ -16,7 +15,7 @@ public class TodoDbContext : IdentityDbContext<ApplicationUser, ApplicationRole,
     public DbSet<Project> Projects { get; set; }
     public DbSet<TodoItem> TodoItems { get; set; }
     public DbSet<TodoList> TodoLists { get; set; }
-    public DbSet<ProjectCollaborators> Collaborators { get; set; }
+    public DbSet<ProjectCollaborators> ProjectCollaborators { get; set; }
     public DbSet<Label> Labels { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -1,3 +1,5 @@
+using Todo.Api.Dtos.TodoListDtos;
+
 namespace Todo.Api.Dtos.ProjectDtos;
 
 public class ProjectDto
@@ -12,4 +14,6 @@ public class ProjectDto
     public int TodoListsCount { get; set; }
 
     public int TodoItemsCount { get; set; }
+    
+    public List<TodoListDto> TodoLists { get; set; } = new(); 
 }

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
-using Todo.Web.Data;
+using Todo.Core.Entities;
+
 
 namespace Todo.Web.Components.Account;
 

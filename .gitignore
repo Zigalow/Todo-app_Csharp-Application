@@ -4,6 +4,7 @@
 Todo.Api/appsettings.json
 Todo.Api/appsettings.Development.json
 Todo.Api/appsettings.*.json
+Todo.Web/appsettings.json
 
 # User-specific files
 *.suo

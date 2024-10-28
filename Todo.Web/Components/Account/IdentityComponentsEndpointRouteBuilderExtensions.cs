@@ -6,9 +6,10 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using Todo.Core.Entities;
 using Todo.Web.Components.Account.Pages;
 using Todo.Web.Components.Account.Pages.Manage;
-using Todo.Web.Data;
+
 
 namespace Microsoft.AspNetCore.Routing;
 

@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using Todo.Web.Data;
+using Todo.Core.Entities;
+
 
 namespace Todo.Web.Components.Account;
 

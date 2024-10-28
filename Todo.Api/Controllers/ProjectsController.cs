@@ -49,13 +49,13 @@ public class ProjectsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var createdProject = createProjectDto.ToProjectFromCreateDto();
+        var userId = "12345" ; // Hardcoded for now so they are all linked to the same aspnet user
+        
+        var createdProject = createProjectDto.ToProjectFromCreateDto(userId);
         await _unitOfWork.Projects.AddAsync(createdProject);
-
         await _unitOfWork.SaveChangesAsync();
 
         var newProject = await _unitOfWork.Projects.GetByIdAsync(createdProject.Id);
-
         return CreatedAtAction(nameof(GetProjectById), new { id = newProject!.Id }, newProject.ToProjectDto());
     }
 

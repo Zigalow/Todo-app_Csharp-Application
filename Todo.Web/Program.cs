@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -17,12 +18,12 @@ builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
-builder.Services.AddAuthentication()
-    .AddCookie(options =>
+builder.Services.AddAuthentication(options =>
     {
-        options.LoginPath = "/Account/Unauthorized/";
-        options.AccessDeniedPath = "/Account/Forbidden/";
-    });
+        options.DefaultAuthenticateScheme = IdentityConstants.BearerScheme;
+        options.DefaultChallengeScheme = IdentityConstants.BearerScheme;
+    })
+    .AddBearerToken(IdentityConstants.BearerScheme);
 
 builder.Services.AddAuthorization();
 
@@ -40,7 +41,10 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 
 
 //Connect with todoApi
-builder.Services.AddHttpClient("TodoApi", client => { client.BaseAddress = new Uri("http://localhost:5118"); });
+builder.Services.AddHttpClient("TodoApi", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5118/");
+});
 
 builder.Services.AddDbContext<TodoDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))

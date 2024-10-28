@@ -1,7 +1,6 @@
 using Todo.Api.Data;
 using Todo.Api.Interfaces;
-using Todo.Api.Interfaces.EntityInterfaces;
-using Todo.Api.Repositories.EntityRepositories;
+using Todo.Api.Repositories.Interfaces;
 using Todo.Core.Entities;
 
 namespace Todo.Api.Repositories;

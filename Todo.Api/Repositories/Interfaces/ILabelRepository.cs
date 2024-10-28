@@ -1,6 +1,6 @@
 using Todo.Core.Entities;
 
-namespace Todo.Api.Interfaces.EntityInterfaces;
+namespace Todo.Api.Repositories.Interfaces;
 
 public interface ILabelRepository : IRepository<Label>
 {

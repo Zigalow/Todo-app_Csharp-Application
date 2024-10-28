@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Todo.Api.Data;
 using Todo.Api.Interfaces;
 using Todo.Api.Repositories;
+using Todo.Api.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

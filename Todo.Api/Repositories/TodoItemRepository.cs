@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Todo.Api.Data;
-using Todo.Api.Interfaces.EntityInterfaces;
+using Todo.Api.Repositories.Interfaces;
 using Todo.Core.Common;
 using Todo.Core.Entities;
 
-namespace Todo.Api.Repositories.EntityRepositories;
+namespace Todo.Api.Repositories;
 
 public class TodoItemRepository : GenericRepository<TodoItem>, ITodoItemRepository
 {

@@ -10,4 +10,7 @@ public class TodoItemDto
     public bool IsDone { get; set; } = false;
     public int TodoListId { get; set; }
     public List<String> Labels { get; set; } = new();
+    public bool IsDropdownVisible { get; set; } = false;
+    public bool IsLabelEditorVisible { get; set; } = false;
+    public string LabelColor { get; set; } = "#FFFFFF";  
 }

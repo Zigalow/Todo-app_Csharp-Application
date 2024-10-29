@@ -54,6 +54,7 @@ span{
 .task-container:hover{
     stroke: #000000;
     background-color: #ece6e6;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .todo-date {
@@ -74,6 +75,122 @@ span{
 .task-lower-part p {
     grid-column: 1;
 }
+
 .task-lower-part button{
     grid-column: 2;
+}
+
+.modifiymenu {
+    background-color: #28a745;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px;
+    position: absolute;
+    right: 0;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.modifiymenu button {
+    background: none;
+    border: 1px solid #000000; /* Add a solid black border */
+    color: white;
+    text-align: left;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background-color 0.2s, border-color 0.2s; /* Add transition for smooth effect */
+}
+
+.modifiymenu button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: #ffffff; /* Change border color on hover, optional */
+}
+
+/* Label Editor Styling */
+.label-editor {
+    background-color: #ec0000;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    position: absolute;
+    left: 100px; /* Increase this value as needed */
+    z-index: 1000;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 200px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+
+.label-editor input {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 3px;
+    margin: 5px 0;
+}
+
+/* Updated Color Picker Styling */
+.color-picker {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0;
+    justify-content: center;
+}
+
+.color-picker input {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 3px;
+    margin: 5px 0;
+}
+
+.color-option {
+    width: 24px;
+    height: 24px;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.color-option:hover {
+    transform: scale(1.1);
+}
+
+.color-option.selected {
+    border-color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Reflect Selected Color on Task Container */
+.task-container[data-label-color] {
+    border-left: 5px solid var(--label-color, #f1ecec);
+}
+
+/* Dropdown Container Position */
+.dropdown-container {
+    position: relative;
+}
+
+/* Modify Button Styling */
+.modify-button {
+    background: none;
+    border: 1px solid #000000; /* Add a solid black border */
+    color: #000000;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background-color 0.2s, border-color 0.2s; /* Add transition for smooth effect */
+}
+
+.modify-button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-color: #ffffff; /* Change border color on hover, optional */
 }

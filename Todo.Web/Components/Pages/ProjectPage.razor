@@ -23,6 +23,13 @@
                     @foreach (var task in todoList.TodoItems)
                     {
                         <div class="task-container" @onclick="() => ViewTask=true">
+                                                                @if (task.HasLabel){
+                                    
+                                        <div class="task-label" style="background-color: @task.LabelColor;">
+                                            @task.LabelText
+                                        </div>
+                                    }
+                                    
                             <p><span>@task.Title</span></p>
                             <p>Priority: @task.Priority</p>
                             <div class="task-lower-part">
@@ -82,9 +89,13 @@
                                                     </div>
                                                 }
                                             </div>
+                                            <div>
+                                                <button @onclick="() => CreateLabel(task)" id="Create-label-button">
+                                                    Create label
+                                                </button>
+                                            </div>
                                         </div>
                                     }
-            
                                 </div>
                             </div>
                         </div>
@@ -112,7 +123,10 @@
     public int ProjectId { get; set; }
     public required ProjectDto CurrentProject { get; set; }
     private bool IsColorPickerVisible { get; set; } = false;
-    private string SelectedColor { get; set; } = "#4A90E2";  // Default color
+    private string SelectedColor { get; set; } = "#4A90E2";
+    private bool IsLabelVisible { get; set; } = false;
+
+
 
     // Define color options
     private List<string> ColorOptions = new()
@@ -213,6 +227,19 @@
         SelectedColor = color;
         if (CurrentTodoItem != null) {
             CurrentTodoItem.LabelColor = color;
+            StateHasChanged();
+        }
+    }
+
+    private void CreateLabel(TodoItemDto todoItem){
+        if (!string.IsNullOrWhiteSpace(TextValue) && !string.IsNullOrWhiteSpace(SelectedColor))
+        {
+            IsLabelVisible = true;
+            todoItem.LabelText = TextValue;
+            todoItem.LabelColor = SelectedColor;
+            todoItem.HasLabel = true;
+            TextValue = "";
+            todoItem.IsLabelEditorVisible = false;
             StateHasChanged();
         }
     }

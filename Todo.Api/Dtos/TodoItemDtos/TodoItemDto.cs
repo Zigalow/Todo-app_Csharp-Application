@@ -13,4 +13,6 @@ public class TodoItemDto
     public bool IsDropdownVisible { get; set; } = false;
     public bool IsLabelEditorVisible { get; set; } = false;
     public string LabelColor { get; set; } = "#FFFFFF";  
+    public string? LabelText { get; set; }
+    public bool HasLabel { get; set; }
 }

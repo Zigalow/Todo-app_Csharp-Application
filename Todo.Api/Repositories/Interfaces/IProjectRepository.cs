@@ -8,4 +8,5 @@ public interface IProjectRepository : IRepository<Project>
     Task<IEnumerable<ApplicationUser>> GetProjectCollaboratorsAsync(int projectId);
     Task AddCollaboratorAsync(int projectId, string userId, string roleId);
     Task RemoveCollaboratorAsync(int projectId, int userId);
+    Task<List<Project>> GetAllProjectsForUserAsync(string userId);
 }

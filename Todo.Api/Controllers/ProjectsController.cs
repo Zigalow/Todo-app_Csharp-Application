@@ -6,9 +6,7 @@ using Todo.Api.Mappers;
 
 namespace Todo.Api.Controllers;
 [Authorize]
-[Route("api/projects")]
-[ApiController]
-public class ProjectsController : ControllerBase
+public class ProjectsController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
 
@@ -25,7 +23,8 @@ public class ProjectsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var projects = await _unitOfWork.Projects.GetAllAsync();
+        var userId = GetCurrentUserId();
+        var projects = await _unitOfWork.Projects.GetAllProjectsForUserAsync(userId);
 
         return Ok(projects.ToListedProjectDtos());
     }

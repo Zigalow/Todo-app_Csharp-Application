@@ -8,8 +8,7 @@ namespace Todo.Api.Controllers;
 
 [Authorize]
 [Route("api/todo-lists")]
-[ApiController]
-public class TodoListsController : ControllerBase
+public class TodoListsController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
 

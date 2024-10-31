@@ -7,9 +7,7 @@ using Todo.Api.Mappers;
 namespace Todo.Api.Controllers;
 
 [Authorize]
-[Route("api/labels")]
-[ApiController]
-public class LabelsController : ControllerBase
+public class LabelsController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
 

@@ -1,6 +1,6 @@
-using Todo.Api.Dtos.TodoListDtos;
+using Todo.Core.Dtos.TodoListDtos;
 
-namespace Todo.Api.Dtos.ProjectDtos;
+namespace Todo.Core.Dtos.ProjectDtos;
 
 public class ProjectDto
 {

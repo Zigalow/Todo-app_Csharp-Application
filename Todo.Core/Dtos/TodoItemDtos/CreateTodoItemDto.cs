@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Todo.Core.Entities;
 
-namespace Todo.Api.Dtos.TodoItemDtos;
+namespace Todo.Core.Dtos.TodoItemDtos;
 
 public class CreateTodoItemDto
 {

@@ -1,10 +1,10 @@
 ﻿@page "/"
-@rendermode InteractiveServer
-@inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
-@using Todo.Api.Dtos.ProjectDtos
+@using Todo.Core.Dtos.ProjectDtos
 @using Todo.Core.Entities
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
 
 @inject UserManager<ApplicationUser> UserManager
 @*@inject HttpClient Http*@

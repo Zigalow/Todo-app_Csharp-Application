@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Todo.Api.Dtos.TodoListDtos;
+namespace Todo.Core.Dtos.ProjectDtos;
 
-public class CreateTodoListDto
+public class CreateProjectDto
 {
     [Required]
     [StringLength(100)]

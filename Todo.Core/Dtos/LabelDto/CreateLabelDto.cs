@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Todo.Api.Dtos.LabelDto;
+namespace Todo.Core.Dtos.LabelDto;
 
 public class CreateLabelDto
 {

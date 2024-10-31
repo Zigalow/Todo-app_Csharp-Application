@@ -1,4 +1,4 @@
-using Todo.Api.Dtos.LabelDto;
+using Todo.Core.Dtos.LabelDto;
 using Todo.Core.Entities;
 
 namespace Todo.Api.Mappers;

@@ -1,6 +1,6 @@
-using Todo.Api.Dtos.TodoItemDtos;
+using Todo.Core.Dtos.TodoItemDtos;
 
-namespace Todo.Api.Dtos.TodoListDtos;
+namespace Todo.Core.Dtos.TodoListDtos;
 
 public class TodoListDto
 {

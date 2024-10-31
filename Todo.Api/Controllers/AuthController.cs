@@ -4,8 +4,8 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using Todo.Api.Dtos.AuthDto;
 using Todo.Api.Interfaces;
+using Todo.Core.Dtos.AuthDto;
 using Todo.Core.Entities;
 
 namespace Todo.Api.Controllers;

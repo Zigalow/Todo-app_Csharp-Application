@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Todo.Api.Dtos.AuthDto;
+namespace Todo.Core.Dtos.AuthDto;
 
 public class LoginDto
 {

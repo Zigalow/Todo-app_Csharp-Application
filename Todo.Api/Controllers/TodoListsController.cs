@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Todo.Api.Dtos.TodoListDtos;
 using Todo.Api.Interfaces;
 using Todo.Api.Mappers;
+using Todo.Core.Dtos.TodoListDtos;
 
 namespace Todo.Api.Controllers;
 

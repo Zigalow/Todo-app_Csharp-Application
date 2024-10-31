@@ -53,6 +53,16 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
             .ThenInclude(tl => tl.Items)
             .ToListAsync();
     }
+    
+    public async Task<List<Project>> GetAllProjectsForUserAsync(string userId)
+    {
+        return await _dbContext.Projects
+            .Where(p => p.AdminId == userId)
+            .Include(p => p.Owner)
+            .Include(p => p.TodoLists)
+            .ThenInclude(tl => tl.Items)
+            .ToListAsync();
+    }
 
     public new async Task<Project?> GetByIdAsync(int id)
     {

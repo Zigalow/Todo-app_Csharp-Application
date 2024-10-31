@@ -1,10 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Todo.Api.Dtos.ProjectDtos;
 using Todo.Api.Interfaces;
 using Todo.Api.Mappers;
 
 namespace Todo.Api.Controllers;
-
+[Authorize]
 [Route("api/projects")]
 [ApiController]
 public class ProjectsController : ControllerBase

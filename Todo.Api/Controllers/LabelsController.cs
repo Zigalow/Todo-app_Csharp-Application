@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Todo.Api.Dtos.LabelDto;
 using Todo.Api.Interfaces;
@@ -5,6 +6,7 @@ using Todo.Api.Mappers;
 
 namespace Todo.Api.Controllers;
 
+[Authorize]
 [Route("api/labels")]
 [ApiController]
 public class LabelsController : ControllerBase

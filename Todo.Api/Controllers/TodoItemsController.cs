@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Todo.Api.Dtos.TodoItemDtos;
 using Todo.Api.Interfaces;
@@ -5,6 +6,7 @@ using Todo.Api.Mappers;
 
 namespace Todo.Api.Controllers;
 
+[Authorize]
 [Route("api/todo-items")]
 [ApiController]
 public class TodoItemsController : ControllerBase
@@ -152,6 +154,7 @@ public class TodoItemsController : ControllerBase
         {
             return BadRequest(ModelState);
         }
+
         var result = await _unitOfWork.TodoItems.AttachLabelToItem(todoItemId, labelId);
 
         if (!result.IsSuccess)
@@ -170,6 +173,7 @@ public class TodoItemsController : ControllerBase
         {
             return BadRequest(ModelState);
         }
+
         var result = await _unitOfWork.TodoItems.DetachLabelFromItem(todoItemId, labelId);
 
         if (!result.IsSuccess)

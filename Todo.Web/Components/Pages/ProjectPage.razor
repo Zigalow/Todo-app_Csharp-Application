@@ -10,7 +10,8 @@
 <h1>@CurrentProject.Name</h1>
 
 <div class="todo-lists-container">
-    @if(!CurrentProject.TodoLists.IsNullOrEmpty()){
+    @if (CurrentProject.TodoLists.Count != 0)
+    {
         @foreach (var todoList in CurrentProject.TodoLists)
         {
             <div class="todo-list-container">
@@ -20,13 +21,16 @@
                     <img src="images/menu.png"/>
                 </div>
 
-                @if(!todoList.TodoItems.IsNullOrEmpty()){  
-                        @foreach (var task in todoList.TodoItems)
-                        {
-                            <div class = "task-container" @onclick="() => ViewTask=true">
-                                <p><span>@task.Title</span></p>
-                                <p>Priority: @task.Priority</p>
-                                @*@if(task. > 0){
+                @if (todoList.TodoItems.Count != 0)
+                {
+                    @foreach (var task in todoList.TodoItems)
+                    {
+                        <div class="task-container" @onclick="() => ViewTask = true">
+                            <p>
+                                <span>@task.Title</span>
+                            </p>
+                            <p>Priority: @task.Priority</p>
+                            @*@if(task. > 0){
                                     <p>Duration: @task.Duration</p>
                                 }
                                 @if(task.TimeStart!="" || task.TimeEnd!=""){

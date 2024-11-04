@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Todo.Api.Interfaces;
@@ -59,6 +60,7 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginDto loginDto)
     {
+        Console.WriteLine("Login begin");
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -68,6 +70,7 @@ public class AuthController : ControllerBase
 
         if (user == null)
         {
+            Console.WriteLine("User is null");
             return BadRequest("Invalid credentials");
         }
 
@@ -75,11 +78,12 @@ public class AuthController : ControllerBase
 
         if (!result.Succeeded)
         {
+            Console.WriteLine("Result not success");
             return BadRequest("Invalid credentials");
         }
 
         var token = await GenerateJwtToken(user);
-
+        Console.WriteLine("Login end");
         return Ok(new { Token = token });
     }
 

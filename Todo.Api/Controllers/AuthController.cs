@@ -32,11 +32,12 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterDto registerDto)
     {
+        Console.WriteLine("Register");
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
-
+        Console.WriteLine("Create new user");
         var user = new ApplicationUser
         {
             UserName = registerDto.UserName,
@@ -44,14 +45,15 @@ public class AuthController : ControllerBase
         };
 
         var result = await _userManager.CreateAsync(user, registerDto.Password);
-
+        Console.WriteLine("Result " + result.Succeeded);
         if (!result.Succeeded)
         {
+            Console.WriteLine(result.Errors.FirstOrDefault()?.Description);
             return BadRequest(result.Errors);
         }
-
-        // await _userManager.AddToRoleAsync(user, "User");
-
+        
+       //await _userManager.AddToRoleAsync(user, "User");
+        Console.WriteLine("User Created Token generate");
         var token = await GenerateJwtToken(user);
 
         return Ok(new { Token = token });

@@ -1,5 +1,4 @@
-using Microsoft.AspNetCore.Identity.Data;
-using LoginRequest = Todo.Web.Auth.Models.LoginRequest;
+using Todo.Web.Auth.Models;
 
 namespace Todo.Web.Auth;
 

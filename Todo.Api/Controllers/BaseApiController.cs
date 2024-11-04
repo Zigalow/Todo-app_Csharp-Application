@@ -18,7 +18,9 @@ public abstract class BaseApiController : ControllerBase
     protected string GetCurrentUserEmail()
     {
         var emailClaim = User.FindFirst(ClaimTypes.Email);
-        return emailClaim?.Value;
+        if (emailClaim == null)
+            throw new UnauthorizedAccessException("User is not authenticated");
+        return emailClaim.Value;
     }
 
     protected bool IsAuthenticated => User.Identity?.IsAuthenticated ?? false;

@@ -1,27 +1,23 @@
 ﻿@page "/Account/Login"
-
 @using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Identity
-@using Todo.Core.Entities
-
-
-@inject SignInManager<ApplicationUser> SignInManager
-@inject ILogger<Login> Logger
+@using Microsoft.AspNetCore.Http
+@using Todo.Web.Auth
+@using Todo.Web.Auth.Models
+@inject IAuthService AuthService
 @inject NavigationManager NavigationManager
-@inject IdentityRedirectManager RedirectManager
+@inject IHttpContextAccessor HttpContextAccessor
+@rendermode InteractiveServer
 
 <PageTitle>Log in</PageTitle>
 
 <div class="container">
-    @*<div class="col-md-4">*@
     <h2>Log in</h2>
     <section>
-        <StatusMessage Message="@errorMessage"/>
+        @if(errorMessage != ""){
+            <p>@errorMessage</p>
+        }
         <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
             <DataAnnotationsValidator/>
-            @*<h2>Use a local account to log in.</h2>
-                <hr/>*@
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
                 <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com"/>
@@ -59,7 +55,7 @@
                     <a href="Account/ForgotPassword">Forgot your password?</a>
                 </p>
                 <p>
-                    <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
+                    <a href="Account/Register">Register as a new user</a>
                 </p>
                 <p>
                     <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
@@ -78,48 +74,36 @@
 </div>
 
 @code {
-    private string? errorMessage;
-
-    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
-
+    private string errorMessage = "";
+    private LoginRequest loginRequest = new();
     [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    private bool isLoading = false;
 
-    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
-
-    protected override async Task OnInitializedAsync()
+    private async Task LoginUser()
     {
-        if (HttpMethods.IsGet(HttpContext.Request.Method))
+        try
         {
-            // Clear the existing external cookie to ensure a clean login process
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            isLoading = true;
+            loginRequest.Email = Input.Email;
+            loginRequest.Password = Input.Password;
+            
+            var isAuthenticated = await AuthService.LoginAsync(loginRequest);
+            if (isAuthenticated)
+            {
+                Console.WriteLine("Authenticated");
+                NavigationManager.NavigateTo("/");
+            } else
+            {
+                Console.WriteLine("Not Authenticated");
+            }
+            isLoading = false;
         }
-    }
-
-    public async Task LoginUser()
-    {
-        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-        if (result.Succeeded)
-        {
-            Logger.LogInformation("User logged in.");
-            RedirectManager.RedirectTo(ReturnUrl);
-        }
-        else if (result.RequiresTwoFactor)
-        {
-            RedirectManager.RedirectTo(
-                "Account/LoginWith2fa",
-                new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
-        }
-        else if (result.IsLockedOut)
-        {
-            Logger.LogWarning("User account locked out.");
-            RedirectManager.RedirectTo("Account/Lockout");
-        }
-        else
+        catch(Exception)
         {
             errorMessage = "Error: Invalid login attempt.";
+            isLoading = false;
         }
     }
-
 
     private sealed class InputModel
     {

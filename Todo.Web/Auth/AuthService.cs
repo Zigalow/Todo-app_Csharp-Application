@@ -1,35 +1,54 @@
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Todo.Web.Auth.Models;
-using RegisterRequest = Microsoft.AspNetCore.Identity.Data.RegisterRequest;
 
 namespace Todo.Web.Auth;
 
 public class AuthService : IAuthService
 {
     private readonly HttpClient _httpClient;
-    private readonly AuthenticationStateProvider _authStateProvider;
     private readonly ILocalStorageService _localStorage;
+    private readonly AuthenticationStateProvider _authenticationStateProvider;
 
-    public AuthService(HttpClient httpClient, AuthenticationStateProvider authStateProvider,
-        ILocalStorageService localStorage)
+    public AuthService(IHttpClientFactory httpClientFactory, ILocalStorageService localStorage, AuthenticationStateProvider authenticationStateProvider)
     {
-        _httpClient = httpClient;
-        _authStateProvider = authStateProvider;
+        _httpClient = httpClientFactory.CreateClient("TodoApi");
         _localStorage = localStorage;
+        _authenticationStateProvider = authenticationStateProvider;
     }
-
+    
     public async Task<bool> LoginAsync(LoginRequest request)
     {
-        var response = await _httpClient.PostAsJsonAsync("api/auth/login", request);
+        try
+        {
+            Console.WriteLine("Sending");
+            var response = await _httpClient.PostAsJsonAsync("api/auth/login", request);
+            Console.WriteLine("Response Received");
+            
+            var content = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Login response: {response.StatusCode}, Content: {content}");
 
-        if (!response.IsSuccessStatusCode) return false;
+            if (!response.IsSuccessStatusCode) return false;
+            Console.WriteLine("Logged in");
+            var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+            if (result?.Token == null) return false;
+            Console.WriteLine($"Token: {result.Token}");
+            await _localStorage.SetItemAsync("authToken", result.Token);
+            await ((CustomAuthenticationStateProvider)_authenticationStateProvider)
+                .MarkUserAsAuthenticated(result.Token);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Login error: {ex.Message}");
+            return false;
+        }
+    }
 
-        var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
-        if (result?.Token == null) return false;
-
-        await ((CustomAuthenticationStateProvider)_authStateProvider).MarkUserAsAuthenticated(result.Token);
-        return true;
+    public async Task LogoutAsync()
+    {
+        await _localStorage.RemoveItemAsync("authToken");
+        ((CustomAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsLoggedOut();
     }
 
     public async Task<bool> RegisterAsync(RegisterRequest request)
@@ -41,14 +60,10 @@ public class AuthService : IAuthService
         var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
         if (result?.Token == null) return false;
 
-        await ((CustomAuthenticationStateProvider)_authStateProvider).MarkUserAsAuthenticated(result.Token);
+        await ((CustomAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(result.Token);
         return true;
     }
 
-    public async Task LogoutAsync()
-    {
-        await ((CustomAuthenticationStateProvider)_authStateProvider).MarkUserAsLoggedOut();
-    }
 
     public async Task<bool> IsAuthenticatedAsync()
     {

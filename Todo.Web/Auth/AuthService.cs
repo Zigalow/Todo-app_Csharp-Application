@@ -53,15 +53,25 @@ public class AuthService : IAuthService
 
     public async Task<bool> RegisterAsync(RegisterRequest request)
     {
-        var response = await _httpClient.PostAsJsonAsync("api/auth/register", request);
+        try
+        {
+            Console.WriteLine("Sending");
+            var response = await _httpClient.PostAsJsonAsync("api/auth/register", request);
+            Console.WriteLine("Response Received");
 
-        if (!response.IsSuccessStatusCode) return false;
-
-        var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
-        if (result?.Token == null) return false;
-
-        await ((CustomAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(result.Token);
-        return true;
+            if (!response.IsSuccessStatusCode) return false;
+            var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
+            if (result?.Token == null) return false;
+            await _localStorage.SetItemAsync("authToken", result.Token);
+            await ((CustomAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(result.Token);
+            return true;
+            
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Register error: {ex.Message}");
+            return false;
+        }
     }
 
 

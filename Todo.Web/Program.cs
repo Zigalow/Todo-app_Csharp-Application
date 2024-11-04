@@ -35,6 +35,7 @@ builder.Services
     .AddHttpMessageHandler<AuthorizationMessageHandler>();
 
 builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

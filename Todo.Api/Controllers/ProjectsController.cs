@@ -5,6 +5,7 @@ using Todo.Api.Mappers;
 using Todo.Core.Dtos.ProjectDtos;
 
 namespace Todo.Api.Controllers;
+
 [Authorize]
 public class ProjectsController : BaseApiController
 {
@@ -49,8 +50,8 @@ public class ProjectsController : BaseApiController
             return BadRequest(ModelState);
         }
 
-        var userId = "12345" ; // Hardcoded for now so they are all linked to the same aspnet user
-        
+        var userId = GetCurrentUserId();
+
         var createdProject = createProjectDto.ToProjectFromCreateDto(userId);
         await _unitOfWork.Projects.AddAsync(createdProject);
         await _unitOfWork.SaveChangesAsync();

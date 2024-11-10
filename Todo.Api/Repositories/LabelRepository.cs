@@ -14,9 +14,10 @@ public class LabelRepository : GenericRepository<Label>, ILabelRepository
         _dbContext = dbContext;
     }
 
-    public new async Task<List<Label>> GetAllAsync()
+    public override async Task<IEnumerable<Label>> GetAllAsync(string userId)
     {
         return await _dbContext.Labels
+            .Where(l => l.Project.AdminId == userId)
             .Include(l => l.TodoItems)
             .ToListAsync();
     }

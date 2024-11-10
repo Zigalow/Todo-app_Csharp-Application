@@ -14,7 +14,7 @@ public class TodoListRepository : GenericRepository<TodoList>, ITodoListReposito
         _dbContext = dbContext;
     }
 
-    public async Task<List<TodoList>> GetAllTodoListsForUser(String userId)
+    public override async Task<IEnumerable<TodoList>> GetAllAsync(string userId)
     {
         var projectsWithTodoLists = await _dbContext.Projects
             .Include(p => p.TodoLists)

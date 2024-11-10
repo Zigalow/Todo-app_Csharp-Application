@@ -28,7 +28,7 @@ public class ProjectsController : BaseApiController
         }
 
         var userId = GetCurrentUserId();
-        var projects = await _unitOfWork.Projects.GetAllProjectsForUserAsync(userId);
+        var projects = await _unitOfWork.Projects.GetAllAsync(userId);
 
         return Ok(projects.ToListedProjectDtos());
     }

@@ -25,9 +25,9 @@ public class TodoItemsController : BaseApiController
             return BadRequest(ModelState);
         }
 
-        var todoItems = await _unitOfWork.TodoItems.GetAllAsync();
+        var userId = GetCurrentUserId();
 
-        var todoItemsDto = todoItems.Select(todoItem => todoItem.ToTodoItemDto());
+        var todoItems = await _unitOfWork.TodoItems.GetAllAsync(userId);
 
         return Ok(todoItems.ToListedTodoItemsDtos());
     }

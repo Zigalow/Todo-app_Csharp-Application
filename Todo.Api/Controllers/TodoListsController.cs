@@ -27,7 +27,7 @@ public class TodoListsController : BaseApiController
 
         var userId = GetCurrentUserId();
 
-        var todoLists = await _unitOfWork.TodoLists.GetAllTodoListsForUser(userId);
+        var todoLists = await _unitOfWork.TodoLists.GetAllAsync(userId);
         return Ok(todoLists.ToListedTodoListDtos());
     }
 

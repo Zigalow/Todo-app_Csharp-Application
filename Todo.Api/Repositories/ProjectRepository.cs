@@ -44,7 +44,8 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
             _dbContext.ProjectCollaborators.Remove(collaborator);
         }
     }
-    public async Task<List<Project>> GetAllProjectsForUserAsync(string userId)
+
+    public override async Task<IEnumerable<Project>> GetAllAsync(string userId)
     {
         return await _dbContext.Projects
             .Where(p => p.AdminId == userId)

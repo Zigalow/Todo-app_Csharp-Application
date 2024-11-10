@@ -24,7 +24,9 @@ public class LabelsController : BaseApiController
             return BadRequest(ModelState);
         }
 
-        var labels = await _unitOfWork.Labels.GetAllAsync();
+        var userId = GetCurrentUserId();
+
+        var labels = await _unitOfWork.Labels.GetAllAsync(userId);
         return Ok(labels.ToListedLabelDtos());
     }
 

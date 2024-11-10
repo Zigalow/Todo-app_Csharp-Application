@@ -15,10 +15,12 @@ public class TodoItemRepository : GenericRepository<TodoItem>, ITodoItemReposito
         _dbContext = dbContext;
     }
 
-    public new async Task<List<TodoItem>> GetAllAsync()
+    public override async Task<IEnumerable<TodoItem>> GetAllAsync(string userId)
     {
         return await _dbContext.TodoItems
             .Include(i => i.Labels)
+            .Include(i => i.TodoList)
+            .Where(i => i.TodoList.Project.AdminId == userId)
             .ToListAsync();
     }
 
@@ -107,7 +109,7 @@ public class TodoItemRepository : GenericRepository<TodoItem>, ITodoItemReposito
         {
             return Result<TodoItem>.Failure("Label not from the same project as the todo item");
         }
-        
+
         if (!todoItem.Labels.Contains(label))
         {
             return Result<TodoItem>.Failure("Label not attached to the todo item");

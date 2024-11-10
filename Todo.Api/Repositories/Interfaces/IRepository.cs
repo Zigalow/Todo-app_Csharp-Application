@@ -2,7 +2,7 @@ namespace Todo.Api.Repositories.Interfaces;
 
 public interface IRepository<T>
 {
-    Task<List<T>> GetAllAsync();
+    Task<IEnumerable<T>> GetAllAsync(string userId);
     Task<T?> GetByIdAsync(int id);
     Task<T> AddAsync(T entity);
     Task UpdateAsync(T entity);

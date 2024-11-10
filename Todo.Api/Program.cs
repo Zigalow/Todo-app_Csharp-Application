@@ -9,8 +9,6 @@ using Todo.Api.Data;
 using Todo.Api.Interfaces;
 using Todo.Api.Repositories;
 using Todo.Api.Repositories.Interfaces;
-using Todo.Api.Services;
-using Todo.Api.Services.interfaces;
 using Todo.Core.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,7 +27,7 @@ builder.Services.AddDbContext<TodoDbContext>(options =>
 // Register UnitOfWork
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IAuthorizationRepository, AuthorizationRepository>();
 
 // Add Identity configuration
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>

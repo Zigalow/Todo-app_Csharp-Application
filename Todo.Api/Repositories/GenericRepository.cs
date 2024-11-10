@@ -14,7 +14,15 @@ public class GenericRepository<T> : IRepository<T> where T : class
         DbContext = dbContext;
         DbSet = dbContext.Set<T>();
     }
-    public async Task<T?> GetByIdAsync(int id)
+
+    public virtual Task<IEnumerable<T>> GetAllAsync(string id)
+    {
+        throw new NotImplementedException(
+            $"GetAllAsync must be implemented in the derived repository for {typeof(T).Name}"
+        );
+    }
+
+    public virtual async Task<T?> GetByIdAsync(int id)
     {
         return await DbSet.FindAsync(id);
     }

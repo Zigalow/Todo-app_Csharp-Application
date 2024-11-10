@@ -14,12 +14,6 @@ public class GenericRepository<T> : IRepository<T> where T : class
         DbContext = dbContext;
         DbSet = dbContext.Set<T>();
     }
-
-    public async Task<List<T>> GetAllAsync()
-    {
-        return await DbSet.ToListAsync();
-    }
-
     public async Task<T?> GetByIdAsync(int id)
     {
         return await DbSet.FindAsync(id);

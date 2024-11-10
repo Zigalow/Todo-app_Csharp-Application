@@ -25,7 +25,9 @@ public class TodoListsController : BaseApiController
             return BadRequest(ModelState);
         }
 
-        var todoLists = await _unitOfWork.TodoLists.GetAllAsync();
+        var userId = GetCurrentUserId();
+
+        var todoLists = await _unitOfWork.TodoLists.GetAllTodoListsForUser(userId);
         return Ok(todoLists.ToListedTodoListDtos());
     }
 

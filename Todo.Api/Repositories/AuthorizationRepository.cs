@@ -20,6 +20,11 @@ public class AuthorizationRepository : IAuthorizationRepository
                            (p.AdminId == userId || p.Collaborators.Any(c => c.UserId == userId)));
     }
 
+    public Task<bool> CanCreateProjectAsync(string userId)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<bool> CanModifyProjectAsync(string userId, int projectId)
     {
         throw new NotImplementedException();
@@ -31,6 +36,11 @@ public class AuthorizationRepository : IAuthorizationRepository
             .AnyAsync(tl => tl.Id == todoListId &&
                             (tl.Project.AdminId == userId ||
                              tl.Project.Collaborators.Any(c => c.UserId == userId)));
+    }
+
+    public Task<bool> CanCreateTodoListAsync(string userId, int projectId)
+    {
+        throw new NotImplementedException();
     }
 
     public Task<bool> CanModifyTodoListAsync(string userId, int todoListId)
@@ -46,12 +56,17 @@ public class AuthorizationRepository : IAuthorizationRepository
                              ti.TodoList.Project.Collaborators.Any(c => c.UserId == userId)));
     }
 
+    public Task<bool> CanCreateTodoItemAsync(string userId, int todoListId)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<bool> CanModifyTodoItemAsync(string userId, int todoItemId)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<bool> CanAccessTodoLabelAsync(string userId, int labelId)
+    public async Task<bool> CanAccessLabelAsync(string userId, int labelId)
     {
         return await _dbContext.Labels
             .AnyAsync(l => l.Id == labelId &&
@@ -59,7 +74,12 @@ public class AuthorizationRepository : IAuthorizationRepository
                             l.Project.Collaborators.Any(c => c.UserId == userId)));
     }
 
-    public Task<bool> CanModifyTodoLabelAsync(string userId, int labelId)
+    public Task<bool> CanCreateLabelAsync(string userId, int projectId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<bool> CanModifyLabelAsync(string userId, int labelId)
     {
         throw new NotImplementedException();
     }

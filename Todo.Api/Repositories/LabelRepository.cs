@@ -30,7 +30,7 @@ public class LabelRepository : GenericRepository<Label>, ILabelRepository
             .ToListAsync();
     }
 
-    public new async Task<Label?> GetByIdAsync(int id)
+    public override async Task<Label?> GetByIdAsync(int id)
     {
         return await _dbContext.Labels
             .Include(l => l.TodoItems)

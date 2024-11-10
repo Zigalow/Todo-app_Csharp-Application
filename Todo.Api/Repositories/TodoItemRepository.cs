@@ -50,7 +50,7 @@ public class TodoItemRepository : GenericRepository<TodoItem>, ITodoItemReposito
         return todoItemsFromProject?.Items.ToList();
     }
 
-    public new async Task<TodoItem?> GetByIdAsync(int id)
+    public override async Task<TodoItem?> GetByIdAsync(int id)
     {
         return await _dbContext.TodoItems
             .Include(i => i.Labels)

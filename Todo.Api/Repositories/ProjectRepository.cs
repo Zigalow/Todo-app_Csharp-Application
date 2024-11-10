@@ -55,7 +55,7 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
             .ToListAsync();
     }
 
-    public new async Task<Project?> GetByIdAsync(int id)
+    public override async Task<Project?> GetByIdAsync(int id)
     {
         return await _dbContext.Projects
             .Include(p => p.Owner)

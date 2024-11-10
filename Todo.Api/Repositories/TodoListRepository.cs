@@ -14,11 +14,15 @@ public class TodoListRepository : GenericRepository<TodoList>, ITodoListReposito
         _dbContext = dbContext;
     }
 
-    public new async Task<List<TodoList>> GetAllAsync()
+    public async Task<List<TodoList>> GetAllTodoListsForUser(String userId)
     {
-        return await _dbContext.TodoLists
-            .Include(tl => tl.Items)
+        var projectsWithTodoLists = await _dbContext.Projects
+            .Include(p => p.TodoLists)
+            .ThenInclude(tl => tl.Items)
+            .Where(p => p.AdminId == userId)
             .ToListAsync();
+
+        return projectsWithTodoLists.SelectMany(p => p.TodoLists).ToList();
     }
 
     public new async Task<TodoList?> GetByIdAsync(int id)

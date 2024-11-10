@@ -44,16 +44,6 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
             _dbContext.ProjectCollaborators.Remove(collaborator);
         }
     }
-
-    public new async Task<List<Project>> GetAllAsync()
-    {
-        return await _dbContext.Projects
-            .Include(p => p.Owner)
-            .Include(p => p.TodoLists)
-            .ThenInclude(tl => tl.Items)
-            .ToListAsync();
-    }
-    
     public async Task<List<Project>> GetAllProjectsForUserAsync(string userId)
     {
         return await _dbContext.Projects

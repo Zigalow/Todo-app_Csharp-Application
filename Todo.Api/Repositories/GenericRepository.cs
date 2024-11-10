@@ -19,25 +19,25 @@ public class GenericRepository<T> : IRepository<T> where T : class
         return await DbSet.FindAsync(id);
     }
 
-    public async Task<T> AddAsync(T entity)
+    public virtual async Task<T> AddAsync(T entity)
     {
         await DbSet.AddAsync(entity);
         return entity;
     }
 
-    public Task UpdateAsync(T entity)
+    public virtual Task UpdateAsync(T entity)
     {
         DbSet.Update(entity);
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(T entity)
+    public virtual Task DeleteAsync(T entity)
     {
         DbSet.Remove(entity);
         return Task.CompletedTask;
     }
 
-    public Task<bool> ExistsAsync(int id)
+    public virtual Task<bool> ExistsAsync(int id)
     {
         return DbSet.AnyAsync(e => EF.Property<int>(e, "Id") == id);
     }

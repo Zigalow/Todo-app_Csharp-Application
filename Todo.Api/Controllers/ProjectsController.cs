@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Todo.Api.Interfaces;
 using Todo.Api.Mappers;
+using Todo.Api.Repositories.Interfaces;
 using Todo.Core.Dtos.ProjectDtos;
 
 namespace Todo.Api.Controllers;
@@ -41,7 +42,18 @@ public class ProjectsController : BaseApiController
         }
 
         var project = await _unitOfWork.Projects.GetByIdAsync(id);
-        return project == null ? NotFound() : Ok(project.ToProjectDto());
+        if (project == null)
+        {
+            return NotFound();
+        }
+
+        var userId = GetCurrentUserId();
+        if (!await _authorizationRepository.CanAccessProjectAsync(userId, id))
+        {
+            return Forbid("User does not have access to this project");
+        }
+
+        return Ok(project.ToProjectDto());
     }
 
     [HttpPost]

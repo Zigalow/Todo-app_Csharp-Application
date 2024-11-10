@@ -10,10 +10,12 @@ namespace Todo.Api.Controllers;
 public class ProjectsController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAuthorizationRepository _authorizationRepository;
 
-    public ProjectsController(IUnitOfWork unitOfWork)
+    public ProjectsController(IUnitOfWork unitOfWork, IAuthorizationRepository authorizationRepository)
     {
         _unitOfWork = unitOfWork;
+        _authorizationRepository = authorizationRepository;
     }
 
     [HttpGet]

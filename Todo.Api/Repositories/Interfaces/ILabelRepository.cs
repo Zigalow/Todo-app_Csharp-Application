@@ -6,5 +6,5 @@ public interface ILabelRepository : IRepository<Label>
 {
     Task<List<Label>?> GetAllLabelsForProject(int projectId);
 
-    Task<bool> ExistsAsync(Label createLabelDto);
+    Task<bool> ExistsAsync(int projectId, string labelName);
 }

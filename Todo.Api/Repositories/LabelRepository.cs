@@ -37,9 +37,9 @@ public class LabelRepository : GenericRepository<Label>, ILabelRepository
             .FirstOrDefaultAsync(l => l.Id == id);
     }
 
-    public async Task<bool> ExistsAsync(Label label)
+    public async Task<bool> ExistsAsync(int projectId, string labelName)
     {
         return await _dbContext.Labels.AnyAsync(l =>
-            l.Name == label.Name && l.ProjectId == label.ProjectId);
+            l.Name == labelName && l.ProjectId == projectId);
     }
 }

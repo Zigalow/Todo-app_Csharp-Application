@@ -77,7 +77,7 @@ public class LabelsController : BaseApiController
 
         var label = createLabelDto.ToLabelFromCreateDto(projectId);
 
-        if (await _unitOfWork.Labels.ExistsAsync(label))
+        if (await _unitOfWork.Labels.ExistsAsync(projectId, createLabelDto.Name))
         {
             return BadRequest("Label already exists");
         }

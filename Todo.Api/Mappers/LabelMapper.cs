@@ -29,12 +29,10 @@ public static class LabelMapper
 
     public static void UpdateLabelFromUpdateDto(this Label label, UpdateLabelDto updateLabelDto)
     {
-        
         if (updateLabelDto.Name is not null)
-        label.Name = updateLabelDto.Name;
+            label.Name = updateLabelDto.Name;
         if (updateLabelDto.Color is not null)
             label.Color = updateLabelDto.Color;
-        
     }
 
     public static IEnumerable<LabelDto> ToListedLabelDtos(this IEnumerable<Label> labels)

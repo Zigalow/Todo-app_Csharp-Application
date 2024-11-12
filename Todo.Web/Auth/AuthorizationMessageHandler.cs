@@ -1,8 +1,7 @@
-using Microsoft.AspNetCore.Components;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Http;
+
+namespace Todo.Web.Auth;
 
 public class AuthorizationMessageHandler : DelegatingHandler
 {

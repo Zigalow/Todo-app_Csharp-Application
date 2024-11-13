@@ -1,4 +1,7 @@
-using Blazored.LocalStorage;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Todo.Web.Auth.Models;
 
@@ -7,35 +10,51 @@ namespace Todo.Web.Auth;
 public class AuthService : IAuthService
 {
     private readonly HttpClient _httpClient;
-    private readonly ILocalStorageService _localStorage;
     private readonly AuthenticationStateProvider _authenticationStateProvider;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public AuthService(IHttpClientFactory httpClientFactory, ILocalStorageService localStorage, AuthenticationStateProvider authenticationStateProvider)
+    public AuthService(IHttpClientFactory httpClientFactory, AuthenticationStateProvider authenticationStateProvider,
+        IHttpContextAccessor httpContextAccessor)
     {
         _httpClient = httpClientFactory.CreateClient("TodoApi");
-        _localStorage = localStorage;
         _authenticationStateProvider = authenticationStateProvider;
+        _httpContextAccessor = httpContextAccessor;
     }
-    
+
     public async Task<bool> LoginAsync(LoginRequest request)
     {
         try
         {
-            Console.WriteLine("Sending");
             var response = await _httpClient.PostAsJsonAsync("api/auth/login", request);
-            Console.WriteLine("Response Received");
-            
-            var content = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Login response: {response.StatusCode}, Content: {content}");
 
             if (!response.IsSuccessStatusCode) return false;
-            Console.WriteLine("Logged in");
+
             var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
             if (result?.Token == null) return false;
-            Console.WriteLine($"Token: {result.Token}");
-            await _localStorage.SetItemAsync("authToken", result.Token);
-            await ((CustomAuthenticationStateProvider)_authenticationStateProvider)
-                .MarkUserAsAuthenticated(result.Token);
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(result.Token);
+            var claims = jwt.Claims.ToList();
+
+            // Add the JWT token as a claim
+            claims.Add(new Claim("jwt_token", result.Token));
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            // Sign in the user
+            await _httpContextAccessor.HttpContext!.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                principal,
+                new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
+                });
+
+            ((CustomAuthenticationStateProvider)_authenticationStateProvider)
+                .NotifyUserAuthentication(principal);
+
             return true;
         }
         catch (Exception ex)
@@ -47,25 +66,17 @@ public class AuthService : IAuthService
 
     public async Task LogoutAsync()
     {
-        await _localStorage.RemoveItemAsync("authToken");
-        ((CustomAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsLoggedOut();
+        await _httpContextAccessor.HttpContext!.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        ((CustomAuthenticationStateProvider)_authenticationStateProvider).NotifyUserLogout();
     }
 
     public async Task<bool> RegisterAsync(RegisterRequest request)
     {
         try
         {
-            Console.WriteLine("Sending");
             var response = await _httpClient.PostAsJsonAsync("api/auth/register", request);
-            Console.WriteLine("Response Received");
 
-            if (!response.IsSuccessStatusCode) return false;
-            var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
-            if (result?.Token == null) return false;
-            await _localStorage.SetItemAsync("authToken", result.Token);
-            await ((CustomAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(result.Token);
-            return true;
-            
+            return response.IsSuccessStatusCode;
         }
         catch (Exception ex)
         {
@@ -74,10 +85,8 @@ public class AuthService : IAuthService
         }
     }
 
-
     public async Task<bool> IsAuthenticatedAsync()
     {
-        var token = await _localStorage.GetItemAsync<string>("authToken");
-        return !string.IsNullOrEmpty(token);
+        return _httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
     }
 }

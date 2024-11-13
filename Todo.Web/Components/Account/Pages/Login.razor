@@ -1,19 +1,19 @@
 ﻿@page "/Account/Login"
 @using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Authorization
 @using Todo.Web.Auth
 @using Todo.Web.Auth.Models
 @inject IAuthService AuthService
 @inject NavigationManager NavigationManager
-@inject IHttpContextAccessor HttpContextAccessor
-@rendermode InteractiveServer
+@attribute [AllowAnonymous]
 
 <PageTitle>Log in</PageTitle>
 
 <div class="container">
     <h2>Log in</h2>
     <section>
-        @if(errorMessage != ""){
+        @if (errorMessage != "")
+        {
             <p>@errorMessage</p>
         }
         <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
@@ -75,45 +75,61 @@
 
 @code {
     private string errorMessage = "";
-    private LoginRequest loginRequest = new();
-    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
-    private bool isLoading = false;
+    private bool isLoading;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
 
     private async Task LoginUser()
     {
         try
         {
+            if (isLoading) return;
             isLoading = true;
-            loginRequest.Email = Input.Email;
-            loginRequest.Password = Input.Password;
-            
+            errorMessage = "";
+            StateHasChanged();
+
+            var loginRequest = new LoginRequest
+            {
+                Email = Input.Email,
+                Password = Input.Password
+            };
+
             var isAuthenticated = await AuthService.LoginAsync(loginRequest);
+
             if (isAuthenticated)
             {
-                Console.WriteLine("Authenticated");
-                NavigationManager.NavigateTo("/");
-            } else
-            {
-                Console.WriteLine("Not Authenticated");
+                NavigationManager.NavigateTo("/", true);
             }
-            isLoading = false;
+            else
+            {
+                errorMessage = "Invalid login attempt. Please check your credentials.";
+            }
         }
-        catch(Exception)
+        catch (Exception ex)
         {
-            errorMessage = "Error: Invalid login attempt.";
+            errorMessage = "An error occurred while logging in. Please try again.";
+            Console.WriteLine($"Login error: {ex.Message}");
+        }
+        finally
+        {
             isLoading = false;
+            StateHasChanged();
         }
     }
 
     private sealed class InputModel
     {
-        [Required] [EmailAddress] public string Email { get; set; } = "";
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
 
         [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; } = "";
 
-        [Display(Name = "Remember me?")] public bool RememberMe { get; set; }
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
     }
 
 }

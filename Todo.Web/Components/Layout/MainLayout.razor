@@ -6,7 +6,7 @@
     </div>
 
     <main>
-        
+
         @*<div class="top-row">
             <div class="top-row-title">
                 <h1>Taskify</h1>
@@ -24,3 +24,13 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="Account/Logout">
+                <span class="oi oi-account-logout" aria-hidden="true"></span> Logout
+            </NavLink>
+        </div>
+    </Authorized>
+</AuthorizeView>

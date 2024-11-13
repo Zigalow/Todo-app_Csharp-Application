@@ -11,12 +11,16 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // Add authentication and authorization
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    })
     .AddCookie(options =>
     {
         options.Cookie.Name = "TodoApp.Auth";
         options.LoginPath = "/Account/Login";
-        options.LogoutPath = "/logout"; // Provide a custom logout path
+        options.LogoutPath = "/Account/Logout";
         options.ExpireTimeSpan = TimeSpan.FromDays(1);
     });
 builder.Services.AddAuthorization();
@@ -24,7 +28,7 @@ builder.Services.AddAuthorization();
 // Add custom auth state provider and auth service
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<AuthorizationMessageHandler>();
+builder.Services.AddScoped<AuthHeaderHandler>();
 builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddAntiforgery();
@@ -32,7 +36,7 @@ builder.Services.AddAntiforgery();
 //Connect with todoApi
 builder.Services
     .AddHttpClient("TodoApi", client => { client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!); })
-    .AddHttpMessageHandler<AuthorizationMessageHandler>();
+    .AddHttpMessageHandler<AuthHeaderHandler>();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpContextAccessor();

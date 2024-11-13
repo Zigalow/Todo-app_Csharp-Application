@@ -2,6 +2,7 @@ namespace Todo.Api.Repositories.Interfaces;
 
 public interface IAuthorizationRepository
 {
+    Task<bool> IsAdminAsync(string userId);
     Task<bool> CanAccessProjectAsync(string userId, int projectId);
     Task<bool> CanCreateProjectAsync(string userId);
     Task<bool> CanModifyProjectAsync(string userId, int projectId);

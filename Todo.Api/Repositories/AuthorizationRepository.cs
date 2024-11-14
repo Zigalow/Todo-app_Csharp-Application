@@ -139,4 +139,9 @@ public class AuthorizationRepository : IAuthorizationRepository
 
         return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageTodoItems);
     }
+
+    private static bool HasPermission(ProjectRole role, string permission)
+    {
+        return RolePermissions.HasPermission(role, permission);
+    }
 }

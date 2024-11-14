@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Todo.Api.Data;
 using Todo.Api.Repositories.Interfaces;
+using Todo.Core.Entities;
 
 namespace Todo.Api.Repositories;
 
@@ -24,20 +25,18 @@ public class AuthorizationRepository : IAuthorizationRepository
             return true;
 
         return await _dbContext.Projects
-            .AnyAsync(p => p.Id == projectId &&
-                           (p.AdminId == userId || p.Collaborators.Any(c => c.UserId == userId)));
+            .AnyAsync(p => p.Id == projectId && p.Collaborators.Any(c => c.UserId == userId));
     }
 
-    public Task<bool> CanCreateProjectAsync(string userId)
+    public async Task<bool> CanModifyProjectAsync(string userId, int projectId)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> CanModifyProjectAsync(string userId, int projectId)
-    {
-        throw new NotImplementedException();
         if (await IsAdminAsync(userId))
             return true;
+
+        var collaborator = await _dbContext.ProjectCollaborators
+            .FirstOrDefaultAsync(c => c.UserId == userId && c.ProjectId == projectId);
+
+        return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageProject);
     }
 
     public async Task<bool> CanAccessTodoListAsync(string userId, int todoListId)
@@ -47,22 +46,29 @@ public class AuthorizationRepository : IAuthorizationRepository
 
         return await _dbContext.TodoLists
             .AnyAsync(tl => tl.Id == todoListId &&
-                            (tl.Project.AdminId == userId ||
-                             tl.Project.Collaborators.Any(c => c.UserId == userId)));
+                            tl.Project.Collaborators.Any(c => c.UserId == userId));
     }
 
-    public Task<bool> CanCreateTodoListAsync(string userId, int projectId)
+    public async Task<bool> CanCreateTodoListAsync(string userId, int projectId)
     {
-        throw new NotImplementedException();
         if (await IsAdminAsync(userId))
             return true;
+
+        var collaborator = await _dbContext.ProjectCollaborators
+            .FirstOrDefaultAsync(c => c.UserId == userId && c.ProjectId == projectId);
+
+        return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageTodoLists);
     }
 
-    public Task<bool> CanModifyTodoListAsync(string userId, int todoListId)
+    public async Task<bool> CanModifyTodoListAsync(string userId, int todoListId)
     {
-        throw new NotImplementedException();
         if (await IsAdminAsync(userId))
             return true;
+
+        var collaborator = await _dbContext.ProjectCollaborators
+            .FirstOrDefaultAsync(c => c.UserId == userId && c.Project.TodoLists.Any(tl => tl.Id == todoListId));
+
+        return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageTodoLists);
     }
 
     public async Task<bool> CanAccessTodoItemAsync(string userId, int todoItemId)
@@ -72,47 +78,65 @@ public class AuthorizationRepository : IAuthorizationRepository
 
         return await _dbContext.TodoItems
             .AnyAsync(ti => ti.Id == todoItemId &&
-                            (ti.TodoList.Project.AdminId == userId ||
-                             ti.TodoList.Project.Collaborators.Any(c => c.UserId == userId)));
+                            ti.TodoList.Project.Collaborators.Any(c => c.UserId == userId));
     }
 
-    public Task<bool> CanCreateTodoItemAsync(string userId, int todoListId)
+    public async Task<bool> CanCreateTodoItemAsync(string userId, int todoListId)
     {
-        throw new NotImplementedException();
         if (await IsAdminAsync(userId))
             return true;
+
+        var collaborator = await _dbContext.ProjectCollaborators
+            .FirstOrDefaultAsync(c => c.UserId == userId && c.Project.TodoLists.Any(tl => tl.Id == todoListId));
+
+        return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageTodoItems);
     }
 
-    public Task<bool> CanModifyTodoItemAsync(string userId, int todoItemId)
+    public async Task<bool> CanModifyTodoItemAsync(string userId, int todoItemId)
     {
-        throw new NotImplementedException();
         if (await IsAdminAsync(userId))
             return true;
+
+        var collaborator = await _dbContext.ProjectCollaborators
+            .FirstOrDefaultAsync(c =>
+                c.UserId == userId && c.Project.TodoLists.Any(tl => tl.Items.Any(ti => ti.Id == todoItemId)));
+
+        return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageTodoItems);
     }
 
     public async Task<bool> CanAccessLabelAsync(string userId, int labelId)
     {
         if (await IsAdminAsync(userId))
             return true;
+
         return await _dbContext.Labels
-            .AnyAsync(l => l.Id == labelId &&
-                           (l.Project.AdminId == userId ||
-                            l.Project.Collaborators.Any(c => c.UserId == userId)));
+            .AnyAsync(l => l.Id == labelId && l.Project.Collaborators.Any(c => c.UserId == userId));
     }
 
-    public Task<bool> CanCreateLabelAsync(string userId, int projectId)
+    public async Task<bool> CanCreateLabelAsync(string userId, int projectId)
     {
-        throw new NotImplementedException();
-        if (await IsAdminAsync(userId))
-            return true;
-        
-    }
-
-    public Task<bool> CanModifyLabelAsync(string userId, int labelId)
-    {
-        throw new NotImplementedException();
         if (await IsAdminAsync(userId))
             return true;
 
+        var collaborator = await _dbContext.ProjectCollaborators
+            .FirstOrDefaultAsync(c => c.UserId == userId && c.ProjectId == projectId);
+
+        return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageLabels);
+    }
+
+    public async Task<bool> CanModifyLabelAsync(string userId, int labelId)
+    {
+        if (await IsAdminAsync(userId))
+            return true;
+
+        var projectId = await _dbContext.Labels
+            .Where(l => l.Id == labelId)
+            .Select(l => l.ProjectId)
+            .FirstOrDefaultAsync();
+
+        var collaborator = await _dbContext.ProjectCollaborators
+            .FirstOrDefaultAsync(c => c.UserId == userId && c.ProjectId == projectId);
+
+        return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageTodoItems);
     }
 }

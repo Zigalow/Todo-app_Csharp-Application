@@ -4,7 +4,6 @@ public interface IAuthorizationRepository
 {
     Task<bool> IsAdminAsync(string userId);
     Task<bool> CanAccessProjectAsync(string userId, int projectId);
-    Task<bool> CanCreateProjectAsync(string userId);
     Task<bool> CanModifyProjectAsync(string userId, int projectId);
     Task<bool> CanAccessTodoListAsync(string userId, int todoListId);
     Task<bool> CanCreateTodoListAsync(string userId, int projectId);

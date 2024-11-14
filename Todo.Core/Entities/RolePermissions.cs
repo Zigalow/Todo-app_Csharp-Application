@@ -16,7 +16,7 @@ public static class RolePermissions
             Permissions.ManageLabels
         ],
 
-        // Owner has all permissions except managing admins
+        // Owner has all permissions except managing admins and modifying project
         [ProjectRole.ProjectOwner] = new HashSet<string>
         {
             Permissions.ManageCollaborators,

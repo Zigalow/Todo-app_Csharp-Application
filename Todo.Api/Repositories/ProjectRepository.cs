@@ -22,13 +22,13 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
             .ToListAsync();
     }
 
-    public async Task AddCollaboratorAsync(int projectId, string userId, string roleId)
+    public async Task AddCollaboratorAsync(int projectId, string userId, ProjectRole role)
     {
         var collaborator = new ProjectCollaborators
         {
             ProjectId = projectId,
             UserId = userId,
-            RoleId = roleId
+            Role = role
         };
 
         await _dbContext.ProjectCollaborators.AddAsync(collaborator);

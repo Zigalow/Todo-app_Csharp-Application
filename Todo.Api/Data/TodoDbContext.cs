@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Todo.Api.Configuration;
@@ -5,7 +6,7 @@ using Todo.Core.Entities;
 
 namespace Todo.Api.Data;
 
-public class TodoDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
+public class TodoDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
 {
     public TodoDbContext(DbContextOptions dbContextOptions)
         : base(dbContextOptions)
@@ -22,7 +23,7 @@ public class TodoDbContext : IdentityDbContext<ApplicationUser, ApplicationRole,
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.ApplyConfiguration(new RoleConfiguration());
+        modelBuilder.ApplyConfiguration(new ProjectCollaboratorsConfiguration());
         modelBuilder.ApplyConfiguration(new TodoItemConfiguration());
     }
 }

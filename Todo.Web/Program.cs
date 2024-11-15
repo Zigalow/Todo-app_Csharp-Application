@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Todo.Web.Auth;
 using Todo.Web.Components;
+using Todo.Web.Services;
+using Todo.Web.Services.interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,10 @@ builder.Services.AddAuthorization();
 // Add custom auth state provider and auth service
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<ITodoListService, TodoListService>();
+builder.Services.AddScoped<ITodoItemService, TodoItemService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<AuthHeaderHandler>();
 builder.Services.AddBlazoredLocalStorage();
 

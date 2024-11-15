@@ -52,3 +52,7 @@ a .project-name {
 .new-project:hover{
     background-color: #ece6e6;
 }
+
+.error-message{
+    color:red;
+}

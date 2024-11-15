@@ -1,147 +1,118 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Authorization
 @using Todo.Core.Dtos.ProjectDtos
+@using Todo.Web.Services.interfaces
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
-
-@*@inject HttpClient Http*@
-@inject IHttpClientFactory HttpClientFactory
+@inject IProjectService ProjectService
 
 @attribute [Authorize]
 
 <title>Projects</title>
 
 <h1>My Projects</h1>
-@if (Projects == null)
-{
-<p>Loading...</p>
-}
 
-else
-{
-
-    <div class="projects-container">
-        @foreach (var project in Projects)
+<div class="projects-container">
+    @if (_projects == null)
+    {
+        <p class="project">loading...</p>
+    }
+    else if (!_projects.Any())
+    {
+        <p class="project">No project found</p>
+    }
+    else
+    {
+        @foreach (var project in _projects)
         {
             <div class="project" @onclick="() => NavigateToProject(project.Id)">
                 <p class="project-name">@project.Name</p>
             </div>
         }
-        @if (IsAddingProject)
-        {
-            <div class="new-project">
-                <input type="text" @bind="NewProjectName" placeholder="Project Name"/>
-                <button @onclick="() => CreateProjectAsync()">Create Project</button>
-                <button @onclick="() => IsAddingProject = false">Cancel</button>
-            </div>
-        }
-        else
-        {
-            <button class="new-project" @onclick="() => ShowInputProject()">Create new project</button>
-        }
-
+    }
+    @if (IsAddingProject)
+    {
+    <div class="new-project">
+        <input type="text" @bind="_newProjectName" placeholder="Project Name"/>
+        <button @onclick="CreateProjectAsync">Create Project</button>
+        <button @onclick="() => IsAddingProject = false">Cancel</button>
     </div>
+    }
+    else
+    {
+    <button class="new-project" @onclick="ShowInputProject">Create new project</button>
+    }
+    
+</div>
+@if (_showError)
+{
+<b class="error-message">
+    @_errorMessage
+</b>
 }
 
 @code {
-    [Parameter]
-    public bool IsAddingProject {get; set;} = false;
-    private string NewProjectName = "";
-
-    public List<ProjectDto>? Projects
-    /*{
-        new ProjectDto { Id = 0, Name = "Default" },
-        new ProjectDto { Id = 1, Name = "Test" },
-        new ProjectDto { Id = 2, Name = "CSharp Course" },
-        new ProjectDto { Id = 3, Name = "Test 2" },
-        new ProjectDto { Id = 4, Name = "Test 3" }
-    }*/;
+    [Parameter] public bool IsAddingProject { get; set; }
+    private string _newProjectName = ""; // Used too name the new project created
+    private List<ProjectDto>? _projects;
+    private bool _showError = false;
+    private string _errorMessage = "";
     
+    // Get all the project for the given user
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            var client = HttpClientFactory.CreateClient("TodoApi"); // Create a client for TodoApi
-            Projects = await client.GetFromJsonAsync<List<ProjectDto>>("api/projects");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error fetching projects: {ex.Message}");
-        }
+        _projects = await ProjectService.GetAllProjectsAsync();
     }
 
-    private void CreateProject(){
-        if(string.IsNullOrEmpty(NewProjectName) || string.IsNullOrWhiteSpace(NewProjectName)){
-            return;
-        }
-        Projects?.Add(
-            new ProjectDto {Id =6 ,Name = NewProjectName}
-        );
-        
-        var createProjectDto = new CreateProjectDto();
-
-        createProjectDto.Name = NewProjectName;
-
-        /*
-         * TODO: Use ProjectsController
-         */
-        
-        
-        NewProjectName = "";
-        IsAddingProject = false;
-        Console.WriteLine("Added a new project");
-    }
-    
     private async Task CreateProjectAsync()
     {
-        if (string.IsNullOrEmpty(NewProjectName) || string.IsNullOrWhiteSpace(NewProjectName))
+        if (string.IsNullOrEmpty(_newProjectName) || string.IsNullOrWhiteSpace(_newProjectName))
         {
+            await ShowErrorMessage("Failed to create project. Please try again.");
             return;
         }
 
         // Create a new project DTO to send to the API
         var createProjectDto = new CreateProjectDto
         {
-            Name = NewProjectName
+            Name = _newProjectName
         };
 
-        try
+        // Create the project in the database
+        var isCreated = await ProjectService.CreateProjectAsync(createProjectDto);
+        if (isCreated)
         {
-            // Send POST request to create a new project
-            var client = HttpClientFactory.CreateClient("TodoApi");
-            var response = await client.PostAsJsonAsync("api/projects", createProjectDto);
+            //Load all projects again
+            _projects = await ProjectService.GetAllProjectsAsync();
+        }
+        else
+        {
+            await ShowErrorMessage("Failed to create project. Please try again.");
+        }
 
-            if (response.IsSuccessStatusCode)
-            {
-                var newProject = await response.Content.ReadFromJsonAsync<ProjectDto>();
-                Projects?.Add(newProject!); // Update the local list with the new project
-                NewProjectName = "";
-                IsAddingProject = false;
-            }
-            else
-            {
-                Console.WriteLine($"Error creating project: {response.ReasonPhrase}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception creating project: {ex.Message}");
-        }
+        _newProjectName = "";
+        IsAddingProject = false;
     }
 
-    
-    private string GetProjectLink(int projectId)
-    {
-        return $"/project/{projectId}";
-    }
-    
     private void NavigateToProject(int projectId)
     {
         Console.WriteLine($"Navigating to project {projectId}");
         NavigationManager.NavigateTo($"/project/{projectId}");
     }
-    
-    private void ShowInputProject(){
+
+    private void ShowInputProject()
+    {
         IsAddingProject = true;
     }
+    
+    private async Task ShowErrorMessage(string message)
+    {
+        _errorMessage = message;
+        _showError = true;
+
+        await Task.Delay(1000);
+        _errorMessage = "";
+        _showError = false;
+    }
+    
 }

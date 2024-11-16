@@ -6,9 +6,6 @@ namespace Todo.Core.Dtos.ProjectCollaborator;
 public class UpdateProjectCollaboratorDto
 {
     [Required]
-    public string UserId { get; set; } = null!;
-
-    [Required]
     [Range(1, 4)]
     public ProjectRole Role { get; set; }
 }

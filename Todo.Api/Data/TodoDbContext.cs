@@ -16,7 +16,7 @@ public class TodoDbContext : IdentityDbContext<ApplicationUser, IdentityRole, st
     public DbSet<Project> Projects { get; set; }
     public DbSet<TodoItem> TodoItems { get; set; }
     public DbSet<TodoList> TodoLists { get; set; }
-    public DbSet<ProjectCollaborators> ProjectCollaborators { get; set; }
+    public DbSet<ProjectCollaborator> ProjectCollaborators { get; set; }
     public DbSet<Label> Labels { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

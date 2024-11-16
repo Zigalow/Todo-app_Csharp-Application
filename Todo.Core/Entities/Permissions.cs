@@ -9,7 +9,7 @@ public static class Permissions
     public const string Viewer = "Viewer";
 
     [Description("Can add/remove project members")]
-    public const string ManageCollaborators = "ManageCollaborators";
+    public const string ManageProjectCollaborators = "ManageProjectCollaborators";
 
     [Description("Can change roles of other members")]
     public const string ManageRoles = "ManageRoles";

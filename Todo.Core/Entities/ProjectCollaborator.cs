@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Todo.Core.Entities;
 
 [PrimaryKey(nameof(UserId), nameof(ProjectId))]
-public class ProjectCollaborators
+public class ProjectCollaborator
 {
     public string UserId { get; set; }
 

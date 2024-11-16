@@ -8,7 +8,7 @@ public static class RolePermissions
         [ProjectRole.Admin] =
         [
             Permissions.ManageProject,
-            Permissions.ManageCollaborators,
+            Permissions.ManageProjectCollaborators,
             Permissions.ManageRoles,
             Permissions.Viewer,
             Permissions.ManageTodoLists,
@@ -19,7 +19,7 @@ public static class RolePermissions
         // Owner has all permissions except managing admins and modifying project
         [ProjectRole.ProjectOwner] = new HashSet<string>
         {
-            Permissions.ManageCollaborators,
+            Permissions.ManageProjectCollaborators,
             Permissions.ManageRoles,
             Permissions.Viewer,
             Permissions.ManageTodoLists,

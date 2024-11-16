@@ -14,4 +14,5 @@ public interface IAuthorizationRepository
     Task<bool> CanAccessLabelAsync(string userId, int labelId);
     Task<bool> CanCreateLabelAsync(string userId, int projectId);
     Task<bool> CanModifyLabelAsync(string userId, int labelId);
+    Task<bool> CanManageProjectCollaborator(string userId, int projectId);
 }

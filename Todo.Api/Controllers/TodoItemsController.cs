@@ -154,6 +154,20 @@ public class TodoItemsController : BaseApiController
             return BadRequest(ModelState);
         }
 
+        var todoItemExists = await _unitOfWork.TodoItems.ExistsAsync(todoItemId);
+
+        if (!todoItemExists)
+        {
+            return NotFound("Todo item not found");
+        }
+
+        var labelExists = await _unitOfWork.Labels.ExistsAsync(labelId);
+
+        if (!labelExists)
+        {
+            return NotFound("Label not found");
+        }
+
         var result = await _unitOfWork.TodoItems.AttachLabelToItem(todoItemId, labelId);
 
         if (!result.IsSuccess)
@@ -171,6 +185,20 @@ public class TodoItemsController : BaseApiController
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
+        }
+
+        var todoItemExists = await _unitOfWork.TodoItems.ExistsAsync(todoItemId);
+
+        if (!todoItemExists)
+        {
+            return NotFound("Todo item not found");
+        }
+
+        var labelExists = await _unitOfWork.Labels.ExistsAsync(labelId);
+
+        if (!labelExists)
+        {
+            return NotFound("Label not found");
         }
 
         var result = await _unitOfWork.TodoItems.DetachLabelFromItem(todoItemId, labelId);

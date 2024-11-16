@@ -15,8 +15,7 @@
 {
     <h1>No project found</h1>    
 }
-else
-{
+else {
     <title>@CurrentProject.Name</title>
 
     <h1>@CurrentProject.Name</h1>
@@ -26,6 +25,7 @@ else
             @_errorMessage
         </b>
     }
+    
     <div class="todo-lists-container">
         @if (CurrentProject.TodoLists.Count != 0) {
             @foreach (var todoList in CurrentProject.TodoLists) {
@@ -49,77 +49,74 @@ else
                                     <div class="todo-date">
                                         @if (task.DueDate.HasValue)
                                         {
-                                        <span>Due: @task.DueDate.Value.ToShortDateString()</span>
+                                            <span>Due: @task.DueDate.Value.ToShortDateString()</span>
                                         }
                                     </div>
                                     <div class="dropdown-container" @onclick:stopPropagation>
-                                        <button class="modify-button" @onclick="() => HandleIsModifiyer(task)">
+                                        <button class="modify-button" @onclick="() => HandleIsModifier(task)">
                                             Modify
                                         </button>
 
                                         @if (CurrentTodoItem == task)
                                         {
-                                        <div class="modifiymenu">
-                                            <button>Open card</button>
-                                            <button @onclick="() => ToggleLabelEditor(task)">
-                                                Edit label
-                                            </button>
-                                            <button>Add date</button>
-                                            <button>Move</button>
-                                            <button>Copy</button>
-                                        </div>
-
-                                        @if (IsHandleLabel)
-                                        {
-                                        <div class="label-editor">
-                                            <h5>Labels</h5>
-                                            @if (ProjectLabels.Any())
-                                            {
-                                            <div class="saved-labels">
-                                                <h6>Project Labels</h6>
-                                                @foreach (var label in ProjectLabels)
-                                                {
-                                                <div class="saved-label-item"
-                                                     @onclick="() => ApplyExistingLabel(task, label)"
-                                                     style="background-color: #@label.Color">
-                                                    @label.Name
-                                                    <span class="label-count">(@label.TodoCount)</span>
-
-                                                    @if (task.LabelText == label.Name)
-                                                    {
-                                                    <button class="remove-label" @onclick:stopPropagation="true"
-                                                            @onclick="() => RemoveLabel(task, label)">×</button>
-
-                                                    <button class="delete-label" @onclick:stopPropagation="true"
-                                                            @onclick="() => DeleteLabel(label)">Delete</button>
-                                                    }
-
-                                                </div>
-                                                }
-                                            </div>
-                                            }
-
-                                            <div class="create-label-section">
-                                                <h6>Create New Label</h6>
-                                                <input type="text" @bind="TextValue" placeholder="Enter label name..." />
-                                                <div class="color-picker">
-                                                    @foreach (var color in ColorOptions)
-                                                    {
-                                                    <div class="color-option @(SelectedColor == color ? "selected" : "")"
-                                                         style="background-color: #@color"
-                                                         @onclick="() => SelectColor(color)">
-                                                    </div>
-                                                    }
-                                                </div>
-                                                <button @onclick="() => CreateLabel(task)" class="create-label-button">
-                                                    Create New Label
+                                            <div class="modifiymenu">
+                                                <button>Open card</button>
+                                                <button @onclick="() => ToggleLabelEditor(task)">
+                                                    Edit label
                                                 </button>
+                                                <button>Add date</button>
+                                                <button>Move</button>
+                                                <button>Copy</button>
                                             </div>
-                                        </div>
+
+                                            @if (IsHandleLabel) {
+                                                <div class="label-editor">
+                                                    <h5>Labels</h5>
+                                                    @if (ProjectLabels.Any()) {
+                                                        <div class="saved-labels">
+                                                            <h6>Project Labels</h6>
+                                                            @foreach (var label in ProjectLabels)
+                                                            {
+                                                                <div class="saved-label-item"
+                                                                     @onclick="() => ApplyExistingLabel(task, label)"
+                                                                     style="background-color: @label.Color">
+                                                                    @label.Name
+                                                                    <span class="label-count">(@label.TodoCount)</span>
+
+                                                                    @if (task.LabelText == label.Name)
+                                                                    {
+                                                                        <button class="remove-label" @onclick:stopPropagation="true"
+                                                                                @onclick="() => RemoveLabel(task, label)">×</button>
+
+                                                                        <button class="delete-label" @onclick:stopPropagation="true"
+                                                                                @onclick="() => DeleteLabel(label)">Delete</button>
+                                                                    }
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    }
+
+                                                    <div class="create-label-section">
+                                                        <h6>Create New Label</h6>
+                                                        <input type="text" @bind="_newTodoItemName" placeholder="Enter label name..." />
+                                                        <div class="color-picker">
+                                                            @foreach (var color in ColorOptions)
+                                                            {
+                                                                <div class="color-option @(SelectedColor == color ? "selected" : "")"
+                                                                     style="background-color: @color"
+                                                                     @onclick="() => SelectColor(color)">
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                        <button @onclick="() => CreateLabel(task)" class="create-label-button">
+                                                            Create New Label
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            }
                                         }
-                                        }
-                                        
                                     </div>
+                                </div>
                             </div>
                         }
                     }
@@ -147,7 +144,6 @@ else
             }
         </div>
     </div>
-    
 }
 
 @code {
@@ -155,31 +151,30 @@ else
     public int ProjectId { get; set; }
     public required ProjectDto? CurrentProject { get; set; }
     private List<LabelDto> ProjectLabels { get; set; } = new();
-    private string SelectedColor { get; set; } = "4A90E2";
+    private string SelectedColor { get; set; } = "#4A90E2";
     private bool IsColorPickerVisible { get; set; } = false;
     private bool IsLabelVisible { get; set; } = false;
     
     private List<string> ColorOptions = new()
     {
-        "4A90E2",  // Blue
-        "50C878",  // Green
-        "FF6B6B",  // Red
-        "FFD93D",  // Yellow
-        "8A2BE2",  // Purple
-        "FF5733",  // Orange
-        "33FFBD",  // Mint Green
-        "FF33F6",  // Pink
-        "33D4FF",  // Light Blue
-        "FFC300",  // Gold
-        "FF7F50",  // Coral
-        "6A5ACD",  // Slate Blue
-        "20B2AA",  // Light Sea Green
-        "D2691E"   // Chocolate
+        "#4A90E2",  // Blue
+        "#50C878",  // Green
+        "#FF6B6B",  // Red
+        "#FFD93D",  // Yellow
+        "#8A2BE2",  // Purple
+        "#FF5733",  // Orange
+        "#33FFBD",  // Mint Green
+        "#FF33F6",  // Pink
+        "#33D4FF",  // Light Blue
+        "#FFC300",  // Gold
+        "#FF7F50",  // Coral
+        "#6A5ACD",  // Slate Blue
+        "#20B2AA",  // Light Sea Green
+        "#D2691E"   // Chocolate
     };
     
     private bool IsHandleLabel { get; set; } = false;
     private bool IsAddingTask { get; set; } = false;
-    private bool IsModifiyingOpen { get; set; } = false;
     private TodoListDto CurrentListAddingTask { get; set; }
     private TodoItemDto CurrentTodoItem { get; set; }
     private string _newTodoItemName = "";
@@ -294,7 +289,7 @@ else
         _showError = false;
     }
     
-    private void HandleIsModifiyer(TodoItemDto todoItem)
+    private void HandleIsModifier(TodoItemDto todoItem)
     {
         CurrentTodoItem = CurrentTodoItem == todoItem ? null : todoItem;
     }

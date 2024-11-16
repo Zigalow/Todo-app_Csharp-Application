@@ -16,12 +16,12 @@ public class AuthorizationRepository : IAuthorizationRepository
 
     public async Task<bool> IsAdminAsync(string userId, int projectId)
     {
-        return await _dbContext.Projects.AnyAsync(p => p.AdminId == userId);
+        return await _dbContext.Projects.AnyAsync(p => p.Id == projectId && p.AdminId == userId);
     }
 
     public async Task<bool> CanAccessProjectAsync(string userId, int projectId)
     {
-        if (await IsAdminAsync(userId))
+        if (await IsAdminAsync(userId, projectId))
             return true;
 
         return await _dbContext.Projects
@@ -30,7 +30,7 @@ public class AuthorizationRepository : IAuthorizationRepository
 
     public async Task<bool> CanModifyProjectAsync(string userId, int projectId)
     {
-        if (await IsAdminAsync(userId))
+        if (await IsAdminAsync(userId, projectId))
             return true;
 
         var collaborator = await _dbContext.ProjectCollaborators
@@ -41,7 +41,7 @@ public class AuthorizationRepository : IAuthorizationRepository
 
     public async Task<bool> CanAccessTodoListAsync(string userId, int todoListId)
     {
-        if (await IsAdminAsync(userId))
+        if (await IsAdminAsync(userId, await GetProjectIdFromTodoList(todoListId)))
             return true;
 
         return await _dbContext.TodoLists
@@ -51,7 +51,7 @@ public class AuthorizationRepository : IAuthorizationRepository
 
     public async Task<bool> CanCreateTodoListAsync(string userId, int projectId)
     {
-        if (await IsAdminAsync(userId))
+        if (await IsAdminAsync(userId, projectId))
             return true;
 
         var collaborator = await _dbContext.ProjectCollaborators
@@ -62,7 +62,7 @@ public class AuthorizationRepository : IAuthorizationRepository
 
     public async Task<bool> CanModifyTodoListAsync(string userId, int todoListId)
     {
-        if (await IsAdminAsync(userId))
+        if (await IsAdminAsync(userId, await GetProjectIdFromTodoList(todoListId)))
             return true;
 
         var collaborator = await _dbContext.ProjectCollaborators
@@ -73,7 +73,7 @@ public class AuthorizationRepository : IAuthorizationRepository
 
     public async Task<bool> CanAccessTodoItemAsync(string userId, int todoItemId)
     {
-        if (await IsAdminAsync(userId))
+        if (await IsAdminAsync(userId, await GetProjectIdFromTodoItem(todoItemId)))
             return true;
 
         return await _dbContext.TodoItems
@@ -83,7 +83,7 @@ public class AuthorizationRepository : IAuthorizationRepository
 
     public async Task<bool> CanCreateTodoItemAsync(string userId, int todoListId)
     {
-        if (await IsAdminAsync(userId))
+        if (await IsAdminAsync(userId, await GetProjectIdFromTodoList(todoListId)))
             return true;
 
         var collaborator = await _dbContext.ProjectCollaborators
@@ -94,7 +94,7 @@ public class AuthorizationRepository : IAuthorizationRepository
 
     public async Task<bool> CanModifyTodoItemAsync(string userId, int todoItemId)
     {
-        if (await IsAdminAsync(userId))
+        if (await IsAdminAsync(userId, await GetProjectIdFromTodoItem(todoItemId)))
             return true;
 
         var collaborator = await _dbContext.ProjectCollaborators
@@ -106,7 +106,7 @@ public class AuthorizationRepository : IAuthorizationRepository
 
     public async Task<bool> CanAccessLabelAsync(string userId, int labelId)
     {
-        if (await IsAdminAsync(userId))
+        if (await IsAdminAsync(userId, await GetProjectIdFromLabel(labelId)))
             return true;
 
         return await _dbContext.Labels
@@ -115,7 +115,7 @@ public class AuthorizationRepository : IAuthorizationRepository
 
     public async Task<bool> CanCreateLabelAsync(string userId, int projectId)
     {
-        if (await IsAdminAsync(userId))
+        if (await IsAdminAsync(userId, projectId))
             return true;
 
         var collaborator = await _dbContext.ProjectCollaborators
@@ -126,7 +126,7 @@ public class AuthorizationRepository : IAuthorizationRepository
 
     public async Task<bool> CanModifyLabelAsync(string userId, int labelId)
     {
-        if (await IsAdminAsync(userId))
+        if (await IsAdminAsync(userId, await GetProjectIdFromLabel(labelId)))
             return true;
 
         var projectId = await _dbContext.Labels

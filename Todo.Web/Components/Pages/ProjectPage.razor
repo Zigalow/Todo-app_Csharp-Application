@@ -19,62 +19,57 @@ else
     <title>@CurrentProject.Name</title>
 
     <h1>@CurrentProject.Name</h1>
-
+    
+    @if (_showError) {
+        <b class="error-message">
+            @_errorMessage
+        </b>
+    }
     <div class="todo-lists-container">
-        @if (CurrentProject.TodoLists.Count != 0)
-        {
-            @foreach (var todoList in CurrentProject.TodoLists)
-            {
+        @if (CurrentProject.TodoLists.Count != 0) {
+            @foreach (var todoList in CurrentProject.TodoLists) {
                 <div class="todo-list-container">
-
-                    @if (todoList.TodoItems.Count != 0)
-                    {
-                        <div class="todo-list-title">
-                            <h5>@todoList.Name</h5>
-                            <img src="images/menu.png"/>
-                        </div>
-                        @foreach (var task in todoList.TodoItems)
-                        {
+                    <div class="todo-list-title">
+                        <h5>@todoList.Name</h5>
+                        <img src="images/menu.png"/>
+                    </div>
+                    @if (todoList.TodoItems.Count != 0) {
+                        @foreach (var task in todoList.TodoItems) {
                             <div class="task-container" @onclick="() => ViewTask = true">
-                                <p>
-                                    <span>@task.Title</span>
-                                </p>
+                                <p><span>@task.Title</span></p>
                                 <p>Priority: @task.Priority</p>
-                                @*@if(task. > 0){
-                                    <p>Duration: @task.Duration</p>
-                                }
-                                @if(task.TimeStart!="" || task.TimeEnd!=""){
-                                <p>Time: @task.TimeStart - @task.TimeEnd</p>
-                                }*@
+                                
                                 <div class="task-lower-part">
-                                    <div class="todo-date">
-                                        @*@if(task.StartDate == "" && task.EndDate != ""){
-                                            <p>@task.EndDate</p>
-                                        } else if (task.StartDate != "" && task.EndDate != "") {
-                                            <p>@task.StartDate - @task.EndDate</p>
-                                        }*@
-                                    </div>
                                     <button @onclick="() => ModifiyTask(task)">Modifiy</button>
                                 </div>
                             </div>
                         }
                     }
-                    @if (IsAddingTask && CurrentListAddingTask == todoList)
-                    {
-                        <input type="text" @bind="TextValue" placeholder="Enter task name..."/>
+                    @if (IsAddingTask && CurrentListAddingTask == todoList) {
+                        <input type="text" @bind="_newTodoItemName" placeholder="Enter task name..."/>
                         <button @onclick="() => CreateTask(todoList)">Create Task</button>
+                        <img class="x-icon" src="images/x-icon.png" alt="" @onclick="() => {IsAddingTask = !IsAddingTask;}"/>
                     }
-                    else
-                    {
+                    else {
                         <button @onclick="() => ShowInputField(todoList)">Add Task</button>
                     }
                 </div>
             }
         }
+        @if (IsAddingTodoList)
+        {
+            <input type="text" @bind="_newTodoListName" placeholder="Enter Todolist name..."/>
+        }
+        
         <div class="todo-list-container">
-            <button>Create new List</button>
+            <button @onclick="CreateTodoListAsync">Create new List</button>
+            @if (IsAddingTodoList)
+            {
+                <img class="x-icon" src="images/x-icon.png" alt="" @onclick="() => {IsAddingTodoList = !IsAddingTodoList;}"/>
+            }
         </div>
     </div>
+    
 }
 
 @code {
@@ -84,11 +79,16 @@ else
 
     private bool IsAddingTask { get; set; } = false;
     private TodoListDto CurrentListAddingTask { get; set; }
-    private string TextValue = "";
-
+    private string _newTodoItemName = "";
     private bool ViewTask {get; set; } = false;
-
-    //Shouldn't actually create a new project (fetch the given project)
+    
+    private bool IsAddingTodoList { get; set; }
+    private string _newTodoListName = "";
+    
+    private bool _showError = false;
+    private string _errorMessage = "";
+    
+    
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine($"ProjectId received: {ProjectId}");
@@ -104,28 +104,79 @@ else
         CurrentListAddingTask = todoList;
     }
 
-    private void CreateTask(TodoListDto todoList){
-        if (string.IsNullOrEmpty(TextValue))
+    private async Task CreateTask(TodoListDto todoList){
+        if (string.IsNullOrEmpty(_newTodoItemName))
         {
+            await ShowErrorMessage("Failed to create TodoItem. Please try again.");
             return;
         }
 
-        var createTodoItemDto = new CreateTodoItemDto();
+        var createTodoItemDto = new CreateTodoItemDto
+        {
+            Title = _newTodoItemName
+        };
 
-        createTodoItemDto.Title = TextValue;
-        /*createTodoItemDto.Description = "";
-        createTodoItemDto.Priority = "";
-        createTodoItemDto.DueDate = ;*/
+        var isCreated = await TodoItemService.CreateTodoItemAsync(todoList.Id, createTodoItemDto);
+        if (isCreated)
+        {
+            Console.WriteLine($"Created {_newTodoItemName} TodoItem");
+            CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
+        }
+        else
+        {
+            Console.WriteLine("Failed to create TodoItem");
+            await ShowErrorMessage("Failed to create TodoItem. Please try again.");
+        }
         
-        /*TODO: Add TodoItemsController*/
-        
-        /*todoList.Tasks.Add (
-            new TodoTask {Name = TextValue, TimeStart="", TimeEnd="", StartDate="", EndDate="", Description=""}
-        );*/
-        TextValue = "";
+        _newTodoItemName = "";
         IsAddingTask = false;
-        CurrentListAddingTask = null;
     }
+    
 
+    private async Task CreateTodoListAsync()
+    {
+        if (!IsAddingTodoList)
+        {
+            IsAddingTodoList = true;
+            return;
+        }
+        //IsAddingTodoList = !IsAddingTodoList;
+        if (string.IsNullOrEmpty(_newTodoListName) || string.IsNullOrWhiteSpace(_newTodoListName))
+        {
+            await ShowErrorMessage("Failed to create TodoList. Please try again.");
+            //IsAddingTodoList = false;
+            return;
+        }
+        var createTodoListDto = new CreateTodoListDto()
+        {
+            Name = _newTodoListName
+        };
+        
+        var isCreated = await TodoListService.CreateTodoListAsync(ProjectId, createTodoListDto);
+        if (isCreated)
+        {
+            Console.WriteLine($"Created {_newTodoListName} TodoList");
+            CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
+        }
+        else
+        {
+            Console.WriteLine("Failed to create TodoList");
+            await ShowErrorMessage("Failed to create TodoList. Please try again.");
+        }
+
+        _newTodoListName = "";
+        IsAddingTodoList = false;
+    }
+    
+    private async Task ShowErrorMessage(string message)
+    {
+        _errorMessage = message;
+        _showError = true;
+        
+        await Task.Delay(1000);
+        
+        _errorMessage = "";
+        _showError = false;
+    }
 
 }

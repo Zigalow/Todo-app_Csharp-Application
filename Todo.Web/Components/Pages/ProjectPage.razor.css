@@ -77,3 +77,12 @@ span{
 .task-lower-part button{
     grid-column: 2;
 }
+
+.error-message{
+    color:red;
+}
+
+.x-icon {
+    width: 16px;
+    height: 16px;
+}

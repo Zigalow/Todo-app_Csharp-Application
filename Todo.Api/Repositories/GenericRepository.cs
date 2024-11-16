@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Todo.Api.Data;
-using Todo.Api.Interfaces;
+using Todo.Api.Repositories.Interfaces;
 
 namespace Todo.Api.Repositories;
 
@@ -15,35 +15,37 @@ public class GenericRepository<T> : IRepository<T> where T : class
         DbSet = dbContext.Set<T>();
     }
 
-    public async Task<List<T>> GetAllAsync()
+    public virtual Task<IEnumerable<T>> GetAllAsync(string id)
     {
-        return await DbSet.ToListAsync();
+        throw new NotImplementedException(
+            $"GetAllAsync must be implemented in the derived repository for {typeof(T).Name}"
+        );
     }
 
-    public async Task<T?> GetByIdAsync(int id)
+    public virtual async Task<T?> GetByIdAsync(int id)
     {
         return await DbSet.FindAsync(id);
     }
 
-    public async Task<T> AddAsync(T entity)
+    public virtual async Task<T> AddAsync(T entity)
     {
         await DbSet.AddAsync(entity);
         return entity;
     }
 
-    public Task UpdateAsync(T entity)
+    public virtual Task UpdateAsync(T entity)
     {
         DbSet.Update(entity);
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(T entity)
+    public virtual Task DeleteAsync(T entity)
     {
         DbSet.Remove(entity);
         return Task.CompletedTask;
     }
 
-    public Task<bool> ExistsAsync(int id)
+    public virtual Task<bool> ExistsAsync(int id)
     {
         return DbSet.AnyAsync(e => EF.Property<int>(e, "Id") == id);
     }

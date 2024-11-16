@@ -1,19 +1,22 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Todo.Api.Dtos.ProjectDtos;
 using Todo.Api.Interfaces;
 using Todo.Api.Mappers;
+using Todo.Api.Repositories.Interfaces;
+using Todo.Core.Dtos.ProjectDtos;
 
 namespace Todo.Api.Controllers;
 
-[Route("api/projects")]
-[ApiController]
-public class ProjectsController : ControllerBase
+[Authorize]
+public class ProjectsController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAuthorizationRepository _authorizationRepository;
 
-    public ProjectsController(IUnitOfWork unitOfWork)
+    public ProjectsController(IUnitOfWork unitOfWork, IAuthorizationRepository authorizationRepository)
     {
         _unitOfWork = unitOfWork;
+        _authorizationRepository = authorizationRepository;
     }
 
     [HttpGet]
@@ -24,7 +27,8 @@ public class ProjectsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var projects = await _unitOfWork.Projects.GetAllAsync();
+        var userId = GetCurrentUserId();
+        var projects = await _unitOfWork.Projects.GetAllAsync(userId);
 
         return Ok(projects.ToListedProjectDtos());
     }
@@ -38,7 +42,18 @@ public class ProjectsController : ControllerBase
         }
 
         var project = await _unitOfWork.Projects.GetByIdAsync(id);
-        return project == null ? NotFound() : Ok(project.ToProjectDto());
+        if (project == null)
+        {
+            return NotFound();
+        }
+
+        var userId = GetCurrentUserId();
+        if (!await _authorizationRepository.CanAccessProjectAsync(userId, id))
+        {
+            return Forbid("User does not have access to this project");
+        }
+
+        return Ok(project.ToProjectDto());
     }
 
     [HttpPost]
@@ -49,13 +64,13 @@ public class ProjectsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var createdProject = createProjectDto.ToProjectFromCreateDto();
-        await _unitOfWork.Projects.AddAsync(createdProject);
+        var userId = GetCurrentUserId();
 
+        var createdProject = createProjectDto.ToProjectFromCreateDto(userId);
+        await _unitOfWork.Projects.AddAsync(createdProject);
         await _unitOfWork.SaveChangesAsync();
 
         var newProject = await _unitOfWork.Projects.GetByIdAsync(createdProject.Id);
-
         return CreatedAtAction(nameof(GetProjectById), new { id = newProject!.Id }, newProject.ToProjectDto());
     }
 

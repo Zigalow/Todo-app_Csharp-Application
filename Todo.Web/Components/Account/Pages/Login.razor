@@ -1,73 +1,68 @@
 ﻿@page "/Account/Login"
-
 @using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Identity
-@using Todo.Web.Data
-
-@inject SignInManager<ApplicationUser> SignInManager
-@inject ILogger<Login> Logger
+@using Microsoft.AspNetCore.Authorization
+@using Todo.Web.Auth
+@using Todo.Web.Auth.Models
+@inject IAuthService AuthService
 @inject NavigationManager NavigationManager
-@inject IdentityRedirectManager RedirectManager
+@attribute [AllowAnonymous]
 
 <PageTitle>Log in</PageTitle>
 
 <div class="container">
-    @*<div class="col-md-4">*@
     <h2>Log in</h2>
-        <section>
-            <StatusMessage Message="@errorMessage"/>
-            <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
-                <DataAnnotationsValidator/>
-                @*<h2>Use a local account to log in.</h2>
-                <hr/>*@
-                <ValidationSummary class="text-danger" role="alert"/>
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com"/>
-                    <label for="email" class="form-label">Email</label>
-                    <ValidationMessage For="() => Input.Email" class="text-danger"/>
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password"/>
-                    <label for="password" class="form-label">Password</label>
-                    <ValidationMessage For="() => Input.Password" class="text-danger"/>
-                </div>
-                <div class="checkbox mb-3">
-                    <label class="form-label">
-                        <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input"/>
-                        Remember me
-                    </label>
-</div>          
-           <div>
-    <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-    <h3>Or signup with</h3>
-</div>
+    <section>
+        @if (errorMessage != "")
+        {
+            <p>@errorMessage</p>
+        }
+        <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+            <DataAnnotationsValidator/>
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com"/>
+                <label for="email" class="form-label">Email</label>
+                <ValidationMessage For="() => Input.Email" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-3">
+                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password"/>
+                <label for="password" class="form-label">Password</label>
+                <ValidationMessage For="() => Input.Password" class="text-danger"/>
+            </div>
+            <div class="checkbox mb-3">
+                <label class="form-label">
+                    <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input"/>
+                    Remember me
+                </label>
+            </div>
+            <div>
+                <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
+                <h3>Or signup with</h3>
+            </div>
+            <div class="button-container">
+                <!-- Google Button -->
+                <button class="circular-button">
+                    <img src="./Images/google.png" alt="Google Logo"/>
+                </button>
 
-<div class="button-container">
-    <!-- Google Button -->
-    <button class="circular-button">
-        <img src="./Images/google.png" alt="Google Logo"/>
-    </button>
-    
-    <!-- Facebook Button -->
-    <button class="circular-button">
-        <img src="./Images/facebook_logo.svg" alt="Facebook Logo"/>
-    </button>
-</div>
-                
-                <div>
-                    <p>
-                        <a href="Account/ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
-                    </p>
-                    <p>
-                        <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
-                </div>
-            </EditForm>
-        </section>
+                <!-- Facebook Button -->
+                <button class="circular-button">
+                    <img src="./Images/facebook_logo.svg" alt="Facebook Logo"/>
+                </button>
+            </div>
+            <div>
+                <p>
+                    <a href="Account/ForgotPassword">Forgot your password?</a>
+                </p>
+                <p>
+                    <a href="Account/Register">Register as a new user</a>
+                </p>
+                <p>
+                    <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
+                </p>
+            </div>
+        </EditForm>
+    </section>
     @*</div>*@
     @*<div class="col-md-6 col-md-offset-2">
         <section>
@@ -79,50 +74,47 @@
 </div>
 
 @code {
-    private string? errorMessage;
-
-    [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
+    private string errorMessage = "";
+    private bool isLoading;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
 
-    [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
-
-    protected override async Task OnInitializedAsync()
+    private async Task LoginUser()
     {
-        if (HttpMethods.IsGet(HttpContext.Request.Method))
+        try
         {
-            // Clear the existing external cookie to ensure a clean login process
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-        }
-    }
+            if (isLoading) return;
+            isLoading = true;
+            errorMessage = "";
+            StateHasChanged();
 
-    public async Task LoginUser()
-    {
-        // This doesn't count login failures towards account lockout
-        // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-        if (result.Succeeded)
-        {
-            Logger.LogInformation("User logged in.");
-            RedirectManager.RedirectTo(ReturnUrl);
+            var loginRequest = new LoginRequest
+            {
+                Email = Input.Email,
+                Password = Input.Password
+            };
+
+            var isAuthenticated = await AuthService.LoginAsync(loginRequest);
+
+            if (isAuthenticated)
+            {
+                NavigationManager.NavigateTo("/", true);
+            }
+            else
+            {
+                errorMessage = "Invalid login attempt. Please check your credentials.";
+            }
         }
-        else if (result.RequiresTwoFactor)
+        catch (Exception ex)
         {
-            RedirectManager.RedirectTo(
-                "Account/LoginWith2fa",
-                new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
+            errorMessage = "An error occurred while logging in. Please try again.";
+            Console.WriteLine($"Login error: {ex.Message}");
         }
-        else if (result.IsLockedOut)
+        finally
         {
-            Logger.LogWarning("User account locked out.");
-            RedirectManager.RedirectTo("Account/Lockout");
-        }
-        else
-        {
-            errorMessage = "Error: Invalid login attempt.";
+            isLoading = false;
+            StateHasChanged();
         }
     }
 

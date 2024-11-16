@@ -1,13 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Todo.Api.Dtos.LabelDto;
 using Todo.Api.Interfaces;
 using Todo.Api.Mappers;
+using Todo.Core.Dtos.LabelDto;
 
 namespace Todo.Api.Controllers;
 
-[Route("api/labels")]
-[ApiController]
-public class LabelsController : ControllerBase
+[Authorize]
+public class LabelsController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
 
@@ -24,7 +24,9 @@ public class LabelsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var labels = await _unitOfWork.Labels.GetAllAsync();
+        var userId = GetCurrentUserId();
+
+        var labels = await _unitOfWork.Labels.GetAllAsync(userId);
         return Ok(labels.ToListedLabelDtos());
     }
 
@@ -75,7 +77,7 @@ public class LabelsController : ControllerBase
 
         var label = createLabelDto.ToLabelFromCreateDto(projectId);
 
-        if (await _unitOfWork.Labels.ExistsAsync(label))
+        if (await _unitOfWork.Labels.ExistsAsync(projectId, createLabelDto.Name))
         {
             return BadRequest("Label already exists");
         }

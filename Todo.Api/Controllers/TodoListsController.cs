@@ -1,13 +1,14 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Todo.Api.Dtos.TodoListDtos;
 using Todo.Api.Interfaces;
 using Todo.Api.Mappers;
+using Todo.Core.Dtos.TodoListDtos;
 
 namespace Todo.Api.Controllers;
 
+[Authorize]
 [Route("api/todo-lists")]
-[ApiController]
-public class TodoListsController : ControllerBase
+public class TodoListsController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
 
@@ -24,7 +25,9 @@ public class TodoListsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var todoLists = await _unitOfWork.TodoLists.GetAllAsync();
+        var userId = GetCurrentUserId();
+
+        var todoLists = await _unitOfWork.TodoLists.GetAllAsync(userId);
         return Ok(todoLists.ToListedTodoListDtos());
     }
 

@@ -1,0 +1,12 @@
+@page "/Account/Logout"
+@using Todo.Web.Auth
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.LogoutAsync();
+        NavigationManager.NavigateTo("/Account/Login");
+    }
+}

@@ -1,13 +1,14 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Todo.Api.Dtos.TodoItemDtos;
 using Todo.Api.Interfaces;
 using Todo.Api.Mappers;
+using Todo.Core.Dtos.TodoItemDtos;
 
 namespace Todo.Api.Controllers;
 
+[Authorize]
 [Route("api/todo-items")]
-[ApiController]
-public class TodoItemsController : ControllerBase
+public class TodoItemsController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
 
@@ -24,9 +25,9 @@ public class TodoItemsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var todoItems = await _unitOfWork.TodoItems.GetAllAsync();
+        var userId = GetCurrentUserId();
 
-        var todoItemsDto = todoItems.Select(todoItem => todoItem.ToTodoItemDto());
+        var todoItems = await _unitOfWork.TodoItems.GetAllAsync(userId);
 
         return Ok(todoItems.ToListedTodoItemsDtos());
     }
@@ -152,6 +153,7 @@ public class TodoItemsController : ControllerBase
         {
             return BadRequest(ModelState);
         }
+
         var result = await _unitOfWork.TodoItems.AttachLabelToItem(todoItemId, labelId);
 
         if (!result.IsSuccess)
@@ -170,6 +172,7 @@ public class TodoItemsController : ControllerBase
         {
             return BadRequest(ModelState);
         }
+
         var result = await _unitOfWork.TodoItems.DetachLabelFromItem(todoItemId, labelId);
 
         if (!result.IsSuccess)

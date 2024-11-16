@@ -1,4 +1,4 @@
-using Todo.Api.Dtos.ProjectDtos;
+using Todo.Core.Dtos.ProjectDtos;
 using Todo.Core.Entities;
 
 namespace Todo.Api.Mappers;
@@ -19,12 +19,12 @@ public static class ProjectMapper
         };
     }
 
-    public static Project ToProjectFromCreateDto(this CreateProjectDto createProjectDto)
+    public static Project ToProjectFromCreateDto(this CreateProjectDto createProjectDto, string userId)
     {
         return new Project
         {
             Name = createProjectDto.Name,
-            AdminId = "12345" // Hardcoded for now so they are all linked to the same aspnet user
+            AdminId = userId,
         };
     }
 

@@ -1,5 +1,5 @@
 using Microsoft.OpenApi.Extensions;
-using Todo.Api.Dtos.TodoItemDtos;
+using Todo.Core.Dtos.TodoItemDtos;
 using Todo.Core.Entities;
 
 namespace Todo.Api.Mappers;

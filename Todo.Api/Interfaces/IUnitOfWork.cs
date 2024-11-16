@@ -1,4 +1,4 @@
-using Todo.Api.Interfaces.EntityInterfaces;
+using Todo.Api.Repositories.Interfaces;
 using Todo.Core.Entities;
 
 namespace Todo.Api.Interfaces;

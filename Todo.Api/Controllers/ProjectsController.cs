@@ -67,6 +67,7 @@ public class ProjectsController : BaseApiController
         var userId = GetCurrentUserId();
 
         var createdProject = createProjectDto.ToProjectFromCreateDto(userId);
+
         await _unitOfWork.Projects.AddAsync(createdProject);
         await _unitOfWork.SaveChangesAsync();
 
@@ -89,6 +90,13 @@ public class ProjectsController : BaseApiController
             return NotFound();
         }
 
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanModifyProjectAsync(userId, id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have permission to modify this project");
+        }
+
         project.UpdateProjectFromUpdateDto(updateProjectDto);
 
         await _unitOfWork.Projects.UpdateAsync(project);
@@ -109,6 +117,13 @@ public class ProjectsController : BaseApiController
         if (project == null)
         {
             return NotFound();
+        }
+
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanModifyProjectAsync(userId, id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have permission to delete this project");
         }
 
         await _unitOfWork.Projects.DeleteAsync(project);

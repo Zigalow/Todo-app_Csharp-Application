@@ -14,7 +14,7 @@ public class AuthorizationRepository : IAuthorizationRepository
         _dbContext = dbContext;
     }
 
-    public async Task<bool> IsAdminAsync(string userId)
+    public async Task<bool> IsAdminAsync(string userId, int projectId)
     {
         return await _dbContext.Projects.AnyAsync(p => p.AdminId == userId);
     }

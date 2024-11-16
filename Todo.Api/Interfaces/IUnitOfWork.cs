@@ -10,7 +10,7 @@ public interface IUnitOfWork
     ITodoListRepository TodoLists { get; }
     IProjectRepository Projects { get; }
     ILabelRepository Labels { get; }
-    IRepository<ProjectCollaborators> ProjectCollaborators { get; }
+    IProjectCollaboratorRepository ProjectCollaborators { get; }
 
     Task SaveChangesAsync();
 }

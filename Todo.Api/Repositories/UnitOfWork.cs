@@ -14,7 +14,7 @@ public class UnitOfWork : IUnitOfWork
     public ITodoListRepository TodoLists { get; }
     public IProjectRepository Projects { get; }
     public ILabelRepository Labels { get; }
-    public IRepository<ProjectCollaborators> ProjectCollaborators { get; }
+    public IProjectCollaboratorRepository ProjectCollaborators { get; }
 
     public UnitOfWork(TodoDbContext dbContext)
     {
@@ -24,7 +24,7 @@ public class UnitOfWork : IUnitOfWork
         TodoLists = new TodoListRepository(_dbContext);
         Projects = new ProjectRepository(_dbContext);
         Labels = new LabelRepository(_dbContext);
-        ProjectCollaborators = new GenericRepository<ProjectCollaborators>(_dbContext);
+        ProjectCollaborators = new ProjectCollaboratorRepository(_dbContext);
     }
 
     public async Task SaveChangesAsync()

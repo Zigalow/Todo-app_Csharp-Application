@@ -140,6 +140,17 @@ public class AuthorizationRepository : IAuthorizationRepository
         return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageTodoItems);
     }
 
+    public async Task<bool> CanManageProjectCollaborator(string userId, int projectId)
+    {
+        if (await IsAdminAsync(userId, projectId))
+            return true;
+
+        var collaborator = await _dbContext.ProjectCollaborators
+            .FirstOrDefaultAsync(c => c.UserId == userId && c.ProjectId == projectId);
+
+        return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageProjectCollaborators);
+    }
+
     private static bool HasPermission(ProjectRole role, string permission)
     {
         return RolePermissions.HasPermission(role, permission);

@@ -144,4 +144,28 @@ public class AuthorizationRepository : IAuthorizationRepository
     {
         return RolePermissions.HasPermission(role, permission);
     }
+
+    private async Task<int> GetProjectIdFromTodoList(int todoListId)
+    {
+        return await _dbContext.TodoLists
+            .Where(tl => tl.Id == todoListId)
+            .Select(tl => tl.ProjectId)
+            .FirstOrDefaultAsync();
+    }
+
+    private async Task<int> GetProjectIdFromTodoItem(int todoItemId)
+    {
+        return await _dbContext.TodoItems
+            .Where(ti => ti.Id == todoItemId)
+            .Select(ti => ti.TodoList.ProjectId)
+            .FirstOrDefaultAsync();
+    }
+
+    private async Task<int> GetProjectIdFromLabel(int labelId)
+    {
+        return await _dbContext.Labels
+            .Where(l => l.Id == labelId)
+            .Select(l => l.ProjectId)
+            .FirstOrDefaultAsync();
+    }
 }

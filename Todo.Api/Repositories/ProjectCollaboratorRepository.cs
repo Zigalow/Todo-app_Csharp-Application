@@ -40,7 +40,7 @@ public class ProjectCollaboratorRepository : IProjectCollaboratorRepository
 
         if (projectCollaborator.UserId.Equals(adminId))
         {
-            return Result<bool>.Failure("User is the admin of the project");
+            return Result<bool>.Forbidden("User is the admin of the project");
         }
 
         var isExisting = await _dbContext.ProjectCollaborator
@@ -79,7 +79,7 @@ public class ProjectCollaboratorRepository : IProjectCollaboratorRepository
 
         if (removeUserId.Equals(adminId))
         {
-            return Result<ProjectCollaborator>.Failure("Cannot remove admin from the project");
+            return Result<ProjectCollaborator>.Forbidden("Cannot remove admin from the project");
         }
 
         // Find the existing collaborator

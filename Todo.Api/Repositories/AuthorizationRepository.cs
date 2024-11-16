@@ -33,7 +33,7 @@ public class AuthorizationRepository : IAuthorizationRepository
         if (await IsAdminAsync(userId, projectId))
             return true;
 
-        var collaborator = await _dbContext.ProjectCollaborator
+        var collaborator = await _dbContext.ProjectCollaborators
             .FirstOrDefaultAsync(c => c.UserId == userId && c.ProjectId == projectId);
 
         return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageProject);
@@ -54,7 +54,7 @@ public class AuthorizationRepository : IAuthorizationRepository
         if (await IsAdminAsync(userId, projectId))
             return true;
 
-        var collaborator = await _dbContext.ProjectCollaborator
+        var collaborator = await _dbContext.ProjectCollaborators
             .FirstOrDefaultAsync(c => c.UserId == userId && c.ProjectId == projectId);
 
         return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageTodoLists);
@@ -65,7 +65,7 @@ public class AuthorizationRepository : IAuthorizationRepository
         if (await IsAdminAsync(userId, await GetProjectIdFromTodoList(todoListId)))
             return true;
 
-        var collaborator = await _dbContext.ProjectCollaborator
+        var collaborator = await _dbContext.ProjectCollaborators
             .FirstOrDefaultAsync(c => c.UserId == userId && c.Project.TodoLists.Any(tl => tl.Id == todoListId));
 
         return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageTodoLists);
@@ -86,7 +86,7 @@ public class AuthorizationRepository : IAuthorizationRepository
         if (await IsAdminAsync(userId, await GetProjectIdFromTodoList(todoListId)))
             return true;
 
-        var collaborator = await _dbContext.ProjectCollaborator
+        var collaborator = await _dbContext.ProjectCollaborators
             .FirstOrDefaultAsync(c => c.UserId == userId && c.Project.TodoLists.Any(tl => tl.Id == todoListId));
 
         return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageTodoItems);
@@ -97,7 +97,7 @@ public class AuthorizationRepository : IAuthorizationRepository
         if (await IsAdminAsync(userId, await GetProjectIdFromTodoItem(todoItemId)))
             return true;
 
-        var collaborator = await _dbContext.ProjectCollaborator
+        var collaborator = await _dbContext.ProjectCollaborators
             .FirstOrDefaultAsync(c =>
                 c.UserId == userId && c.Project.TodoLists.Any(tl => tl.Items.Any(ti => ti.Id == todoItemId)));
 
@@ -118,7 +118,7 @@ public class AuthorizationRepository : IAuthorizationRepository
         if (await IsAdminAsync(userId, projectId))
             return true;
 
-        var collaborator = await _dbContext.ProjectCollaborator
+        var collaborator = await _dbContext.ProjectCollaborators
             .FirstOrDefaultAsync(c => c.UserId == userId && c.ProjectId == projectId);
 
         return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageLabels);
@@ -134,7 +134,7 @@ public class AuthorizationRepository : IAuthorizationRepository
             .Select(l => l.ProjectId)
             .FirstOrDefaultAsync();
 
-        var collaborator = await _dbContext.ProjectCollaborator
+        var collaborator = await _dbContext.ProjectCollaborators
             .FirstOrDefaultAsync(c => c.UserId == userId && c.ProjectId == projectId);
 
         return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageTodoItems);
@@ -145,7 +145,7 @@ public class AuthorizationRepository : IAuthorizationRepository
         if (await IsAdminAsync(userId, projectId))
             return true;
 
-        var collaborator = await _dbContext.ProjectCollaborator
+        var collaborator = await _dbContext.ProjectCollaborators
             .FirstOrDefaultAsync(c => c.UserId == userId && c.ProjectId == projectId);
 
         return collaborator != null && HasPermission(collaborator.Role, Permissions.ManageProjectCollaborators);

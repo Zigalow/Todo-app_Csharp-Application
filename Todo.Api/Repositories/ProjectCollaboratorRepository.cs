@@ -17,7 +17,7 @@ public class ProjectCollaboratorRepository : IProjectCollaboratorRepository
 
     public async Task<IEnumerable<ProjectCollaborator>> GetCollaboratorsFromProjectAsync(int projectId)
     {
-        return await _dbContext.ProjectCollaborator
+        return await _dbContext.ProjectCollaborators
             .Where(pc => pc.ProjectId == projectId)
             .Include(pc => pc.ApplicationUser)
             .ToListAsync();
@@ -25,7 +25,7 @@ public class ProjectCollaboratorRepository : IProjectCollaboratorRepository
 
     public async Task<ProjectCollaborator?> GetProjectCollaboratorByIdAsync(int projectId, string userId)
     {
-        return await _dbContext.ProjectCollaborator
+        return await _dbContext.ProjectCollaborators
             .Where(pc => pc.ProjectId == projectId && pc.UserId == userId)
             .Include(pc => pc.ApplicationUser)
             .FirstOrDefaultAsync();
@@ -43,7 +43,7 @@ public class ProjectCollaboratorRepository : IProjectCollaboratorRepository
             return Result<bool>.Forbidden("User is the admin of the project");
         }
 
-        var isExisting = await _dbContext.ProjectCollaborator
+        var isExisting = await _dbContext.ProjectCollaborators
             .AnyAsync(c => c.ProjectId == projectId && c.UserId.Equals(projectCollaborator.UserId));
 
         if (isExisting)
@@ -58,14 +58,14 @@ public class ProjectCollaboratorRepository : IProjectCollaboratorRepository
             Role = projectCollaborator.Role
         };
 
-        await _dbContext.ProjectCollaborator.AddAsync(collaborator);
+        await _dbContext.ProjectCollaborators.AddAsync(collaborator);
 
         return Result<bool>.Success(true);
     }
 
     public Task<ProjectCollaborator> UpdateProjectCollaboratorAsync(ProjectCollaborator projectCollaborator)
     {
-        _dbContext.ProjectCollaborator.Update(projectCollaborator);
+        _dbContext.ProjectCollaborators.Update(projectCollaborator);
 
         return Task.FromResult(projectCollaborator);
     }
@@ -90,7 +90,7 @@ public class ProjectCollaboratorRepository : IProjectCollaboratorRepository
             return Result<ProjectCollaborator>.Failure("User is not a part of the project");
         }
 
-        _dbContext.ProjectCollaborator.Remove(collaborator);
+        _dbContext.ProjectCollaborators.Remove(collaborator);
 
         return Result<ProjectCollaborator>.Success(collaborator);
     }

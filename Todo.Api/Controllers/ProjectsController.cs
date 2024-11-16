@@ -50,7 +50,7 @@ public class ProjectsController : BaseApiController
         var userId = GetCurrentUserId();
         if (!await _authorizationRepository.CanAccessProjectAsync(userId, id))
         {
-            return Forbid("User does not have access to this project");
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to this project");
         }
 
         return Ok(project.ToProjectDto());

@@ -8,8 +8,8 @@ public class ProjectDto
 
     public string Name { get; set; } = null!;
 
-    public string? AdminId { get; set; } = null!;
-    public string? AdminName { get; set; } = null!;
+    public string AdminId { get; set; } = null!;
+    public string AdminName { get; set; } = null!;
 
     public int TodoListsCount { get; set; }
 

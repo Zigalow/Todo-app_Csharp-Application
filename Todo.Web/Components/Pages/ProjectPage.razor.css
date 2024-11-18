@@ -48,6 +48,8 @@ span {
     border-radius: 8px;
     padding: 16px;
     min-width: 300px;
+    max-height: 550px;
+    overflow-y: auto;
 }
 .task-container {
     background-color: white;
@@ -141,15 +143,17 @@ span {
 
 /* Updated Label Editor Styling */
 .label-editor {
-    position: absolute; /* Change to fixed positioning */
-    left: 70%; /* Center horizontally */
+    position: fixed; /* Change to fixed positioning */
+    left: 46%; /* Center horizontally */
     top: 50%;
+    transform: translate(-50%, -50%);
     background-color: white;
     border: 1px solid #000000;
     border-radius: 4px;
     padding: 16px;
-    z-index: 1000; /* Higher than modifiymenu */
+    z-index: 1100; /* Higher than modifiymenu */
     min-width: 250px;
+    max-width: 300px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 

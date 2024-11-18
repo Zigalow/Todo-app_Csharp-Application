@@ -19,6 +19,7 @@ public class TodoListRepository : GenericRepository<TodoList>, ITodoListReposito
         var projectsWithTodoLists = await _dbContext.Projects
             .Include(p => p.TodoLists)
             .ThenInclude(tl => tl.Items)
+            .ThenInclude(l=>l.Labels)
             .Where(p => p.AdminId == userId)
             .ToListAsync();
 
@@ -29,6 +30,7 @@ public class TodoListRepository : GenericRepository<TodoList>, ITodoListReposito
     {
         return await _dbContext.TodoLists
             .Include(tl => tl.Items)
+            .ThenInclude(l=>l.Labels)
             .FirstOrDefaultAsync(tl => tl.Id == id);
     }
 

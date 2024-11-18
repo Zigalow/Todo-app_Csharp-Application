@@ -293,6 +293,7 @@ else {
     private void HandleIsModifier(TodoItemDto todoItem)
     {
         CurrentTodoItem = CurrentTodoItem == todoItem ? null : todoItem;
+        IsHandleLabel = false;
     }
 
     private void ToggleLabelEditor(TodoItemDto todoItem)

@@ -34,6 +34,7 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITodoListService, TodoListService>();
 builder.Services.AddScoped<ITodoItemService, TodoItemService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ILabelService, LabelService>();
 builder.Services.AddScoped<AuthHeaderHandler>();
 builder.Services.AddBlazoredLocalStorage();
 

@@ -27,12 +27,6 @@ public class TodoItem
 
     [ForeignKey(nameof(TodoListId))]
     public TodoList TodoList { get; set; } = null!;
-
-        [NotMapped]
-        public bool IsDropdownVisible { get; set; }
-        
-        [NotMapped]
-        public bool IsLabelEditorVisible { get; set; }
     public ICollection<Label> Labels { get; set; } = new List<Label>();
     // public ICollection<ApplicationUser> Assignees { get; set; } = new List<ApplicationUser>();
 }

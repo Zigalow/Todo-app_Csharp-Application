@@ -7,7 +7,7 @@ public interface ITodoItemService
     Task<List<TodoItemDto>> GetAllTodoItemsAsync();
     Task<List<TodoItemDto>?> GetAllTodoItemsForProject(int projectId);
     Task<List<TodoItemDto>?> GetAllTodoItemsForList(int listId);
-    Task<List<TodoItemDto>?> GetTodoItemByIdAsync(int id);
+    Task<TodoItemDto?> GetTodoItemByIdAsync(int id);
     Task<bool> CreateTodoItemAsync(int listId, CreateTodoItemDto todoItemDto);
     Task<bool> UpdateTodoItemAsync(int id, UpdateTodoItemDto todoItem);
     Task<bool> AttachLabelToItemAsync(int itemId, int labelId);

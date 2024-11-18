@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Todo.Api.Interfaces;
 using Todo.Api.Mappers;
-using Todo.Core.Dtos.LabelDto;
+using Todo.Core.Dtos.LabelDtos;
 
 namespace Todo.Api.Controllers;
 
@@ -63,6 +63,7 @@ public class LabelsController : BaseApiController
     [HttpPost("for-project/{projectId:int}")]
     public async Task<IActionResult> CreateLabel(int projectId, CreateLabelDto createLabelDto)
     {
+        Console.WriteLine("Label begin");
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -84,7 +85,7 @@ public class LabelsController : BaseApiController
 
         await _unitOfWork.Labels.AddAsync(label);
         await _unitOfWork.SaveChangesAsync();
-
+        Console.WriteLine("Label Created");
         return CreatedAtAction(nameof(GetLabelById), new { id = label.Id }, label.ToLabelDto());
     }
 

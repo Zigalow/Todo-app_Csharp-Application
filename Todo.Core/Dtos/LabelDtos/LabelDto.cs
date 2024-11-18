@@ -1,4 +1,4 @@
-namespace Todo.Core.Dtos.LabelDto;
+namespace Todo.Core.Dtos.LabelDtos;
 
 public class LabelDto
 {

@@ -1,3 +1,5 @@
+using Todo.Core.Dtos.LabelDtos;
+
 namespace Todo.Core.Dtos.TodoItemDtos;
 
 public class TodoItemDto
@@ -9,5 +11,10 @@ public class TodoItemDto
     public string Priority { get; set; } = "VeryLow";
     public bool IsDone { get; set; } = false;
     public int TodoListId { get; set; }
-    public List<String> Labels { get; set; } = new();
+    public List<LabelDto> Labels { get; set; } = new();
+    //public bool IsDropdownVisible { get; set; } = false;
+    //public bool IsLabelEditorVisible { get; set; } = false;
+    //public string LabelColor { get; set; } = "#FFFFFF";  
+    //public string? LabelText { get; set; }
+    //public bool HasLabel { get; set; }
 }

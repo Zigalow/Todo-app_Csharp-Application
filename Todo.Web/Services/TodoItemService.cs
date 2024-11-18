@@ -75,7 +75,7 @@ public class TodoItemService : ITodoItemService
         }
     }
 
-    public async Task<List<TodoItemDto>?> GetTodoItemByIdAsync(int id)
+    public async Task<TodoItemDto?> GetTodoItemByIdAsync(int id)
     {
         try
         {
@@ -86,7 +86,7 @@ public class TodoItemService : ITodoItemService
                 return null;
             }
 
-            return await response.Content.ReadFromJsonAsync<List<TodoItemDto>>();
+            return await response.Content.ReadFromJsonAsync<TodoItemDto>();
         }
         catch (Exception ex)
         {

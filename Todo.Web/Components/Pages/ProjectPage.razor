@@ -83,7 +83,7 @@ else {
                                                             {
                                                                 <div class="saved-label-item"
                                                                      @onclick="() => ApplyExistingLabel(task, label)"
-                                                                     style="background-color: #@label.Color">
+                                                                     style="background-color: @label.Color">
                                                                     @label.Name
                                                                     <span class="label-count">(@label.TodoCount)</span>
 
@@ -107,7 +107,7 @@ else {
                                                             @foreach (var color in ColorOptions)
                                                             {
                                                                 <div class="color-option @(SelectedColor == color ? "selected" : "")"
-                                                                     style="background-color: #@color"
+                                                                     style="background-color: @color"
                                                                      @onclick="() => SelectColor(color)">
                                                                 </div>
                                                             }
@@ -161,20 +161,20 @@ else {
     
     private List<string> ColorOptions = new()
     {
-        "4A90E2",  // Blue
-        "50C878",  // Green
-        "FF6B6B",  // Red
-        "FFD93D",  // Yellow
-        "8A2BE2",  // Purple
-        "FF5733",  // Orange
-        "33FFBD",  // Mint Green
-        "FF33F6",  // Pink
-        "33D4FF",  // Light Blue
-        "FFC300",  // Gold
-        "FF7F50",  // Coral
-        "6A5ACD",  // Slate Blue
-        "20B2AA",  // Light Sea Green
-        "D2691E"   // Chocolate
+        "#4A90E2",  // Blue
+        "#50C878",  // Green
+        "#FF6B6B",  // Red
+        "#FFD93D",  // Yellow
+        "#8A2BE2",  // Purple
+        "#FF5733",  // Orange
+        "#33FFBD",  // Mint Green
+        "#FF33F6",  // Pink
+        "#33D4FF",  // Light Blue
+        "#FFC300",  // Gold
+        "#FF7F50",  // Coral
+        "#6A5ACD",  // Slate Blue
+        "#20B2AA",  // Light Sea Green
+        "#D2691E"   // Chocolate
     };
     
     private bool IsHandleLabel { get; set; } = false;
@@ -331,7 +331,7 @@ else {
         var createLabelDto = new CreateLabelDto
         {
             Name = _newLabelName,
-            Color = "#" + SelectedColor
+            Color = SelectedColor
         };
 
         var newLabelCreated = await LabelService.CreateLabelAsync(ProjectId, createLabelDto);

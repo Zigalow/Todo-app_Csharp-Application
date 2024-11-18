@@ -36,7 +36,8 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     })
     .AddEntityFrameworkStores<TodoDbContext>()
     .AddSignInManager()
-    .AddRoles<ApplicationRole>();
+    .AddRoles<ApplicationRole>()
+    .AddDefaultTokenProviders();
 
 // JWT authentication
 builder.Services.AddAuthentication(options =>

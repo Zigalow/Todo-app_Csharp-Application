@@ -1,17 +1,16 @@
 ﻿@page "/Account/Manage/EnableAuthenticator"
-
 @using System.ComponentModel.DataAnnotations
 @using System.Globalization
 @using System.Text
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
 @using Todo.Core.Entities
+@using Todo.Web.Auth
 
 
-@inject UserManager<ApplicationUser> UserManager
-@inject IdentityUserAccessor UserAccessor
+@inject IUserService UserService
 @inject UrlEncoder UrlEncoder
-@inject IdentityRedirectManager RedirectManager
+
 @inject ILogger<EnableAuthenticator> Logger
 
 <PageTitle>Configure authenticator app</PageTitle>
@@ -22,6 +21,7 @@
 }
 else
 {
+    <PageScript Src="./Components/Account/Pages/Manage/EnableAuthenticator.razor.js" />
     <StatusMessage Message="@message"/>
     <h3>Configure authenticator app</h3>
     <div>
@@ -39,9 +39,9 @@ else
             </li>
             <li>
                 <p>Scan the QR Code or enter this key <kbd>@sharedKey</kbd> into your two factor authenticator app. Spaces and casing do not matter.</p>
-                <div class="alert alert-info">Learn how to <a href="https://go.microsoft.com/fwlink/?Linkid=852423">enable QR code generation</a>.</div>
-                <div></div>
-                <div data-url="@authenticatorUri"></div>
+                @*<div class="alert alert-info">Learn how to <a href="https://go.microsoft.com/fwlink/?Linkid=852423">enable QR code generation</a>.</div>*@
+                <div id="qrCode"></div>
+                <div id="qrCodeData" data-url="@authenticatorUri"></div>
             </li>
             <li>
                 <p>
@@ -71,7 +71,6 @@ else
     private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
     private string? message;
-    private ApplicationUser user = default!;
     private string? sharedKey;
     private string? authenticatorUri;
     private IEnumerable<string>? recoveryCodes;
@@ -84,9 +83,70 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        // Get authenticator information from the UserService
+        var twoFactorInfo = await UserService.GetTwoFactorInfoAsync();
+        var user = await UserService.GetUserInfoAsync();
 
-        await LoadSharedKeyAndQrCodeUriAsync(user);
+        if (twoFactorInfo is not null)
+        {
+            sharedKey = FormatKey(twoFactorInfo.SharedKey);
+            authenticatorUri = GenerateQrCodeUri(user.Email,twoFactorInfo.SharedKey);
+        }
+    }
+
+    private async Task OnValidSubmitAsync()
+    {
+        var is2FaEnabled = await UserService.Enable2FaAsync();
+
+        if (!is2FaEnabled)
+        {
+            message = "Error: Verification code is invalid.";
+            return;
+        }
+
+        message = "Your authenticator app has been verified.";
+        recoveryCodes = await UserService.GenerateRecoveryCodesAsync();
+    }
+    
+    private string GenerateQrCodeUri(string email, string unformattedKey)
+    {
+        return string.Format(
+            CultureInfo.InvariantCulture,
+            AuthenticatorUriFormat,
+            UrlEncoder.Encode("Taskify"),
+            UrlEncoder.Encode(email),
+            unformattedKey);
+    }
+    
+    private string FormatKey(string unformattedKey)
+    {
+        var result = new StringBuilder();
+        int currentPosition = 0;
+        while (currentPosition + 4 < unformattedKey.Length)
+        {
+            result.Append(unformattedKey.AsSpan(currentPosition, 4)).Append(' ');
+            currentPosition += 4;
+        }
+
+        if (currentPosition < unformattedKey.Length)
+        {
+            result.Append(unformattedKey.AsSpan(currentPosition));
+        }
+
+        return result.ToString().ToLowerInvariant();
+    }
+    
+    
+
+    /*protected override async Task OnInitializedAsync()
+    {
+        var twoFactorInfo = await UserService.GetTwoFactorInfoAsync();
+
+        if (twoFactorInfo is not null)
+        {
+            sharedKey = twoFactorInfo.SharedKey;
+            authenticatorUri = twoFactorInfo.AuthenticatorUri;
+        }
     }
 
     private async Task OnValidSubmitAsync()
@@ -161,7 +221,7 @@ else
             UrlEncoder.Encode("Microsoft.AspNetCore.Identity.UI"),
             UrlEncoder.Encode(email),
             unformattedKey);
-    }
+    }*/
 
     private sealed class InputModel
     {

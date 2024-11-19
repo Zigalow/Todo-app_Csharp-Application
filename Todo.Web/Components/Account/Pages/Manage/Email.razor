@@ -6,11 +6,10 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using Todo.Core.Entities
+@using Todo.Web.Auth
+@using Todo.Web.Auth.Models
 
-
-@inject UserManager<ApplicationUser> UserManager
-@inject IEmailSender<ApplicationUser> EmailSender
-@inject IdentityUserAccessor UserAccessor
+@inject IUserService UserService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Manage email</PageTitle>
@@ -20,9 +19,9 @@
 <StatusMessage Message="@message"/>
 <div class="row">
     <div class="col-md-6">
-        <form @onsubmit="OnSendEmailVerificationAsync" @formname="send-verification" id="send-verification-form" method="post">
+        @*<form @onsubmit="OnSendEmailVerificationAsync" @formname="send-verification" id="send-verification-form" method="post">
             <AntiforgeryToken/>
-        </form>
+        </form>*@
         <EditForm Model="Input" FormName="change-email" OnValidSubmit="OnValidSubmitAsync" method="post">
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
@@ -56,7 +55,7 @@
 
 @code {
     private string? message;
-    private ApplicationUser user = default!;
+    private UserInfoRequest? user = default!;
     private string? email;
     private bool isEmailConfirmed;
 
@@ -68,9 +67,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        email = await UserManager.GetEmailAsync(user);
-        isEmailConfirmed = await UserManager.IsEmailConfirmedAsync(user);
+        user = await UserService.GetUserInfoAsync();
+        //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        email = user.Email;
+        isEmailConfirmed = await UserService.IsEmailConfirmedAsync();
 
         Input.NewEmail ??= email;
     }
@@ -79,11 +79,42 @@
     {
         if (Input.NewEmail is null || Input.NewEmail == email)
         {
+            message = "Your email did not change.";
+            return;
+        }
+
+        var userRequest = new UserInfoRequest()
+        {
+            Username = user.Username,
+            Email = Input.NewEmail
+        };
+        Console.WriteLine("NEW EMAIL: "  +Input.NewEmail);
+        var updateSuccess = await UserService.UpdateEmailAsync(userRequest);
+        if (!updateSuccess)
+        {
+            message = "Error: Failed to change email.";
+            return;
+        }
+        
+        user = await UserService.GetUserInfoAsync();
+        if (user != null)
+        {
+            email = user.Email;
+        }
+
+        message = "Your email has been changed.";
+    }
+    
+    /* OLD IDENTiTY CODE
+     private async Task OnValidSubmitAsync()
+    {
+        if (Input.NewEmail is null || Input.NewEmail == email)
+        {
             message = "Your email is unchanged.";
             return;
         }
 
-        var userId = await UserManager.GetUserIdAsync(user);
+        
         var code = await UserManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
         var callbackUrl = NavigationManager.GetUriWithQueryParameters(
@@ -112,7 +143,8 @@
         await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
 
         message = "Verification email sent. Please check your email.";
-    }
+    }*/
+    
 
     private sealed class InputModel
     {

@@ -135,7 +135,7 @@ public class UserService: IUserService
             return false;
         }
     }
-
+    
     public async Task<bool> AddPasswordAsync(string password)
     {
         try
@@ -152,5 +152,109 @@ public class UserService: IUserService
             Console.WriteLine($"Error setting password: {ex.Message}");
             return false;
         }   
+    }
+    
+    public async Task<TwoFactorInfo?> GetTwoFactorInfoAsync()
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync("api/user/twoFactorInfo");
+            if (!response.IsSuccessStatusCode) return null;
+            
+            return await response.Content.ReadFromJsonAsync<TwoFactorInfo>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching Two Factor info: {ex.Message}");
+            return null;
+        }      
+    }
+    
+    public async Task ForgetTwoFactorClientAsync()
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync("api/user/forgetTwoFactorClient", null);
+        
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Forget Two-Factor Client Failed. Status: {response.StatusCode}, Error: {errorContent}");
+                throw new Exception("Failed to forget two-factor client");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error forgetting two-factor client: {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task<bool> Disable2FaAsync()
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync("api/user/disableTwoFactor", null);
+            return response.IsSuccessStatusCode;
+           
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error disabling two-factor authentication: {ex.Message}");
+            throw;
+        }
+
+    }
+
+    public async Task<bool> Enable2FaAsync()
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync("api/user/EnableTwoFactor", null);
+            return response.IsSuccessStatusCode;
+           
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error disabling two-factor authentication: {ex.Message}");
+            throw;
+        }
+
+    }
+    public async Task<IEnumerable<string>> GenerateRecoveryCodesAsync()
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync("api/user/generateRecoveryCodes", null);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Generate Recovery Codes Failed. Status: {response.StatusCode}, Error: {errorContent}");
+                throw new Exception("Failed to generate recovery codes");
+            }
+
+            var recoveryCodes = await response.Content.ReadFromJsonAsync<IEnumerable<string>>();
+            return recoveryCodes ?? Enumerable.Empty<string>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error generating recovery codes: {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task<bool> ResetAuthenticatorAsync()
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync("api/user/resetAuthenticator", null);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error resetting authenticator: {ex.Message}");
+            throw;
+        }
     }
 }

@@ -221,4 +221,155 @@ public class UserController: ControllerBase
         await _signInManager.RefreshSignInAsync(user);
         return Ok("Password set successfully.");
     }
+    
+    /*-----BEGIN: TwoFactor-----*/
+    [HttpGet("twoFactorInfo")]
+    public async Task<IActionResult> GetTwoFactorInfo()
+    {
+        var userId = _userManager.GetUserId(User);
+        if (userId == null)
+        {
+            Console.WriteLine("User is null");
+            return Unauthorized();
+        }
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound("User not found.");
+        }
+        
+        var key = await _userManager.GetAuthenticatorKeyAsync(user);
+        if (string.IsNullOrEmpty(key))
+        {
+            await _userManager.ResetAuthenticatorKeyAsync(user);
+            key = await _userManager.GetAuthenticatorKeyAsync(user);
+        }
+
+        var information = new TwoFactorInfo
+        {
+            HasAuthenticator = await _userManager.GetAuthenticatorKeyAsync(user) is not null,
+            Is2faEnabled = await _userManager.GetTwoFactorEnabledAsync(user),
+            IsMachineRemembered = await _signInManager.IsTwoFactorClientRememberedAsync(user),
+            RecoveryCodesLeft = await _userManager.CountRecoveryCodesAsync(user),
+            SharedKey = key
+        };
+        
+        Console.WriteLine("Found User information");
+        return Ok(information);
+    }
+    
+    [HttpPost("forgetTwoFactorClient")]
+    public async Task<IActionResult> ForgetTwoFactorClientAsync()
+    {
+        var userId = _userManager.GetUserId(User);
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        await _signInManager.ForgetTwoFactorClientAsync();
+        return Ok();
+    }
+    
+    [HttpPost("disableTwoFactor")]
+    public async Task<IActionResult> Disable2FaAsync()
+    {
+        var userId = _userManager.GetUserId(User);
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var disable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, false);
+        if (!disable2faResult.Succeeded)
+        {
+            return BadRequest("Failed to disable two-factor authentication");
+        }
+
+        return Ok();
+    }
+    [HttpPost("enableTwoFactor")]
+    public async Task<IActionResult> Enable2FaAsync()
+    {
+        var userId = _userManager.GetUserId(User);
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var enable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, true);
+        if (!enable2faResult.Succeeded)
+        {
+            return BadRequest("Failed to disable two-factor authentication");
+        }
+
+        return Ok();
+    }
+
+    [HttpPost("generateRecoveryCodes")]
+    public async Task<IActionResult> GenerateRecoveryCodesAsync()
+    {
+        var userId = _userManager.GetUserId(User);
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+    
+        return Ok(recoveryCodes);
+    }
+
+    [HttpPost("resetAuthenticator")]
+    public async Task<IActionResult> ResetAuthenticatorAsync()
+    {
+        var userId = _userManager.GetUserId(User);
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        // Disable two-factor authentication
+        await _userManager.SetTwoFactorEnabledAsync(user, false);
+    
+        // Reset authenticator key
+        await _userManager.ResetAuthenticatorKeyAsync(user);
+    
+        return Ok();
+    }
+    
+    /*-----END: TwoFactor-----*/
+    
+    
 }

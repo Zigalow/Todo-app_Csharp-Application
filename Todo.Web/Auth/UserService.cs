@@ -1,3 +1,4 @@
+using Todo.Core.Dtos.AuthDto;
 using Todo.Web.Auth.Models;
 
 namespace Todo.Web.Auth;
@@ -106,5 +107,50 @@ public class UserService: IUserService
             return false;
         }
             
+    }
+
+    public async Task<bool> ChangePasswordAsync(string oldPassword, string newPassword)
+    {
+        try
+        {
+            var newPasswordRequest = new ChangePasswordRequest()
+            {
+                NewPassword = newPassword,
+                OldPassword = oldPassword
+            };
+            var response = await _httpClient.PostAsJsonAsync("api/user/changePassword",newPasswordRequest);
+            if (!response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Status Code: {response.StatusCode}");
+                Console.WriteLine($"Error Content: {content}");
+                return   false;
+            }
+            
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating password: {ex.Message}");
+            return false;
+        }
+    }
+
+    public async Task<bool> AddPasswordAsync(string password)
+    {
+        try
+        {
+            var newPasswordRequest = new ChangePasswordRequest()
+            {
+                NewPassword = password,
+            };
+            var response = await _httpClient.PostAsJsonAsync("api/user/setPassword", newPasswordRequest);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error setting password: {ex.Message}");
+            return false;
+        }   
     }
 }

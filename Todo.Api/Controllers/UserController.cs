@@ -10,10 +10,12 @@ namespace Todo.Api.Controllers;
 public class UserController: ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
     
-    public UserController(UserManager<ApplicationUser> userManager)
+    public UserController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
     {
         _userManager = userManager;
+        _signInManager = signInManager;
     }
     
     [HttpGet("userinfo")]
@@ -116,6 +118,30 @@ public class UserController: ControllerBase
         return Ok("Email updated successfully.");
     }
 
+    [HttpGet("hasPassword")]
+    public async Task<IActionResult> HasPasswordAsync()
+    {
+        var userId = _userManager.GetUserId(User);
+
+        if (userId == null)
+        {
+            Console.WriteLine("UserId not found");
+            return Unauthorized();
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            Console.WriteLine("User is null");
+            return NotFound("User not found.");
+        }
+
+        var hasPassword = await _userManager.HasPasswordAsync(user);
+        Console.WriteLine("Password status: "+ hasPassword);
+        
+        return Ok(hasPassword);
+    }
+
     [HttpGet("isEmailConfirmed")]
     public async Task<IActionResult> IsEmailConformedAsync()
     {
@@ -138,5 +164,61 @@ public class UserController: ControllerBase
         Console.WriteLine("Email confirmed status: "+ isConfirmed);
         
         return Ok(isConfirmed);
+    }
+
+    [HttpPost("changePassword")]
+    public async Task<IActionResult> ChangePasswordAsync(PasswordDto passwordDto)
+    {
+        var userId = _userManager.GetUserId(User);
+
+        if (userId == null)
+        {
+            Console.WriteLine("UserId not found");
+            return Unauthorized();
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            Console.WriteLine("User is null");
+            return NotFound("User not found.");
+        }
+        
+        var result = await _userManager.ChangePasswordAsync(user,passwordDto.OldPassword ,passwordDto.NewPassword);
+        if (!result.Succeeded)
+        {
+            return BadRequest(result.Errors);
+        }
+        
+        await _signInManager.RefreshSignInAsync(user);
+        return Ok(passwordDto);
+    }
+    
+    [HttpGet("setPassword")]
+    public async Task<IActionResult> SetPasswordAsync(PasswordDto passwordDto)
+    {
+        var userId = _userManager.GetUserId(User);
+
+        if (userId == null)
+        {
+            Console.WriteLine("UserId not found");
+            return Unauthorized();
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            Console.WriteLine("User is null");
+            return NotFound("User not found.");
+        }
+        
+        var result = await _userManager.AddPasswordAsync(user, passwordDto.NewPassword);
+        if (!result.Succeeded)
+        {
+            return BadRequest(result.Errors);
+        }
+        
+        await _signInManager.RefreshSignInAsync(user);
+        return Ok("Password set successfully.");
     }
 }

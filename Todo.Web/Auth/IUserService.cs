@@ -10,4 +10,6 @@ public interface IUserService
     Task<bool> UpdateEmailAsync(UserInfoRequest info);
     Task<bool> IsEmailConfirmedAsync();
     Task<bool> HasPasswordAsync();
+    Task<bool> ChangePasswordAsync(string oldPassword, string newPassword);
+    Task<bool> AddPasswordAsync(string password);
 }

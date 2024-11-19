@@ -14,7 +14,7 @@ public class UserService: IUserService
         _httpContextAccessor = httpContextAccessor;
     }
     
-    public async Task<UserInfo?> GetUserInfoAsync()
+    public async Task<UserInfoRequest?> GetUserInfoAsync()
     {
         try
         {
@@ -22,7 +22,7 @@ public class UserService: IUserService
 
             if (!response.IsSuccessStatusCode) return null;
             
-            return await response.Content.ReadFromJsonAsync<UserInfo>();
+            return await response.Content.ReadFromJsonAsync<UserInfoRequest>();
         }
         catch (Exception ex)
         {
@@ -35,7 +35,7 @@ public class UserService: IUserService
     {
         try
         {
-            var info = new UserInfo
+            var info = new UserInfoRequest
             {
                 PhoneNumber = phoneNumber
             };
@@ -54,5 +54,57 @@ public class UserService: IUserService
     {
         /*TODO:Implement logic*/
         return false;
+    }
+
+    public async Task<bool> IsEmailConfirmedAsync()
+    {
+        try
+        {
+
+            var response = await _httpClient.GetAsync("api/user/isEmailConfirmed");
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating phone number: {ex.Message}");
+            return false;
+        }
+    }
+
+    public async Task<bool> UpdateEmailAsync(UserInfoRequest info)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/user/updateEmail",  info);
+            if (!response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Status Code: {response.StatusCode}");
+                Console.WriteLine($"Error Content: {content}");
+                return false;
+            }
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating email: {ex.Message}");
+            return false;
+        }
+    }
+    
+    public async Task<bool> HasPasswordAsync()
+    {
+        try
+        {
+
+            var response = await _httpClient.GetAsync("api/user/hasPassword");
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating phone number: {ex.Message}");
+            return false;
+        }
+            
     }
 }

@@ -37,7 +37,7 @@
 </div>
 
 @code {
-    private UserInfo? user = default!;
+    private UserInfoRequest? user = default!;
     private string? username;
     private string? phoneNumber;
     private string StatusMessage { get; set; } = "";
@@ -66,10 +66,9 @@
     {
         if (Input.PhoneNumber != phoneNumber)
         {
-            var updateSuccess = await UserService.UpdatePhoneNumberAsync(Input.PhoneNumber);
+            var updateSuccess = Input.PhoneNumber != null && await UserService.UpdatePhoneNumberAsync(Input.PhoneNumber);
             if (!updateSuccess)
             {
-                // Set the status message if the update fails
                 StatusMessage = "Error: Failed to set phone number.";
                 return;
             }
@@ -78,11 +77,10 @@
             user = await UserService.GetUserInfoAsync();
             if (user != null)
             {
-                phoneNumber = user.PhoneNumber;  // Update local phone number variable
+                phoneNumber = user.PhoneNumber;
             }
         }
-
-        // Set success message and update the component's state
+        
         StatusMessage = "Your profile has been updated";
     }
 

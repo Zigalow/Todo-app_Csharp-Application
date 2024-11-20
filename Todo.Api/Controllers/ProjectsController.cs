@@ -33,6 +33,19 @@ public class ProjectsController : BaseApiController
         return Ok(projects.ToListedProjectDtos());
     }
 
+    [HttpGet("shared")]
+    public async Task<IActionResult> GetAllSharedProjects()
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = GetCurrentUserId();
+        var sharedProjectsWithRoles = await _unitOfWork.Projects.GetAllSharedProjectsAsync(userId);
+        return Ok(sharedProjectsWithRoles.ToListedSharedProjectDtos());
+    }
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetProjectById(int id)
     {
@@ -50,7 +63,7 @@ public class ProjectsController : BaseApiController
         var userId = GetCurrentUserId();
         if (!await _authorizationRepository.CanAccessProjectAsync(userId, id))
         {
-            return Forbid("User does not have access to this project");
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to this project");
         }
 
         return Ok(project.ToProjectDto());
@@ -67,6 +80,7 @@ public class ProjectsController : BaseApiController
         var userId = GetCurrentUserId();
 
         var createdProject = createProjectDto.ToProjectFromCreateDto(userId);
+
         await _unitOfWork.Projects.AddAsync(createdProject);
         await _unitOfWork.SaveChangesAsync();
 
@@ -89,6 +103,13 @@ public class ProjectsController : BaseApiController
             return NotFound();
         }
 
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanModifyProjectAsync(userId, id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have permission to modify this project");
+        }
+
         project.UpdateProjectFromUpdateDto(updateProjectDto);
 
         await _unitOfWork.Projects.UpdateAsync(project);
@@ -109,6 +130,13 @@ public class ProjectsController : BaseApiController
         if (project == null)
         {
             return NotFound();
+        }
+
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanModifyProjectAsync(userId, id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have permission to delete this project");
         }
 
         await _unitOfWork.Projects.DeleteAsync(project);

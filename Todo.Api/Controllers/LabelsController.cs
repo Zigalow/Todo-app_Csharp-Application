@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Todo.Api.Interfaces;
 using Todo.Api.Mappers;
+using Todo.Api.Repositories.Interfaces;
 using Todo.Core.Dtos.LabelDtos;
 
 namespace Todo.Api.Controllers;
@@ -10,10 +11,12 @@ namespace Todo.Api.Controllers;
 public class LabelsController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAuthorizationRepository _authorizationRepository;
 
-    public LabelsController(IUnitOfWork unitOfWork)
+    public LabelsController(IUnitOfWork unitOfWork, IAuthorizationRepository authorizationRepository)
     {
         _unitOfWork = unitOfWork;
+        _authorizationRepository = authorizationRepository;
     }
 
     [HttpGet]
@@ -39,7 +42,20 @@ public class LabelsController : BaseApiController
         }
 
         var label = await _unitOfWork.Labels.GetByIdAsync(id);
-        return label == null ? NotFound() : Ok(label.ToLabelDto());
+
+        if (label == null)
+        {
+            return NotFound("Label not found");
+        }
+
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanAccessLabelAsync(userId, id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to this label");
+        }
+
+        return Ok(label.ToLabelDto());
     }
 
     [HttpGet("by-project/{projectId:int}")]
@@ -55,6 +71,13 @@ public class LabelsController : BaseApiController
         if (labels == null)
         {
             return NotFound("Project not found");
+        }
+
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanAccessProjectAsync(userId, projectId))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden ,"User does not have access to this project");
         }
 
         return Ok(labels.ToListedLabelDtos());
@@ -74,6 +97,13 @@ public class LabelsController : BaseApiController
         if (!projectExists)
         {
             return NotFound("Project not found");
+        }
+
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanCreateLabelAsync(userId, projectId))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to this project");
         }
 
         var label = createLabelDto.ToLabelFromCreateDto(projectId);
@@ -104,7 +134,19 @@ public class LabelsController : BaseApiController
             return NotFound("Label not found");
         }
 
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanModifyLabelAsync(userId, id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to modify this label");
+        }
+
         label.UpdateLabelFromUpdateDto(updateLabelDto);
+
+        if (!await _unitOfWork.Labels.ExistsAsync(label.ProjectId, label.Name))
+        {
+            return BadRequest("Label already exists");
+        }
 
         await _unitOfWork.Labels.UpdateAsync(label);
         await _unitOfWork.SaveChangesAsync();

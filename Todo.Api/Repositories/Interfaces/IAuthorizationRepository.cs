@@ -2,8 +2,8 @@ namespace Todo.Api.Repositories.Interfaces;
 
 public interface IAuthorizationRepository
 {
+    Task<bool> IsAdminAsync(string userId, int projectId);
     Task<bool> CanAccessProjectAsync(string userId, int projectId);
-    Task<bool> CanCreateProjectAsync(string userId);
     Task<bool> CanModifyProjectAsync(string userId, int projectId);
     Task<bool> CanAccessTodoListAsync(string userId, int todoListId);
     Task<bool> CanCreateTodoListAsync(string userId, int projectId);
@@ -14,4 +14,5 @@ public interface IAuthorizationRepository
     Task<bool> CanAccessLabelAsync(string userId, int labelId);
     Task<bool> CanCreateLabelAsync(string userId, int projectId);
     Task<bool> CanModifyLabelAsync(string userId, int labelId);
+    Task<bool> CanManageProjectCollaborator(string userId, int projectId);
 }

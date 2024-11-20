@@ -30,13 +30,12 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IAuthorizationRepository, AuthorizationRepository>();
 
 // Add Identity configuration
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
         options.SignIn.RequireConfirmedAccount = false; /*TODO: Change to True, when conformation is in place*/
     })
     .AddEntityFrameworkStores<TodoDbContext>()
-    .AddSignInManager()
-    .AddRoles<ApplicationRole>();
+    .AddSignInManager();
 
 // JWT authentication
 builder.Services.AddAuthentication(options =>

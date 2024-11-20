@@ -14,37 +14,6 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<ApplicationUser>> GetProjectCollaboratorsAsync(int projectId)
-    {
-        return await _dbContext.ProjectCollaborators
-            .Where(c => c.ProjectId == projectId)
-            .Select(c => c.ApplicationUser)
-            .ToListAsync();
-    }
-
-    public async Task AddCollaboratorAsync(int projectId, string userId, string roleId)
-    {
-        var collaborator = new ProjectCollaborators
-        {
-            ProjectId = projectId,
-            UserId = userId,
-            RoleId = roleId
-        };
-
-        await _dbContext.ProjectCollaborators.AddAsync(collaborator);
-    }
-
-    public async Task RemoveCollaboratorAsync(int projectId, int userId)
-    {
-        var collaborator = await _dbContext.ProjectCollaborators
-            .FirstOrDefaultAsync(c => c.ProjectId == projectId && c.UserId.Equals(userId));
-
-        if (collaborator != null)
-        {
-            _dbContext.ProjectCollaborators.Remove(collaborator);
-        }
-    }
-
     public override async Task<IEnumerable<Project>> GetAllAsync(string userId)
     {
         return await _dbContext.Projects
@@ -64,5 +33,20 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
             .ThenInclude(tl => tl.Items)
             .ThenInclude(l=>l.Labels)
             .FirstOrDefaultAsync(p => p.Id == id);
+    }
+
+    public async Task<Dictionary<Project, ProjectRole>> GetAllSharedProjectsAsync(string userId)
+    {
+        return await _dbContext.ProjectCollaborators
+            .Where(pc => pc.UserId == userId)
+            .Include(pc => pc.Project)
+            .ThenInclude(p => p.Owner)
+            .Include(pc => pc.Project)
+            .ThenInclude(p => p.TodoLists)
+            .ThenInclude(tl => tl.Items)
+            .ToDictionaryAsync(
+                pc => pc.Project,
+                pc => pc.Role
+            );
     }
 }

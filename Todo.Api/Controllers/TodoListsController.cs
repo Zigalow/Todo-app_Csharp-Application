@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Todo.Api.Interfaces;
 using Todo.Api.Mappers;
+using Todo.Api.Repositories.Interfaces;
 using Todo.Core.Dtos.TodoListDtos;
 
 namespace Todo.Api.Controllers;
@@ -11,10 +12,12 @@ namespace Todo.Api.Controllers;
 public class TodoListsController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAuthorizationRepository _authorizationRepository;
 
-    public TodoListsController(IUnitOfWork unitOfWork)
+    public TodoListsController(IUnitOfWork unitOfWork, IAuthorizationRepository authorizationRepository)
     {
         _unitOfWork = unitOfWork;
+        _authorizationRepository = authorizationRepository;
     }
 
     [HttpGet]
@@ -46,6 +49,13 @@ public class TodoListsController : BaseApiController
             return NotFound("Project not found");
         }
 
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanAccessProjectAsync(userId, projectId))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to this project");
+        }
+
         return Ok(todoLists.ToListedTodoListDtos());
     }
 
@@ -53,7 +63,20 @@ public class TodoListsController : BaseApiController
     public async Task<IActionResult> GetTodoListById(int id)
     {
         var todoList = await _unitOfWork.TodoLists.GetByIdAsync(id);
-        return todoList == null ? NotFound() : Ok(todoList.ToTodoListDto());
+
+        if (todoList == null)
+        {
+            return NotFound("Todo-list not found");
+        }
+
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanAccessTodoListAsync(userId, id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to this todo-list");
+        }
+
+        return Ok(todoList.ToTodoListDto());
     }
 
     [HttpPost("for-project/{projectId:int}")]
@@ -66,6 +89,13 @@ public class TodoListsController : BaseApiController
             return NotFound("Project not found");
         }
 
+        var userId = GetCurrentUserId();
+        
+        if (!await _authorizationRepository.CanCreateTodoListAsync(userId, projectId))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to create todo-lists for this project");
+        }
+        
         var todoList = createTodoListDto.ToTodoListFromCreateDto(projectId);
 
         await _unitOfWork.TodoLists.AddAsync(todoList);
@@ -83,6 +113,14 @@ public class TodoListsController : BaseApiController
         {
             return NotFound("Todo list not found");
         }
+        
+        var userId = GetCurrentUserId();
+        
+        if (!await _authorizationRepository.CanModifyTodoListAsync(userId, id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to modify this todo-list");
+        }
+        
 
         todoList.UpdateTodoListFromUpdateDto(updateTodoListDto);
 
@@ -106,6 +144,13 @@ public class TodoListsController : BaseApiController
             return NotFound("Todo list not found");
         }
 
+        var userId = GetCurrentUserId();
+        
+        if (!await _authorizationRepository.CanModifyTodoListAsync(userId, id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to delete this todo-list");
+        }
+        
         await _unitOfWork.TodoLists.DeleteAsync(todoList);
         await _unitOfWork.SaveChangesAsync();
         return NoContent();

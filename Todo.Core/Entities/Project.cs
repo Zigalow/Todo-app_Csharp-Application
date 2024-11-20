@@ -21,5 +21,5 @@ public class Project
     [Required]
     public ICollection<TodoList> TodoLists { get; set; } = new List<TodoList>();
 
-    public ICollection<ProjectCollaborators> Collaborators { get; set; } = new List<ProjectCollaborators>();
+    public ICollection<ProjectCollaborator> Collaborators { get; set; } = new List<ProjectCollaborator>();
 }

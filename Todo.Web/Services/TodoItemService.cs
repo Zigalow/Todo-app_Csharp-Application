@@ -164,4 +164,33 @@ public class TodoItemService : ITodoItemService
             return false;
         }
     }
+    
+    public async Task<bool> MoveTodoItemAsync(int todoItemId, int targetTodoListId)
+    {
+        try
+        {
+            var response = await _httpClient.PutAsJsonAsync($"api/todo-items/{todoItemId}/move", targetTodoListId);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error moving todo item: {ex.Message}");
+            return false;
+        }
+    }
+
+    public async Task<bool> ReorderTodoItemAsync(int todoItemId, int newIndex)
+    {
+        try
+        {
+            var response = await _httpClient.PutAsJsonAsync($"api/todo-items/{todoItemId}/reorder", newIndex);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error reordering todo item: {ex.Message}");
+            return false;
+        }
+    }
+
 }

@@ -183,4 +183,32 @@ public class TodoItemsController : BaseApiController
         await _unitOfWork.SaveChangesAsync();
         return Ok(result.Value!.ToTodoItemDto());
     }
+    [HttpPut("{todoItemId:int}/move")]
+    public async Task<IActionResult> MoveTodoItem(int todoItemId, [FromBody] int targetTodoListId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        var todoListExists = await _unitOfWork.TodoLists.ExistsAsync(targetTodoListId);
+        if (!todoListExists)
+        {
+            return NotFound("Target TodoList is not found");
+        }
+        
+        var todoItem = await _unitOfWork.TodoItems.GetByIdAsync(todoItemId);
+        if (todoItem == null)
+        {
+            return NotFound("TodoItem not found from id");
+        }
+
+        // Update the TodoListId in TodoItem
+        todoItem.TodoListId = targetTodoListId;
+        
+        await _unitOfWork.TodoItems.UpdateAsync(todoItem);
+        
+        await _unitOfWork.SaveChangesAsync();
+        return Ok(todoItem.ToTodoItemDto());
+    }
 }

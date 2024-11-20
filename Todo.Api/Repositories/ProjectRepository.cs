@@ -21,6 +21,7 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
             .Include(p => p.Owner)
             .Include(p => p.TodoLists)
             .ThenInclude(tl => tl.Items)
+            .ThenInclude(l=>l.Labels)
             .ToListAsync();
     }
 
@@ -30,6 +31,7 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
             .Include(p => p.Owner)
             .Include(p => p.TodoLists)
             .ThenInclude(tl => tl.Items)
+            .ThenInclude(l=>l.Labels)
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 

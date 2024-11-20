@@ -55,7 +55,7 @@ public class LabelService : ILabelService
         }
     }
 
-    public async Task<TodoItemDto?> GetAllLabelsForProject(int projectId)
+    public async Task<List<LabelDto?>> GetAllLabelsForProject(int projectId)
     {
         try
         {
@@ -64,10 +64,10 @@ public class LabelService : ILabelService
             {
                 _logger.LogError("Failed to get labels for project {ProjectId}. Status: {StatusCode}", projectId,
                     response.StatusCode);
-                return null;
+                return new List<LabelDto?>();
             }
 
-            return await response.Content.ReadFromJsonAsync<TodoItemDto>();
+            return await response.Content.ReadFromJsonAsync<List<LabelDto>>() ?? new List<LabelDto>();
         }
         catch (Exception ex)
         {
@@ -76,11 +76,11 @@ public class LabelService : ILabelService
         }
     }
 
-    public async Task<bool> CreateLabelAsync(CreateLabelDto labelDto)
+    public async Task<bool> CreateLabelAsync(int projectId,CreateLabelDto labelDto)
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("api/Labels", labelDto);
+            var response = await _httpClient.PostAsJsonAsync($"api/Labels/for-project/{projectId}", labelDto);
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError("Failed to create label. Status: {StatusCode}", response.StatusCode);

@@ -33,6 +33,19 @@ public class ProjectsController : BaseApiController
         return Ok(projects.ToListedProjectDtos());
     }
 
+    [HttpGet("shared")]
+    public async Task<IActionResult> GetAllSharedProjects()
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = GetCurrentUserId();
+        var sharedProjectsWithRoles = await _unitOfWork.Projects.GetAllSharedProjectsAsync(userId);
+        return Ok(sharedProjectsWithRoles.ToListedSharedProjectDtos());
+    }
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetProjectById(int id)
     {

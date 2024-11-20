@@ -32,4 +32,19 @@ public class ProjectRepository : GenericRepository<Project>, IProjectRepository
             .ThenInclude(tl => tl.Items)
             .FirstOrDefaultAsync(p => p.Id == id);
     }
+
+    public async Task<Dictionary<Project, ProjectRole>> GetAllSharedProjectsAsync(string userId)
+    {
+        return await _dbContext.ProjectCollaborators
+            .Where(pc => pc.UserId == userId)
+            .Include(pc => pc.Project)
+            .ThenInclude(p => p.Owner)
+            .Include(pc => pc.Project)
+            .ThenInclude(p => p.TodoLists)
+            .ThenInclude(tl => tl.Items)
+            .ToDictionaryAsync(
+                pc => pc.Project,
+                pc => pc.Role
+            );
+    }
 }

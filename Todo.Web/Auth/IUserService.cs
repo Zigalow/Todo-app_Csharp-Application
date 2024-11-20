@@ -13,6 +13,8 @@ public interface IUserService
     Task<bool> HasPasswordAsync();
     Task<bool> ChangePasswordAsync(string oldPassword, string newPassword);
     Task<bool> AddPasswordAsync(string password);
+
+    Task<bool> DeleteAccountAsync(string password);
     /*Two factor*/
     Task<TwoFactorInfo?> GetTwoFactorInfoAsync();
     Task ForgetTwoFactorClientAsync();

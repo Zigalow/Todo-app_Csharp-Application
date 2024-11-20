@@ -154,6 +154,32 @@ public class UserService: IUserService
         }   
     }
     
+    public async Task<bool> DeleteAccountAsync(string password)
+    {
+        try
+        {
+            var request = new PasswordDto 
+            { 
+                OldPassword = password
+            };
+        
+            var response = await _httpClient.PostAsJsonAsync("api/user/deleteAccount", request);
+            if (!response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Status Code: {response.StatusCode}");
+                Console.WriteLine($"Error Content: {content}");
+                return false;
+            }
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting account: {ex.Message}");
+            return false;
+        }
+    }
+    
     public async Task<TwoFactorInfo?> GetTwoFactorInfoAsync()
     {
         try

@@ -221,6 +221,40 @@ public class UserController: ControllerBase
         await _signInManager.RefreshSignInAsync(user);
         return Ok("Password set successfully.");
     }
+    [HttpPost("deleteAccount")]
+    public async Task<IActionResult> DeleteAccountAsync(PasswordDto passwordDto)
+    {
+        var userId = _userManager.GetUserId(User);
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return NotFound();
+        }
+        
+        if (!string.IsNullOrEmpty(passwordDto.OldPassword))
+        {
+            var isPasswordValid = await _userManager.CheckPasswordAsync(user, passwordDto.OldPassword);
+            if (!isPasswordValid)
+            {
+                return BadRequest("Incorrect password.");
+            }
+        }
+
+        var result = await _userManager.DeleteAsync(user);
+        if (!result.Succeeded)
+        {
+            return BadRequest("Failed to delete account.");
+        }
+
+        await _signInManager.SignOutAsync();
+        return Ok();
+    }
+    
     
     /*-----BEGIN: TwoFactor-----*/
     [HttpGet("twoFactorInfo")]

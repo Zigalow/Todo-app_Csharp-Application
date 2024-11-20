@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Todo.Api.Interfaces;
 using Todo.Api.Mappers;
 using Todo.Api.Repositories.Interfaces;
-using Todo.Core.Dtos.ProjectCollaborator;
+using Todo.Core.Dtos.ProjectCollaboratorDtos;
 using Todo.Core.Entities;
 
 namespace Todo.Api.Controllers;

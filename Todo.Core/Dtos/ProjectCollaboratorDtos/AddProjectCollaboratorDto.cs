@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Todo.Core.Entities;
 
-namespace Todo.Core.Dtos.ProjectCollaborator;
+namespace Todo.Core.Dtos.ProjectCollaboratorDtos;
 
 public class AddProjectCollaboratorDto
 {

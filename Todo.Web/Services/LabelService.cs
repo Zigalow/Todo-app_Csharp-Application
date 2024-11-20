@@ -1,4 +1,4 @@
-using Todo.Core.Dtos.LabelDto;
+using Todo.Core.Dtos.LabelDtos;
 using Todo.Core.Dtos.TodoItemDtos;
 using Todo.Web.Services.interfaces;
 

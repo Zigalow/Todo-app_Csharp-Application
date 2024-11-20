@@ -9,6 +9,6 @@ public class AddProjectCollaboratorDto
     public string UserId { get; set; } = null!;
 
     [Required]
-    [Range(1, 4)]
+    [Range(1, 3)]
     public ProjectRole Role { get; set; }
 }

@@ -1,4 +1,6 @@
-namespace Todo.Core.Dtos.AuthDto;
+using System.ComponentModel.DataAnnotations;
+
+namespace Todo.Core.Dtos.UserInfoDtos;
 
 public class UpdatePhoneNumberDto
 {

@@ -1,4 +1,5 @@
 using Todo.Core.Dtos.AuthDto;
+using Todo.Core.Dtos.UserInfoDtos;
 using Todo.Web.Auth.Models;
 
 namespace Todo.Web.Auth;

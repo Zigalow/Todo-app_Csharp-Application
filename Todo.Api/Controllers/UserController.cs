@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Todo.Core.Dtos.AuthDto;
+using Todo.Core.Dtos.UserInfoDtos;
 using Todo.Core.Entities;
 
 namespace Todo.Api.Controllers;

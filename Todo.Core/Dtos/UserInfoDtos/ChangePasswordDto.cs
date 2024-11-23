@@ -1,4 +1,4 @@
-namespace Todo.Core.Dtos.AuthDto;
+namespace Todo.Core.Dtos.UserInfoDtos;
 
 public class ChangePasswordDto
 {

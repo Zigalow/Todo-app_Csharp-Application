@@ -13,7 +13,5 @@ public interface ITodoItemService
     Task<bool> AttachLabelToItemAsync(int itemId, int labelId);
     Task<bool> DetachLabelFromItemAsync(int itemId, int labelId);
     Task<bool> DeleteTodoItemAsync(int id);
-    
     Task<bool> MoveTodoItemAsync(int todoItemId, int targetTodoListId);
-    Task<bool> ReorderTodoItemAsync(int todoItemId, int newIndex);
 }

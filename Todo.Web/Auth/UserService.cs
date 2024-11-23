@@ -37,12 +37,12 @@ public class UserService: IUserService
     {
         try
         {
-            var info = new UpdatePhoneNumberDto
+            var phoneNumberDto = new UpdatePhoneNumberDto
             {
                 PhoneNumber = phoneNumber
             };
 
-            var response = await _httpClient.PostAsJsonAsync("api/user/updatePhoneNumber",  info);
+            var response = await _httpClient.PostAsJsonAsync("api/user/updatePhoneNumber",  phoneNumberDto);
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex)
@@ -180,14 +180,14 @@ public class UserService: IUserService
         }
     }
     
-    public async Task<TwoFactorInfo?> GetTwoFactorInfoAsync()
+    public async Task<TwoFactorInfoDto?> GetTwoFactorInfoAsync()
     {
         try
         {
             var response = await _httpClient.GetAsync("api/user/twoFactorInfo");
             if (!response.IsSuccessStatusCode) return null;
             
-            return await response.Content.ReadFromJsonAsync<TwoFactorInfo>();
+            return await response.Content.ReadFromJsonAsync<TwoFactorInfoDto>();
         }
         catch (Exception ex)
         {

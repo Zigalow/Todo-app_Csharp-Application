@@ -17,7 +17,7 @@ public interface IUserService
 
     Task<bool> DeleteAccountAsync(string password);
     /*Two factor*/
-    Task<TwoFactorInfo?> GetTwoFactorInfoAsync();
+    Task<TwoFactorInfoDto?> GetTwoFactorInfoAsync();
     Task ForgetTwoFactorClientAsync();
     Task<bool> Disable2FaAsync();
     Task<bool> Enable2FaAsync();

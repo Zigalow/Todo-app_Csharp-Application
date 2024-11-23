@@ -60,6 +60,7 @@ public class UserController: ControllerBase
         {
             return BadRequest(ModelState);
         }
+        
         Console.WriteLine("User phone: " + phoneNumberDto.PhoneNumber);
         var userId = _userManager.GetUserId(User);
 
@@ -215,7 +216,7 @@ public class UserController: ControllerBase
             return NotFound("User not found.");
         }
         
-        var result = await _userManager.ChangePasswordAsync(user,changePasswordDto.OldPassword ,changePasswordDto.NewPassword);
+        var result = await _userManager.ChangePasswordAsync(user, changePasswordDto.OldPassword, changePasswordDto.NewPassword);
         if (!result.Succeeded)
         {
             return BadRequest(result.Errors);
@@ -325,7 +326,7 @@ public class UserController: ControllerBase
             key = await _userManager.GetAuthenticatorKeyAsync(user);
         }
 
-        var information = new TwoFactorInfo
+        var information = new TwoFactorInfoDto
         {
             HasAuthenticator = await _userManager.GetAuthenticatorKeyAsync(user) is not null,
             Is2faEnabled = await _userManager.GetTwoFactorEnabledAsync(user),

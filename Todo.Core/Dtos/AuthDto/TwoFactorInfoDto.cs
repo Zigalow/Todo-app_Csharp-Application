@@ -1,6 +1,6 @@
 namespace Todo.Core.Dtos.AuthDto;
 
-public class TwoFactorInfo
+public class TwoFactorInfoDto
 {
     public bool HasAuthenticator { get; set; }
     public bool Is2faEnabled { get; set; }

@@ -88,6 +88,8 @@
     private sealed class InputModel
     {
         [Phone]
+        [StringLength(12)]
+        [MinLength(6)]
         [Display(Name = "Phone number")]
         public string? PhoneNumber { get; set; }
     }

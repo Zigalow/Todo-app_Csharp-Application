@@ -54,9 +54,12 @@ p{
 }
 
 .circular-button img {
-    width: 200%; 
+    width: 135%;
 }
 
+#rememberMe{
+    color: white;
+}
 .auth-button {
     width: 100%;
     min-height: fit-content;

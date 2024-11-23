@@ -48,8 +48,7 @@ span {
     border-radius: 8px;
     padding: 16px;
     min-width: 300px;
-    max-height: 550px;
-    overflow-y: auto;
+    max-height: 90%;
 }
 .task-container {
     background-color: white;
@@ -148,7 +147,7 @@ span {
 /* Updated Label Editor Styling */
 .label-editor {
     position: absolute; 
-    left: 46%; 
+    left: 100%; 
     top: 50%;
     background-color: white;
     border: 1px solid #000000;

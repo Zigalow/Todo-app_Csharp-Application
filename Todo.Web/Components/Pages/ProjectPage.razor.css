@@ -57,6 +57,10 @@ span {
     padding: 12px;
     margin-bottom: 8px;
     cursor: pointer;
+    user-select: none;
+}
+.task-container.dragging {
+    opacity: 0.5;
 }
 /*.todo-list-container {
     margin-top: 2%;

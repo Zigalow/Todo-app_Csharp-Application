@@ -34,7 +34,10 @@ else
         {
             @foreach (var todoList in CurrentProject.TodoLists)
             {
-                <div class="todo-list-container">
+                <div class="todo-list-container" 
+                     ondragover="event.preventDefault()"
+                     @ondrop="@(async () => await HandleDrop(todoList))"
+                     @ondragover:preventDefault>
                     <div class="todo-list-title">
                         <h5>@todoList.Name</h5>
                         <img src="images/menu.png"/>
@@ -43,7 +46,11 @@ else
                     {
                         @foreach (var task in todoList.TodoItems)
                         {
-                            <div class="task-container" @onclick="() => ViewTask = true">
+                            <div class="task-container"
+                                 draggable="true"
+                                 @ondragstart="@(() => HandleDragStart(task, todoList))"
+                                 @ondragend="@(() => HandleDragEnd())"
+                                 @onclick="() => ViewTask = true">
                                 @if (task.Labels.Any())
                                 {
                                     @foreach (var label in task.Labels)
@@ -207,6 +214,11 @@ else
     private bool _showError = false;
     private string _errorMessage = "";
 
+    /*-----BEGIN: For drag and drop-----*/
+    private TodoItemDto? DraggedItem { get; set; }
+    private TodoListDto? SourceList { get; set; }
+    private int? DraggedItemOriginalIndex { get; set; }
+    /*-----END: For drag and drop-----*/
 
     protected override async Task OnInitializedAsync()
     {
@@ -443,6 +455,39 @@ else
         }
 
         IsLabelVisible = false;
+    }
+    
+    private void HandleDragStart(TodoItemDto item, TodoListDto sourceList)
+    {
+        DraggedItem = item;
+        SourceList = sourceList;
+        DraggedItemOriginalIndex = sourceList.TodoItems.IndexOf(item);
+    }
+
+    private void HandleDragEnd()
+    {
+        DraggedItem = null;
+        SourceList = null;
+        DraggedItemOriginalIndex = null;
+    }
+
+    private async Task HandleDrop(TodoListDto targetList)
+    {
+        if (DraggedItem == null || SourceList == null) return;
+
+        //If Two different lists
+        if (SourceList.Id != targetList.Id)
+        {
+            await TodoItemService.MoveTodoItemAsync(DraggedItem.Id, targetList.Id);
+        }
+        else
+        {
+           /*TODO: IMPLEMENT reordering TodoItem*/
+        }
+
+        // Refresh the project
+        CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
+        StateHasChanged();
     }
 
 }

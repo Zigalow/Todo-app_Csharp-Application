@@ -5,10 +5,10 @@ namespace Todo.Web.Auth;
 
 public interface IUserService
 {
-    Task<UserInfoRequest?> GetUserInfoAsync();
+    Task<UserInfoResponse?> GetUserInfoAsync();
     Task<bool> UpdatePhoneNumberAsync(string phoneNumber);
     Task<bool> HasExternalLoginsAsync();
-    Task<bool> UpdateEmailAsync(UserInfoRequest info);
+    Task<bool> UpdateEmailAsync(UpdateEmailDto info);
     Task<bool> IsEmailConfirmedAsync();
     Task<bool> HasPasswordAsync();
     Task<bool> ChangePasswordAsync(string oldPassword, string newPassword);

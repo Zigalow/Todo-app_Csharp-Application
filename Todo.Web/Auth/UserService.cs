@@ -15,7 +15,7 @@ public class UserService: IUserService
         _httpContextAccessor = httpContextAccessor;
     }
     
-    public async Task<UserInfoRequest?> GetUserInfoAsync()
+    public async Task<UserInfoResponse?> GetUserInfoAsync()
     {
         try
         {
@@ -23,7 +23,7 @@ public class UserService: IUserService
 
             if (!response.IsSuccessStatusCode) return null;
             
-            return await response.Content.ReadFromJsonAsync<UserInfoRequest>();
+            return await response.Content.ReadFromJsonAsync<UserInfoResponse>();
         }
         catch (Exception ex)
         {
@@ -36,7 +36,7 @@ public class UserService: IUserService
     {
         try
         {
-            var info = new UserInfoRequest
+            var info = new UpdatePhoneNumberDto
             {
                 PhoneNumber = phoneNumber
             };
@@ -61,7 +61,6 @@ public class UserService: IUserService
     {
         try
         {
-
             var response = await _httpClient.GetAsync("api/user/isEmailConfirmed");
             return response.IsSuccessStatusCode;
         }
@@ -72,7 +71,7 @@ public class UserService: IUserService
         }
     }
 
-    public async Task<bool> UpdateEmailAsync(UserInfoRequest info)
+    public async Task<bool> UpdateEmailAsync(UpdateEmailDto info)
     {
         try
         {
@@ -140,11 +139,11 @@ public class UserService: IUserService
     {
         try
         {
-            var newPasswordRequest = new ChangePasswordRequest()
+            var PasswordRequest = new AddPasswordDto()
             {
-                NewPassword = password,
+                Password = password,
             };
-            var response = await _httpClient.PostAsJsonAsync("api/user/setPassword", newPasswordRequest);
+            var response = await _httpClient.PostAsJsonAsync("api/user/setPassword", PasswordRequest);
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex)
@@ -158,7 +157,7 @@ public class UserService: IUserService
     {
         try
         {
-            var request = new PasswordDto 
+            var request = new ChangePasswordDto 
             { 
                 OldPassword = password
             };

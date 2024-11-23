@@ -1,10 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Todo.Core.Dtos.AuthDto;
 using Todo.Core.Entities;
 
 namespace Todo.Api.Controllers;
-
+[Authorize]
 [Route("api/user")]
 [ApiController]
 public class UserController: ControllerBase
@@ -21,6 +22,11 @@ public class UserController: ControllerBase
     [HttpGet("userinfo")]
     public async Task<IActionResult> GetUserInfo()
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var userId = _userManager.GetUserId(User);
         if (userId == null)
         {
@@ -47,9 +53,13 @@ public class UserController: ControllerBase
     }
     
     [HttpPost("updatePhoneNumber")]
-    public async Task<IActionResult> UpdatePhoneNumberAsync(ApplicationUser userInfo)
+    public async Task<IActionResult> UpdatePhoneNumberAsync(UpdatePhoneNumberDto phoneNumberDto)
     {
-        Console.WriteLine("User phone: " + userInfo.PhoneNumber);
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        Console.WriteLine("User phone: " + phoneNumberDto.PhoneNumber);
         var userId = _userManager.GetUserId(User);
 
         if (userId == null)
@@ -66,7 +76,7 @@ public class UserController: ControllerBase
         }
         
         //Set users phone number
-        var result = await _userManager.SetPhoneNumberAsync(user, userInfo.PhoneNumber);
+        var result = await _userManager.SetPhoneNumberAsync(user, phoneNumberDto.PhoneNumber);
         
         Console.WriteLine("Update PhoneNumber Result: " + result.Succeeded);
         if (!result.Succeeded)
@@ -80,9 +90,14 @@ public class UserController: ControllerBase
     }
     
     [HttpPost("updateEmail")]
-    public async Task<IActionResult> UpdateEmailAsync(UserInfoDto userInfo)
+    public async Task<IActionResult> UpdateEmailAsync(UpdateEmailDto updateEmailDto)
     {
-        Console.WriteLine("New email: " + userInfo.Email);
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        Console.WriteLine("New email: " + updateEmailDto.Email);
         var userId = _userManager.GetUserId(User);
 
         if (userId == null)
@@ -99,14 +114,14 @@ public class UserController: ControllerBase
         }
 
         // Check if new email is already being used
-        var existingUser = await _userManager.FindByEmailAsync(userInfo.Email);
+        var existingUser = await _userManager.FindByEmailAsync(updateEmailDto.Email);
         if (existingUser != null && existingUser.Id != userId)
         {
             return BadRequest("Email is already in use.");
         }
         
-        var token = await _userManager.GenerateChangeEmailTokenAsync(user, userInfo.Email);
-        var result = await _userManager.ChangeEmailAsync(user, userInfo.Email, token);
+        var token = await _userManager.GenerateChangeEmailTokenAsync(user, updateEmailDto.Email);
+        var result = await _userManager.ChangeEmailAsync(user, updateEmailDto.Email, token);
     
         Console.WriteLine("Update Email Result: " + result.Succeeded);
         if (!result.Succeeded)
@@ -121,6 +136,11 @@ public class UserController: ControllerBase
     [HttpGet("hasPassword")]
     public async Task<IActionResult> HasPasswordAsync()
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var userId = _userManager.GetUserId(User);
 
         if (userId == null)
@@ -145,6 +165,11 @@ public class UserController: ControllerBase
     [HttpGet("isEmailConfirmed")]
     public async Task<IActionResult> IsEmailConformedAsync()
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var userId = _userManager.GetUserId(User);
 
         if (userId == null)
@@ -167,8 +192,13 @@ public class UserController: ControllerBase
     }
 
     [HttpPost("changePassword")]
-    public async Task<IActionResult> ChangePasswordAsync(PasswordDto passwordDto)
+    public async Task<IActionResult> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var userId = _userManager.GetUserId(User);
 
         if (userId == null)
@@ -184,19 +214,24 @@ public class UserController: ControllerBase
             return NotFound("User not found.");
         }
         
-        var result = await _userManager.ChangePasswordAsync(user,passwordDto.OldPassword ,passwordDto.NewPassword);
+        var result = await _userManager.ChangePasswordAsync(user,changePasswordDto.OldPassword ,changePasswordDto.NewPassword);
         if (!result.Succeeded)
         {
             return BadRequest(result.Errors);
         }
         
         await _signInManager.RefreshSignInAsync(user);
-        return Ok(passwordDto);
+        return Ok(changePasswordDto);
     }
     
     [HttpGet("setPassword")]
-    public async Task<IActionResult> SetPasswordAsync(PasswordDto passwordDto)
+    public async Task<IActionResult> SetPasswordAsync(AddPasswordDto addPasswordDto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var userId = _userManager.GetUserId(User);
 
         if (userId == null)
@@ -212,7 +247,7 @@ public class UserController: ControllerBase
             return NotFound("User not found.");
         }
         
-        var result = await _userManager.AddPasswordAsync(user, passwordDto.NewPassword);
+        var result = await _userManager.AddPasswordAsync(user, addPasswordDto.Password);
         if (!result.Succeeded)
         {
             return BadRequest(result.Errors);
@@ -222,8 +257,13 @@ public class UserController: ControllerBase
         return Ok("Password set successfully.");
     }
     [HttpPost("deleteAccount")]
-    public async Task<IActionResult> DeleteAccountAsync(PasswordDto passwordDto)
+    public async Task<IActionResult> DeleteAccountAsync(DeleteAccountDto deleteAccountDto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var userId = _userManager.GetUserId(User);
         if (userId == null)
         {
@@ -236,9 +276,9 @@ public class UserController: ControllerBase
             return NotFound();
         }
         
-        if (!string.IsNullOrEmpty(passwordDto.OldPassword))
+        if (!string.IsNullOrEmpty(deleteAccountDto.Password))
         {
-            var isPasswordValid = await _userManager.CheckPasswordAsync(user, passwordDto.OldPassword);
+            var isPasswordValid = await _userManager.CheckPasswordAsync(user, deleteAccountDto.Password);
             if (!isPasswordValid)
             {
                 return BadRequest("Incorrect password.");
@@ -255,11 +295,15 @@ public class UserController: ControllerBase
         return Ok();
     }
     
-    
     /*-----BEGIN: TwoFactor-----*/
     [HttpGet("twoFactorInfo")]
     public async Task<IActionResult> GetTwoFactorInfo()
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var userId = _userManager.GetUserId(User);
         if (userId == null)
         {
@@ -296,6 +340,11 @@ public class UserController: ControllerBase
     [HttpPost("forgetTwoFactorClient")]
     public async Task<IActionResult> ForgetTwoFactorClientAsync()
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var userId = _userManager.GetUserId(User);
         if (userId == null)
         {
@@ -315,6 +364,11 @@ public class UserController: ControllerBase
     [HttpPost("disableTwoFactor")]
     public async Task<IActionResult> Disable2FaAsync()
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var userId = _userManager.GetUserId(User);
         if (userId == null)
         {
@@ -338,6 +392,11 @@ public class UserController: ControllerBase
     [HttpPost("enableTwoFactor")]
     public async Task<IActionResult> Enable2FaAsync()
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var userId = _userManager.GetUserId(User);
         if (userId == null)
         {
@@ -362,6 +421,11 @@ public class UserController: ControllerBase
     [HttpPost("generateRecoveryCodes")]
     public async Task<IActionResult> GenerateRecoveryCodesAsync()
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var userId = _userManager.GetUserId(User);
         if (userId == null)
         {
@@ -382,6 +446,11 @@ public class UserController: ControllerBase
     [HttpPost("resetAuthenticator")]
     public async Task<IActionResult> ResetAuthenticatorAsync()
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var userId = _userManager.GetUserId(User);
         if (userId == null)
         {
@@ -394,7 +463,7 @@ public class UserController: ControllerBase
             return NotFound();
         }
 
-        // Disable two-factor authentication
+        // Disable twoFactor authentication
         await _userManager.SetTwoFactorEnabledAsync(user, false);
     
         // Reset authenticator key

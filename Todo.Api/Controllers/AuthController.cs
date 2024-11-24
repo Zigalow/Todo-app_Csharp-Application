@@ -36,12 +36,27 @@ public class AuthController : ControllerBase
         {
             return BadRequest(ModelState);
         }
+
         Console.WriteLine("Create new user");
         var user = new ApplicationUser
         {
             UserName = registerDto.UserName,
             Email = registerDto.Email
         };
+
+        var existingEmail = _userManager.FindByEmailAsync(registerDto.Email);
+
+        if (existingEmail.Result != null)
+        {
+            return BadRequest("User with email already exists");
+        }
+
+        var existingUsername = _userManager.FindByNameAsync(registerDto.UserName);
+
+        if (existingUsername.Result != null)
+        {
+            return BadRequest("User with username already exists");
+        }
 
         var result = await _userManager.CreateAsync(user, registerDto.Password);
         Console.WriteLine("Result " + result.Succeeded);
@@ -50,8 +65,8 @@ public class AuthController : ControllerBase
             Console.WriteLine(result.Errors.FirstOrDefault()?.Description);
             return BadRequest(result.Errors);
         }
-        
-       //await _userManager.AddToRoleAsync(user, "User");
+
+        //await _userManager.AddToRoleAsync(user, "User");
         Console.WriteLine("User Created Token generate");
         var token = await GenerateJwtToken(user);
 

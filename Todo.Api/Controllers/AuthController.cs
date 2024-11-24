@@ -2,7 +2,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Todo.Api.Interfaces;
@@ -114,8 +113,8 @@ public class AuthController : ControllerBase
             Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
 
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var expires = DateTime.Now.AddDays(
-            Convert.ToDouble(_configuration["Jwt:ExpireDays"]));
+        var expires = DateTime.Now.AddMinutes(
+            Convert.ToDouble(_configuration["Jwt:ExpiryInMinutes"]));
 
         var token = new JwtSecurityToken(
             _configuration["Jwt:Issuer"],

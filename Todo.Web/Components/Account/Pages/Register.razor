@@ -1,5 +1,4 @@
 ﻿@page "/Account/Register"
-
 @using System.ComponentModel.DataAnnotations
 @using Todo.Web.Auth
 @using Todo.Web.Auth.Models
@@ -73,15 +72,17 @@
             registerRequest.Password = Input.Password;
             registerRequest.ConfirmPassword = Input.ConfirmPassword;
 
-            var success = await AuthService.RegisterAsync(registerRequest);
+            var result = await AuthService.RegisterAsync(registerRequest);
 
-            if (success)
+            if (result.Succeeded)
             {
+                Message = "Registration successful! Redirecting to login...";
+                
                 NavigationManager.NavigateTo("/Account/Login");
             }
             else
             {
-                Message = "Registration failed. Please check your details and try again.";
+                Message = result.Error;
             }
         }
         catch (Exception e)

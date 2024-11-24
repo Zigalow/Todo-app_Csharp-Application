@@ -70,18 +70,26 @@ public class AuthService : IAuthService
         ((CustomAuthenticationStateProvider)_authenticationStateProvider).NotifyUserLogout();
     }
 
-    public async Task<bool> RegisterAsync(RegisterRequest request)
+    public async Task<AuthResult> RegisterAsync(RegisterRequest request)
     {
         try
         {
             var response = await _httpClient.PostAsJsonAsync("api/auth/register", request);
+            var content = await response.Content.ReadAsStringAsync();
 
-            return response.IsSuccessStatusCode;
+            if (response.IsSuccessStatusCode)
+            {
+                return AuthResult.Success(content);
+            }
+
+            return AuthResult.Failure(!string.IsNullOrWhiteSpace(content)
+                ? content
+                : "Registration failed. Please try again.");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Register error: {ex.Message}");
-            return false;
+            return AuthResult.Failure("Registration failed. Please try again.");
         }
     }
 

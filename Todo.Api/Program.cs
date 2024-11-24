@@ -35,7 +35,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
         options.SignIn.RequireConfirmedAccount = false; /*TODO: Change to True, when conformation is in place*/
     })
     .AddEntityFrameworkStores<TodoDbContext>()
-    .AddSignInManager();
+    .AddSignInManager()
+    //.AddRoles<ApplicationRole>()
+    .AddDefaultTokenProviders();
 
 // JWT authentication
 builder.Services.AddAuthentication(options =>

@@ -10,6 +10,12 @@
 <h3>All Task</h3>
 @if (TodoItems?.Count > 0)
 {
+    <label>Sort</label>
+    <select @onchange="HandleSort">
+        <option value="default">Default</option>
+        <option value="ascending">Ascending</option>
+        <option value="descending">Descending</option>
+    </select>
 
     @foreach (var task in TodoItems)
     {
@@ -44,20 +50,24 @@
     }
 }
 
-<SpecificTodoItemComponent TodoItem="@_specificTodoItem" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged" OnTodoItemDeleted="@HandleTodoItemDeleted"/>
+<SpecificTodoItemComponent TodoItem="@_specificTodoItem" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged"
+                           OnTodoItemDeleted="@HandleTodoItemDeleted"/>
 
 
 @code {
-    [Parameter]
-    public List<TodoItemDto> TodoItems { get; set; }
+    [Parameter] public List<TodoItemDto> TodoItems { get; set; }
     private TodoItemDto? _specificTodoItem { get; set; }
+
     private bool ViewTask { get; set; }
+
+    private string _selectedSortOption { get; set; }
+
 
     protected override async Task OnInitializedAsync()
     {
         TodoItems = await TodoItemService.GetAllTodoItemsAsync();
     }
-    
+
     private void SpecificTodoItemHandler(TodoItemDto todoItemDto)
     {
         _specificTodoItem = todoItemDto;
@@ -73,7 +83,7 @@
             TodoItems = await TodoItemService.GetAllTodoItemsAsync();
         }
     }
-    
+
     /*
      * Refresh the project after a todoItem is deleted
      */
@@ -81,6 +91,18 @@
     {
         TodoItems = await TodoItemService.GetAllTodoItemsAsync();
         StateHasChanged();
+    }
+
+    private async Task HandleSort(ChangeEventArgs e)
+    {
+        _selectedSortOption = e.Value?.ToString() ?? "default";
+
+        TodoItems = _selectedSortOption switch
+        {
+            "ascending" => TodoItems.OrderByDescending(todoItem => todoItem.DueDate.HasValue).ThenBy(todoItem => todoItem.DueDate).ToList(),
+            "descending" => TodoItems.OrderByDescending(todoItem => todoItem.DueDate).ToList(),
+            _ => await TodoItemService.GetAllTodoItemsAsync()
+        };
     }
 
 }

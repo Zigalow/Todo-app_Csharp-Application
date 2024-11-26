@@ -14,7 +14,7 @@ namespace Todo.Api.Services
             _configuration = configuration;
         }
 
-        public async Task SendConfirmationEmail(string toEmail, string username)
+        public async Task SendConfirmationEmail(string toEmail, string emailContent)
         {
             var smtpSettings = _configuration.GetSection("SmtpSettings");
 
@@ -30,8 +30,8 @@ namespace Todo.Api.Services
             {
                 From = new MailAddress(smtpSettings["Username"]),
                 Subject = "Bekræftelse af registrering",
-                Body = $"Hej {username},\n\nTak fordi du registrerede dig hos os!\n\nMed venlig hilsen,\nTaskify",
-                IsBodyHtml = false
+                Body = emailContent,
+                IsBodyHtml = true
             };
 
             mailMessage.To.Add(toEmail);

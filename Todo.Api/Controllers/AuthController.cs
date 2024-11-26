@@ -18,14 +18,17 @@ public class AuthController : ControllerBase
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IConfiguration _configuration;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly EmailService _emailService;
+    
 
     public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
-        IConfiguration configuration, IUnitOfWork unitOfWork)
+        IConfiguration configuration, IUnitOfWork unitOfWork, EmailService emailService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _configuration = configuration;
         _unitOfWork = unitOfWork;
+        _emailService = emailService;
     }
 
     [HttpPost("register")]
@@ -60,17 +63,46 @@ public class AuthController : ControllerBase
 
         var result = await _userManager.CreateAsync(user, registerDto.Password);
         Console.WriteLine("Result " + result.Succeeded);
+
         if (!result.Succeeded)
         {
             Console.WriteLine(result.Errors.FirstOrDefault()?.Description);
             return BadRequest(result.Errors);
         }
 
+        try
+        {
+            var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            var confirmationLink = Url.Action(
+                "ConfirmEmail",
+                "Auth",
+                new { userId = user.Id, token = emailConfirmationToken },
+                Request.Scheme
+            );
+
+            var emailContent = $@"
+            <h1>Welcome to Taskify!</h1>
+            <p>Please confirm your registration by clicking the link below:</p>
+            <a href='{confirmationLink}'>Confirm your email</a>";
+
+            await _emailService.SendConfirmationEmail(
+                user.Email,
+                "Confirm Your Registration",
+                emailContent
+            );
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Email sending failed: {ex.Message}");
+        }
+
+
         //await _userManager.AddToRoleAsync(user, "User");
         Console.WriteLine("User Created Token generate");
         var token = await GenerateJwtToken(user);
 
-        return Ok(new { Token = token });
+        return Ok(new { Token = token, Message = "Registration successful! A confirmation email has been sent." });
     }
 
     [HttpPost("login")]

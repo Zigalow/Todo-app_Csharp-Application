@@ -10,16 +10,12 @@ html, body {
     align-items: center;
     margin-bottom: 16px;
 }
-/*.todo-list-title{
-    display: grid;
-    grid-template-columns: 80% 20%;
-}*/
-
 
 h5 {
     font-weight: bold;
     grid-column: 1;
     color:#000000;
+    cursor: pointer;
 }
 
 .todo-list-title img {
@@ -39,6 +35,7 @@ span {
     gap: 1%;
     padding: 20px;
     width: 1200px;
+    min-height: 500px;
     overflow-x: auto; /* Prevent horizontal scroll */
 }
 
@@ -48,7 +45,9 @@ span {
     border-radius: 8px;
     padding: 16px;
     min-width: 300px;
+    min-height: 500px;
     max-height: 90%;
+    
 }
 .task-container {
     background-color: white;
@@ -61,22 +60,6 @@ span {
 .task-container.dragging {
     opacity: 0.5;
 }
-/*.todo-list-container {
-    margin-top: 2%;
-    display: inline-block;
-    border-right: 2px solid #000000;
-    padding: 15px;
-    min-width: fit-content;
-}
-
-.task-container {
-    padding: 10px;
-    width: auto;
-    background-color: #f1ecec;
-    border-radius: 5px;
-    margin-bottom: 5%;
-    cursor: pointer;
-}*/
 
 .task-container:hover {
     stroke: #000000;
@@ -295,4 +278,3 @@ span {
     width: 16px;
     height: 16px;
 }
-

@@ -14,7 +14,7 @@ public static class TodoItemMapper
             Title = todoItem.Title,
             Description = todoItem.Description,
             DueDate = todoItem.DueDate,
-            Priority = todoItem.Priority.GetDisplayName(),
+            Priority = todoItem.Priority,
             IsDone = todoItem.IsDone,
             TodoListId = todoItem.TodoListId,
             Labels = todoItem.Labels.ToListedLabelDtos().ToList()

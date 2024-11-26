@@ -1,0 +1,224 @@
+@using Todo.Core.Dtos.TodoItemDtos
+@using Todo.Core.Entities
+@using Todo.Web.Services.interfaces
+@inject ITodoItemService TodoItemService
+
+@*div for the outter *@
+<div class="page-overlay @(_isVisible ? "visible" : "")" @onclick="CloseView">
+    @if (TodoItem != null)
+    {
+        <div class="todo-item-container" @onclick:stopPropagation>
+            <div class="todo-item-header">
+                <div class="todo-item-title">
+                    @if (_isEditingTitle)
+                    {
+                        <input class="title-input" type="text" @bind="_editedTitle" @onblur="SaveTitle"/>
+                    }
+                    else
+                    {
+                        <h2 @onclick="() => _isEditingTitle = true">@TodoItem.Title</h2>
+                    }
+                </div>
+                <img class="x-icon" src="images/x-icon.png" alt="" @onclick="CloseView"/>
+            </div>
+
+            <div class="todo-item-info">
+                <div class="description-section">
+                    <h3>Description</h3>
+                    @if (_isEditingDescription)
+                    {
+                        <textarea class="description-input" @bind="TodoItem.Description"
+                            placeholder="Add a more detailed description..."></textarea>
+                        
+                        <button class="save-button" @onclick="SaveDescription">Save</button>
+                        <button class="cancel-button" @onclick="() => { _isEditingDescription = false; }">Cancel</button>
+                    }
+                    else
+                    {
+                        <p @onclick="() => _isEditingDescription = true" class="description-text">
+                            @(string.IsNullOrWhiteSpace(TodoItem.Description) ? "Add a more detailed description..." : TodoItem.Description)
+                        </p>
+                    }
+                </div>
+
+                <div class="labels-section">
+                    <h3>Labels</h3>
+                    <div class="labels-container">
+                        @foreach (var label in TodoItem.Labels)
+                        {
+                            <div class="label" style="background-color: @label.Color">
+                                @label.Name
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h3>Details</h3>
+                    <div class="detail-container">
+                        <span class="detail-label">Priority:</span>
+                        <select @bind="Priority">
+                            <option value="@Priority.VeryLow">VeryLow</option>
+                            <option value="@Priority.Low">Low</option>
+                            <option value="@Priority.Medium">Medium</option>
+                            <option value="@Priority.High">High</option>
+                            <option value="@Priority.VeryHigh">VeryHigh</option>
+                        </select>
+                    </div>
+
+                    <div class="detail-container">
+                        <span class="detail-label">Due Date:</span>
+                        <input type="date" @bind="DueDate"/>
+                    </div>
+                </div>
+
+                <div class="bottom-section">
+                    <button class="delete-button" @onclick="DeleteTodoItemAsync">Delete Task</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public TodoItemDto TodoItem { get; set; }
+    [Parameter] public bool IsVisible { get; set; }
+    /*Learned this way from here:https://stackoverflow.com/questions/56831266/passing-method-to-component*/
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public EventCallback OnTodoItemDeleted { get; set; }
+
+    private Priority Priority { get => TodoItem.Priority;
+        set
+        {
+            if (TodoItem.Priority != value)
+            {
+                TodoItem.Priority = value;
+                _ = SavePriority();
+            }
+        }
+    }
+
+    private DateTime? DueDate
+    {
+        get => TodoItem.DueDate;
+        set
+        {
+            TodoItem.DueDate = value;
+            _ = SaveDueDate();
+        }
+    }
+    private bool _isVisible;
+    private bool _isEditingTitle;
+    private bool _isEditingDescription;
+    private string _editedTitle;
+    private string _editedDescription;
+    
+    protected override void OnParametersSet()
+    {
+        _isVisible = IsVisible;
+        if (TodoItem != null)
+        {
+            _editedTitle = TodoItem.Title;
+            _editedDescription = TodoItem.Description;
+            Priority = TodoItem.Priority;
+        }
+        else
+        {
+            _editedTitle = string.Empty;
+            _editedDescription = string.Empty;
+        }
+    }
+
+    private async Task CloseView()
+    {
+        _isVisible = false;
+        
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+
+    private async Task SaveTitle()
+    {
+        if (string.IsNullOrWhiteSpace(_editedTitle)) return;
+
+        var updateDto = new UpdateTodoItemDto
+        {
+            Title = _editedTitle,
+            Description = TodoItem.Description,
+            Priority = Priority,
+            DueDate = TodoItem.DueDate
+        };
+
+        var success = await TodoItemService.UpdateTodoItemAsync(TodoItem.Id, updateDto);
+        if (success)
+        {
+            TodoItem.Title = _editedTitle;
+        }
+        _isEditingTitle = false;
+    }
+
+    private async Task SaveDescription()
+    {
+        var updateDto = new UpdateTodoItemDto
+        {
+            Title = TodoItem.Title,
+            Description = TodoItem.Description,
+            Priority = Priority,
+            DueDate = TodoItem.DueDate
+        };
+
+        var success = await TodoItemService.UpdateTodoItemAsync(TodoItem.Id, updateDto);
+        if (success)
+        {
+            await TodoItemService.GetTodoItemByIdAsync(TodoItem.Id);
+        }
+        _isEditingDescription = false;
+    }
+
+    private async Task SavePriority()
+    {
+        if (TodoItem == null)
+        {
+         return;   
+        }
+        var updateDto = new UpdateTodoItemDto
+        {
+            Title = TodoItem.Title,
+            Description = TodoItem.Description,
+            Priority = Priority,
+            DueDate = TodoItem.DueDate
+        };
+
+        var success = await TodoItemService.UpdateTodoItemAsync(TodoItem.Id, updateDto);
+        if (success)
+        {
+            await TodoItemService.GetTodoItemByIdAsync(TodoItem.Id);
+        }
+    }
+
+    private async Task SaveDueDate()
+    {
+        var updateDto = new UpdateTodoItemDto
+        {
+            Title = TodoItem.Title,
+            Description = TodoItem.Description,
+            Priority = Priority,
+            DueDate = TodoItem.DueDate
+        };
+
+        var success = await TodoItemService.UpdateTodoItemAsync(TodoItem.Id, updateDto);
+        if (success)
+        {
+            await TodoItemService.GetTodoItemByIdAsync(TodoItem.Id);
+        }
+    }
+
+    private async Task DeleteTodoItemAsync()
+    {
+        var success = await TodoItemService.DeleteTodoItemAsync(TodoItem.Id);
+        if (success)
+        {
+            await OnTodoItemDeleted.InvokeAsync();
+            await CloseView();
+        }
+    }
+}

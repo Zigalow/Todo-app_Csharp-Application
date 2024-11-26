@@ -70,7 +70,7 @@ public class AuthController : ControllerBase
             Console.WriteLine(result.Errors.FirstOrDefault()?.Description);
             return BadRequest(result.Errors);
         }
-
+        
         try
         {
             var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -104,6 +104,51 @@ public class AuthController : ControllerBase
 
         return Ok(new { Token = token, Message = "Registration successful! A confirmation email has been sent." });
     }
+
+    [HttpPost("resend-confirmation-email")]
+public async Task<IActionResult> ResendConfirmationEmail(string email)
+{
+    var user = await _userManager.FindByEmailAsync(email);
+    
+    if (user == null)
+    {
+        return BadRequest("No user found with the provided email.");
+    }
+
+    if (await _userManager.IsEmailConfirmedAsync(user))
+    {
+        return BadRequest("This email has already been confirmed.");
+    }
+
+    try
+    {
+        var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+        var confirmationLink = Url.Action(
+            "ConfirmEmail",
+            "Auth",
+            new { userId = user.Id, token = emailConfirmationToken },
+            Request.Scheme
+        );
+
+        var emailContent = $@"
+            <h1>Welcome back to Taskify!</h1>
+            <p>Please confirm your registration by clicking the link below:</p>
+            <a href='{confirmationLink}'>Confirm your email</a>";
+
+        await _emailService.SendConfirmationEmail(
+            user.Email,
+            emailContent
+        );
+
+        return Ok("A new confirmation email has been sent.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Failed to resend email confirmation: {ex.Message}");
+        return StatusCode(500, "An error occurred while sending the confirmation email.");
+    }
+}
 
     [HttpGet("confirm-email")]
     public async Task<IActionResult> ConfirmEmail(string userId, string token)

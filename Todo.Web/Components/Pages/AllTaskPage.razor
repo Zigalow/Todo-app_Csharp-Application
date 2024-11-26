@@ -1,0 +1,86 @@
+@page "/AllTask"
+@using Todo.Web.Services.interfaces
+@using Todo.Core.Dtos.TodoItemDtos
+
+@inject ITodoItemService TodoItemService
+
+@rendermode InteractiveServer
+
+
+<h3>All Task</h3>
+@if (TodoItems?.Count > 0)
+{
+
+    @foreach (var task in TodoItems)
+    {
+        <div class="task-container"
+             @onclick="() => SpecificTodoItemHandler(task)">
+            @if (task.Labels.Any())
+            {
+                @foreach (var label in task.Labels)
+                {
+                    <div class="task-label" style="background-color: @label.Color;">
+                        @label.Name
+                    </div>
+                }
+            }
+            <p>
+                <span>@task.Title</span>
+            </p>
+            <p>Priority: @task.Priority</p>
+
+            <div class="task-lower-part">
+                <div class="todo-date">
+                    @if (task.DueDate.HasValue)
+                    {
+                        <p>Due: @task.DueDate.Value.ToShortDateString()</p>
+                    }
+                </div>
+                <div class="dropdown-container" @onclick:stopPropagation>
+
+                </div>
+            </div>
+        </div>
+    }
+}
+
+<SpecificTodoItemComponent TodoItem="@_specificTodoItem" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged" OnTodoItemDeleted="@HandleTodoItemDeleted"/>
+
+
+@code {
+    [Parameter]
+    public List<TodoItemDto> TodoItems { get; set; }
+    private TodoItemDto? _specificTodoItem { get; set; }
+    private bool ViewTask { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        TodoItems = await TodoItemService.GetAllTodoItemsAsync();
+    }
+    
+    private void SpecificTodoItemHandler(TodoItemDto todoItemDto)
+    {
+        _specificTodoItem = todoItemDto;
+        ViewTask = true;
+    }
+
+    private async Task HandleViewTaskChanged(bool value)
+    {
+        ViewTask = value;
+        if (!value)
+        {
+            _specificTodoItem = null;
+            TodoItems = await TodoItemService.GetAllTodoItemsAsync();
+        }
+    }
+    
+    /*
+     * Refresh the project after a todoItem is deleted
+     */
+    private async Task HandleTodoItemDeleted()
+    {
+        TodoItems = await TodoItemService.GetAllTodoItemsAsync();
+        StateHasChanged();
+    }
+
+}

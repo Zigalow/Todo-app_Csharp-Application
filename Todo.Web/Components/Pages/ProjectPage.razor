@@ -40,7 +40,7 @@ else
                      @ondragover:preventDefault>
                     <div class="todo-list-title">
                         <h5>@todoList.Name</h5>
-                        <img src="images/menu.png"/>
+                        <img src="images/menu.png" alt=""/>
                     </div>
                     @if (todoList.TodoItems.Count != 0)
                     {
@@ -50,7 +50,7 @@ else
                                  draggable="true"
                                  @ondragstart="@(() => HandleDragStart(task, todoList))"
                                  @ondragend="@(() => HandleDragEnd())"
-                                 @onclick="() => ViewTask = true">
+                                 @onclick="() => SpecificTodoItemHandler(task)">
                                 @if (task.Labels.Any())
                                 {
                                     @foreach (var label in task.Labels)
@@ -80,7 +80,7 @@ else
                                         @if (CurrentTodoItem == task)
                                         {
                                             <div class="modifiymenu">
-                                                <button>Open card</button>
+                                                <button @onclick="() => SpecificTodoItemHandler(task)">Open card</button>
                                                 <button @onclick="() => ToggleLabelEditor(task)">
                                                     Edit label
                                                 </button>
@@ -172,6 +172,8 @@ else
             }
         </div>
     </div>
+
+    <SpecificTodoItemComponent TodoItem="@SpecificTodoItem" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged" OnTodoItemDeleted="@HandleTodoItemDeleted"/>
 }
 
 @code {
@@ -182,6 +184,8 @@ else
     private bool IsColorPickerVisible { get; set; } = false;
     private bool IsLabelVisible { get; set; } = false;
 
+    private TodoItemDto? SpecificTodoItem { get; set; }
+    
     private List<string> ColorOptions = new()
     {
         "#4A90E2", // Blue
@@ -480,14 +484,35 @@ else
         {
             await TodoItemService.MoveTodoItemAsync(DraggedItem.Id, targetList.Id);
         }
-        else
-        {
-           /*TODO: IMPLEMENT reordering TodoItem*/
-        }
 
         // Refresh the project
         CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
         StateHasChanged();
     }
 
+    private void SpecificTodoItemHandler(TodoItemDto todoItemDto)
+    {
+        SpecificTodoItem = todoItemDto;
+        ViewTask = true;
+    }
+
+    private async Task HandleViewTaskChanged(bool value)
+    {
+        ViewTask = value;
+        if (!value)
+        {
+            SpecificTodoItem = null;
+            CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
+        }
+    }
+    
+    /*
+     * Refresh the project after a todoItem is deleted
+     */
+    private async Task HandleTodoItemDeleted()
+    {
+        CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
+        StateHasChanged();
+    }
+    
 }

@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
+using Todo.Api.Services.Interfaces;
 
 namespace Todo.Api.Services
 {
@@ -13,11 +14,11 @@ namespace Todo.Api.Services
             _configuration = configuration;
         }
 
-        public void SendConfirmationEmail(string toEmail, string username)
+        public async Task SendConfirmationEmail(string toEmail, string username)
         {
             var smtpSettings = _configuration.GetSection("SmtpSettings");
 
-            var smtpClient = new SmtpClient
+            using var smtpClient = new SmtpClient
             {
                 Host = smtpSettings["Host"],
                 Port = int.Parse(smtpSettings["Port"]),
@@ -37,11 +38,13 @@ namespace Todo.Api.Services
 
             try
             {
-                smtpClient.Send(mailMessage);
+                // Brug await til at sende e-mailen asynkront
+                await smtpClient.SendMailAsync(mailMessage);
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Fejl ved sending af e-mail: " + ex.Message);
+                throw; // Tilføj throw for at sende undtagelsen videre
             }
         }
     }

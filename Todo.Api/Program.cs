@@ -9,6 +9,7 @@ using Todo.Api.Data;
 using Todo.Api.Interfaces;
 using Todo.Api.Repositories;
 using Todo.Api.Repositories.Interfaces;
+using Todo.Api.Services;
 using Todo.Core.Entities;
 
 var builder = WebApplication.CreateBuilder(args);

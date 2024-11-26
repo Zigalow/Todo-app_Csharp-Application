@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Todo.Api.Interfaces;
+using Todo.Api.Services;
 using Todo.Core.Dtos.AuthDto;
 using Todo.Core.Entities;
 
@@ -88,7 +89,6 @@ public class AuthController : ControllerBase
 
             await _emailService.SendConfirmationEmail(
                 user.Email,
-                "Confirm Your Registration",
                 emailContent
             );
         }

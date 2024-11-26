@@ -129,13 +129,6 @@
         }
     }
 
-    private async Task CloseView()
-    {
-        _isVisible = false;
-        
-        await IsVisibleChanged.InvokeAsync(false);
-    }
-
     private async Task SaveTitle()
     {
         if (string.IsNullOrWhiteSpace(_editedTitle)) return;
@@ -220,5 +213,12 @@
             await OnTodoItemDeleted.InvokeAsync();
             await CloseView();
         }
+    }
+    
+    private async Task CloseView()
+    {
+        _isVisible = false;
+        
+        await IsVisibleChanged.InvokeAsync(false);
     }
 }

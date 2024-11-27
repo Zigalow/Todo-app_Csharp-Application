@@ -71,38 +71,24 @@ public class AuthController : ControllerBase
             return BadRequest(result.Errors);
         }
         
-        try
-        {
-            var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var confirmationLink = Url.Action(
+            "ConfirmEmail",
+            "Auth",
+            new { userId = user.Id, token = emailConfirmationToken },
+            Request.Scheme
+        );
 
-            var confirmationLink = Url.Action(
-                "ConfirmEmail",
-                "Auth",
-                new { userId = user.Id, token = emailConfirmationToken },
-                Request.Scheme
-            );
-
-            var emailContent = $@"
+        var emailContent = $@"
             <h1>Welcome to Taskify!</h1>
             <p>Please confirm your registration by clicking the link below:</p>
             <a href='{confirmationLink}'>Confirm your email</a>";
 
-            await _emailService.SendConfirmationEmail(
-                user.Email,
-                emailContent
-            );
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Email sending failed: {ex.Message}");
-        }
+        await SendEmailWithExceptionHandling(user.Email, emailContent);
 
-
-        //await _userManager.AddToRoleAsync(user, "User");
-        Console.WriteLine("User Created Token generate");
         var token = await GenerateJwtToken(user);
-
         return Ok(new { Token = token, Message = "Registration successful! A confirmation email has been sent." });
+
     }
 
     [HttpPost("resend-confirmation-email")]
@@ -120,10 +106,7 @@ public async Task<IActionResult> ResendConfirmationEmail(string email)
         return BadRequest("This email has already been confirmed.");
     }
 
-    try
-    {
-        var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
+    var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         var confirmationLink = Url.Action(
             "ConfirmEmail",
             "Auth",
@@ -132,24 +115,27 @@ public async Task<IActionResult> ResendConfirmationEmail(string email)
         );
 
         var emailContent = $@"
-            <h1>Welcome back to Taskify!</h1>
+            <h1>Welcome to Taskify!</h1>
+            <p>You have requested to resend the confirmation e-mail</p>
             <p>Please confirm your registration by clicking the link below:</p>
             <a href='{confirmationLink}'>Confirm your email</a>";
 
-        await _emailService.SendConfirmationEmail(
-            user.Email,
-            emailContent
-        );
+        await SendEmailWithExceptionHandling(user.Email, emailContent);
 
         return Ok("A new confirmation email has been sent.");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Failed to resend email confirmation: {ex.Message}");
-        return StatusCode(500, "An error occurred while sending the confirmation email.");
-    }
 }
-
+private async Task SendEmailWithExceptionHandling(string recipientEmail, string emailContent)
+    {
+        try
+        {
+            await _emailService.SendConfirmationEmail(recipientEmail, emailContent);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to send email to {recipientEmail}: {ex.Message}");
+            throw new InvalidOperationException("An error occurred while sending the email.", ex);
+        }
+    }
     [HttpGet("confirm-email")]
     public async Task<IActionResult> ConfirmEmail(string userId, string token)
     {
@@ -217,7 +203,6 @@ public async Task<IActionResult> ResendConfirmationEmail(string email)
             new(ClaimTypes.Name, user.UserName),
         };
 
-        // Add roles to claims
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var key = new SymmetricSecurityKey(

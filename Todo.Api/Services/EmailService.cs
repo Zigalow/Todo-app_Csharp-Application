@@ -38,13 +38,12 @@ namespace Todo.Api.Services
 
             try
             {
-                // Brug await til at sende e-mailen asynkront
                 await smtpClient.SendMailAsync(mailMessage);
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Fejl ved sending af e-mail: " + ex.Message);
-                throw; // Tilføj throw for at sende undtagelsen videre
+                throw; 
             }
         }
     }

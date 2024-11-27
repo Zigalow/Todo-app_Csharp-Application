@@ -1,8 +1,10 @@
 @page "/AllTask"
+@using Todo.Core.Dtos.LabelDtos
 @using Todo.Web.Services.interfaces
 @using Todo.Core.Dtos.TodoItemDtos
 
 @inject ITodoItemService TodoItemService
+@inject ILabelService LabelService
 
 @rendermode InteractiveServer
 
@@ -13,9 +15,25 @@
     <label>Sort</label>
     <select @onchange="HandleSort">
         <option value="default">Default</option>
-        <option value="ascending">Ascending</option>
-        <option value="descending">Descending</option>
+        <option value="ascending">A-Z Ascending</option>
+        <option value="descending">Z-A Descending</option>
+        <option value="due-date-ascending">DueDate Asc</option>
+        <option value="due-date-descending">DueDate Desc</option>
     </select>
+    <div class="filter-group">
+        <label>Labels:</label>
+        <select @onchange="HandelFilter">
+            @*<option value="no-label">No Label</option>*@
+            @if (AllLabels != null)
+            {
+                @foreach (var label in AllLabels)
+                {
+                    <option value="@label.Name">@label.Name</option>
+                }
+            }
+        </select>
+    </div>
+
 
     @foreach (var task in TodoItems)
     {
@@ -56,16 +74,19 @@
 
 @code {
     [Parameter] public List<TodoItemDto> TodoItems { get; set; }
+    
     private TodoItemDto? _specificTodoItem { get; set; }
-
     private bool ViewTask { get; set; }
 
     private string _selectedSortOption { get; set; }
-
+    
+    private string _selectedFilterOption { get; set; }
+    public List<LabelDto> AllLabels { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         TodoItems = await TodoItemService.GetAllTodoItemsAsync();
+        AllLabels = await LabelService.GetAllLabelsAsync();
     }
 
     private void SpecificTodoItemHandler(TodoItemDto todoItemDto)
@@ -99,10 +120,23 @@
 
         TodoItems = _selectedSortOption switch
         {
-            "ascending" => TodoItems.OrderByDescending(todoItem => todoItem.DueDate.HasValue).ThenBy(todoItem => todoItem.DueDate).ToList(),
-            "descending" => TodoItems.OrderByDescending(todoItem => todoItem.DueDate).ToList(),
+            "due-date-ascending" => TodoItems.OrderByDescending(todoItem => todoItem.DueDate.HasValue).ThenBy(todoItem => todoItem.DueDate).ToList(),
+            "due-date-descending" => TodoItems.OrderByDescending(todoItem => todoItem.DueDate).ToList(),
+            "ascending" => TodoItems.OrderBy(todoItem => todoItem.Title).ToList(),
+            "descending" =>TodoItems.OrderByDescending(todoItem => todoItem.Title).ToList(),
             _ => await TodoItemService.GetAllTodoItemsAsync()
         };
+    }
+
+    private async Task HandelFilter(ChangeEventArgs e)
+    {
+        _selectedFilterOption = e.Value?.ToString();
+        if (_selectedFilterOption.Any())
+        {
+            TodoItems = await TodoItemService.GetAllTodoItemsAsync();
+            TodoItems = TodoItems
+                .Where(t => t.Labels.Any(l => _selectedFilterOption.Equals(l.Name))).ToList();
+        }
     }
 
 }

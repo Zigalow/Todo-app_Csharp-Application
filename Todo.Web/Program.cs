@@ -1,4 +1,3 @@
-using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Todo.Web.Auth;
@@ -36,14 +35,15 @@ builder.Services.AddScoped<ITodoItemService, TodoItemService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ILabelService, LabelService>();
 builder.Services.AddScoped<AuthHeaderHandler>();
-builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddTransient<AuthenticationInterceptor>();
 
 builder.Services.AddAntiforgery();
 
 //Connect with todoApi
 builder.Services
     .AddHttpClient("TodoApi", client => { client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!); })
-    .AddHttpMessageHandler<AuthHeaderHandler>();
+    .AddHttpMessageHandler<AuthHeaderHandler>()
+    .AddHttpMessageHandler<AuthenticationInterceptor>();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpContextAccessor();

@@ -12,6 +12,7 @@
 <h3>All Task</h3>
 @if (TodoItems?.Count > 0)
 {
+    <div class="sort-container">
     <label>Sort</label>
     <select @onchange="HandleSort">
         <option value="default">Default</option>
@@ -19,7 +20,8 @@
         <option value="due-date-ascending">DueDate Asc</option>
         <option value="due-date-descending">DueDate Desc</option>
     </select>
-    <div class="filter-group">
+    </div>
+    <div class="filter-container">
         <label>Filter:</label>
         <select @onchange="HandleFilter" multiple>
             @*<option value="no-label">No Label</option>*@
@@ -80,7 +82,7 @@
 
     private string _selectedSortOption { get; set; }
     
-    private string _selectedFilterOption { get; set; }
+    private string[] _selectedFilterOptions { get; set; }
     public List<LabelDto> AllLabels { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -130,12 +132,14 @@
     private async Task HandleFilter(ChangeEventArgs e)
     {
         TodoItems = await TodoItemService.GetAllTodoItemsAsync();
-        _selectedFilterOption = e.Value?.ToString() ?? "default";
         
-        if (_selectedFilterOption != "default")
+        _selectedFilterOptions = e.Value as string[] ?? [e.Value?.ToString() ?? "default"];
+        
+        if (_selectedFilterOptions.Contains("default"))
         {
-            TodoItems = TodoItems.Where(t => t.Labels.Any(l => _selectedFilterOption.Equals(l.Name))).ToList();
+            return;
         }
-    }
 
+        TodoItems = TodoItems.Where(todoItem => _selectedFilterOptions.Any(filter => todoItem.Labels.Any(label => filter.Equals(label.Name)))).ToList();
+    }
 }

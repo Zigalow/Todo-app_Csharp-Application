@@ -15,15 +15,15 @@
     <label>Sort</label>
     <select @onchange="HandleSort">
         <option value="default">Default</option>
-        <option value="ascending">A-Z Ascending</option>
-        <option value="descending">Z-A Descending</option>
+        <option value="descending">A-Z Desc</option>
         <option value="due-date-ascending">DueDate Asc</option>
         <option value="due-date-descending">DueDate Desc</option>
     </select>
     <div class="filter-group">
-        <label>Labels:</label>
-        <select @onchange="HandelFilter">
+        <label>Filter:</label>
+        <select @onchange="HandleFilter" multiple>
             @*<option value="no-label">No Label</option>*@
+            <option value="default">Default</option>
             @if (AllLabels != null)
             {
                 @foreach (var label in AllLabels)
@@ -122,20 +122,19 @@
         {
             "due-date-ascending" => TodoItems.OrderByDescending(todoItem => todoItem.DueDate.HasValue).ThenBy(todoItem => todoItem.DueDate).ToList(),
             "due-date-descending" => TodoItems.OrderByDescending(todoItem => todoItem.DueDate).ToList(),
-            "ascending" => TodoItems.OrderBy(todoItem => todoItem.Title).ToList(),
             "descending" =>TodoItems.OrderByDescending(todoItem => todoItem.Title).ToList(),
             _ => await TodoItemService.GetAllTodoItemsAsync()
         };
     }
 
-    private async Task HandelFilter(ChangeEventArgs e)
+    private async Task HandleFilter(ChangeEventArgs e)
     {
-        _selectedFilterOption = e.Value?.ToString();
-        if (_selectedFilterOption.Any())
+        TodoItems = await TodoItemService.GetAllTodoItemsAsync();
+        _selectedFilterOption = e.Value?.ToString() ?? "default";
+        
+        if (_selectedFilterOption != "default")
         {
-            TodoItems = await TodoItemService.GetAllTodoItemsAsync();
-            TodoItems = TodoItems
-                .Where(t => t.Labels.Any(l => _selectedFilterOption.Equals(l.Name))).ToList();
+            TodoItems = TodoItems.Where(t => t.Labels.Any(l => _selectedFilterOption.Equals(l.Name))).ToList();
         }
     }
 

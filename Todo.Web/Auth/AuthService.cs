@@ -19,6 +19,12 @@ public class AuthService : IAuthService
         _httpClient = httpClientFactory.CreateClient("TodoApi");
         _authenticationStateProvider = authenticationStateProvider;
         _httpContextAccessor = httpContextAccessor;
+
+    }
+
+    public string? GetUserEmail()
+    {
+        return _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Email)?.Value;
     }
 
     public async Task<bool> LoginAsync(LoginRequest request)
@@ -97,4 +103,28 @@ public class AuthService : IAuthService
     {
         return _httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
     }
+
+    public async Task<AuthResult> ResendConfirmationEmailAsync(string email)
+    {
+        try
+        {
+            // Replace "api/auth/resend-confirmation-email" with the actual API endpoint
+            var response = await _httpClient.PostAsJsonAsync("api/auth/resend-confirmation-email", new { Email = email });
+
+            if (response.IsSuccessStatusCode)
+            {
+                return AuthResult.Success("Email resent successfully.");
+            }
+
+            var error = await response.Content.ReadAsStringAsync();
+            return AuthResult.Failure(!string.IsNullOrWhiteSpace(error) ? error : "Failed to resend the email.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error resending confirmation email: {ex.Message}");
+            return AuthResult.Failure("An error occurred while resending the confirmation email.");
+        }
+    }
+    
+
 }

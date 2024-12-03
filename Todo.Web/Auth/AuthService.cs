@@ -108,16 +108,15 @@ public class AuthService : IAuthService
     {
         try
         {
-            // Replace "api/auth/resend-confirmation-email" with the actual API endpoint
-            var response = await _httpClient.PostAsJsonAsync("api/auth/resend-confirmation-email", new { Email = email });
+            var response = await _httpClient.PostAsJsonAsync("api/auth/resend-confirmation-email", new { email });
 
             if (response.IsSuccessStatusCode)
             {
-                return AuthResult.Success("Email resent successfully.");
+                return AuthResult.Success("A new confirmation email has been sent.");
             }
 
             var error = await response.Content.ReadAsStringAsync();
-            return AuthResult.Failure(!string.IsNullOrWhiteSpace(error) ? error : "Failed to resend the email.");
+            return AuthResult.Failure(!string.IsNullOrWhiteSpace(error) ? error : "Failed to resend confirmation email.");
         }
         catch (Exception ex)
         {
@@ -125,6 +124,7 @@ public class AuthService : IAuthService
             return AuthResult.Failure("An error occurred while resending the confirmation email.");
         }
     }
+
     
 
 }

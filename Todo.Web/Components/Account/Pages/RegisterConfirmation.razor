@@ -8,7 +8,12 @@
 <div class="container">
     <h2>Email Confirmation Required</h2>
     <p>An email has been sent to your address with a confirmation link. Please check your email and click the link to activate your account.</p>
-    <p>If you didn’t receive the email, click below to resend the confirmation email.</p>
+    <p>If you didn’t receive the email, enter your email below and click Resend Email.</p>
+
+    <div class="form-group">
+        <label for="emailInput">Email Address</label>
+        <input id="emailInput" class="form-control" @bind="Email" placeholder="Enter your email" />
+    </div>
 
     <button class="btn btn-primary" @onclick="ResendConfirmationEmail">Resend Email</button>
 
@@ -16,31 +21,46 @@
     {
         <p class="text-success">@Message</p>
     }
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <p class="text-danger">@ErrorMessage</p>
+    }
 </div>
 
 @code {
+    private string? Email { get; set; }
     private string? Message { get; set; }
+    private string? ErrorMessage { get; set; }
 
     private async Task ResendConfirmationEmail()
     {
         try
         {
-            var email = AuthService.GetUserEmail();
-            var result = await AuthService.ResendConfirmationEmailAsync(email);
-            
+            if (string.IsNullOrWhiteSpace(Email))
+            {
+                ErrorMessage = "Please enter a valid email address.";
+                Message = null;
+                return;
+            }
+
+            var result = await AuthService.ResendConfirmationEmailAsync(Email);
+
             if (result.Succeeded)
             {
                 Message = "Confirmation email has been resent.";
+                ErrorMessage = null;
             }
             else
             {
-                Message = result.Error;
+                ErrorMessage = result.Error;
+                Message = null;
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            Message = "An error occurred while resending the email.";
+            ErrorMessage = "An error occurred while resending the email.";
+            Message = null;
         }
     }
 }

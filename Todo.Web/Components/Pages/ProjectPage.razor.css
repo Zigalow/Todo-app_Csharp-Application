@@ -1,34 +1,22 @@
+/* General Styles */
 html, body {
     background-color: #DED7D7;
     width: 100%;
     overflow-x: hidden;
 }
 
-.todo-list-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
 h5 {
     font-weight: bold;
     grid-column: 1;
-    color:#000000;
+    color: #000000;
     cursor: pointer;
-}
-
-.todo-list-title img {
-    width: 26px;
-    height: 26px;
-    cursor: pointer;
-    grid-column: 2;
 }
 
 span {
     font-weight: bold;
 }
 
+/* Layout Styles */
 .todo-lists-container {
     display: flex;
     box-sizing: border-box;
@@ -47,8 +35,23 @@ span {
     min-width: 300px;
     min-height: 500px;
     max-height: 90%;
-    
 }
+
+.todo-list-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.todo-list-title img {
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    grid-column: 2;
+}
+
+/* Task Styles */
 .task-container {
     background-color: white;
     border-radius: 4px;
@@ -57,6 +60,7 @@ span {
     cursor: pointer;
     user-select: none;
 }
+
 .task-container.dragging {
     opacity: 0.5;
 }
@@ -64,17 +68,12 @@ span {
 .task-container:hover {
     stroke: #000000;
     background-color: #ece6e6;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .todo-date {
     font-style: italic;
     color: #ec0000;
-}
-
-.new-List {
-    background-color: #28a745;
-    width: auto;
 }
 
 .task-lower-part {
@@ -90,7 +89,28 @@ span {
     grid-column: 2;
 }
 
-/* Updated modifiymenu styles */
+/* Button Styles */
+.new-List {
+    background-color: #28a745;
+    width: auto;
+}
+
+.modify-button {
+    background: none;
+    border: 1px solid #000000;
+    color: #000000;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.modify-button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-color: #ffffff;
+}
+
+/* Modify Menu Styles */
 .modifiymenu {
     position: absolute;
     right: 0;
@@ -100,7 +120,7 @@ span {
     border-radius: 4px;
     padding: 8px;
     z-index: 100;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     min-width: 200px;
 }
 
@@ -127,7 +147,7 @@ span {
     border-color: #ffffff;
 }
 
-/* Updated Label Editor Styling */
+/* Label Editor Styles */
 .label-editor {
     position: absolute; 
     left: 100%; 
@@ -139,7 +159,7 @@ span {
     z-index: 1100;
     min-width: 250px;
     max-width: 300px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .label-editor input {
@@ -151,13 +171,14 @@ span {
     margin: 5px 0;
 }
 
-/* Updated Create Label Section */
+/* Create Label Section */
 .create-label-section {
     margin-top: 15px;
     padding-top: 15px;
     border-top: 1px solid #eee;
     width: 100%;
 }
+
 .create-label-section button {
     background: none;
     border: 1px solid #000000;
@@ -169,7 +190,7 @@ span {
     border-color: #000;
 }
 
-/* Rest of the styles remain the same */
+/* Color Picker Styles */
 .color-picker {
     display: flex;
     gap: 8px;
@@ -201,26 +222,45 @@ span {
     border: 2px solid #000;
 }
 
-.dropdown-container {
-    position: relative;
-}
-
-
-.modify-button {
+/* Dropdown Styles */
+.todolist-dropdown {
     background: none;
-    border: 1px solid #000000;
-    color: #000000;
-    padding: 5px 10px;
+    border: none;
     cursor: pointer;
-    border-radius: 3px;
-    transition: background-color 0.2s, border-color 0.2s;
+    padding: 5px;
+    transition: background-color 0.2s ease;
+    border-radius: 4px;
 }
 
-.modify-button:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-    border-color: #ffffff;
+.todo-list-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 150px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    display: block;
+    animation: dropdown-fade-in 0.2s ease;
 }
 
+.todo-list-dropdown button {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    display: block;
+}
+
+.todo-list-dropdown button:hover {
+    background-color: #f4f4f4;
+}
+
+/* Label Styles */
 .label {
     font-size: 12px;
     font-weight: 500;
@@ -237,6 +277,7 @@ span {
     color: white;
 }
 
+/* Saved Labels */
 .saved-labels {
     margin: 10px 0;
     padding: 10px;
@@ -259,19 +300,19 @@ span {
     opacity: 0.9;
 }
 
-.remove-label{
+.remove-label {
     color: black;
     border-radius: 4px;
 }
 
-.delete-label{
+.delete-label {
     color: red;
     border-radius: 4px;
-    
 }
 
-.error-message{
-    color:red;
+/* Miscellaneous */
+.error-message {
+    color: red;
 }
 
 .x-icon {

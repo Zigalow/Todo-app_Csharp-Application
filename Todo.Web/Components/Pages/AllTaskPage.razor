@@ -12,29 +12,32 @@
 <h3>All Task</h3>
 @if (TodoItems?.Count > 0)
 {
-    <div class="sort-container">
-    <label>Sort</label>
-    <select @onchange="HandleSort">
-        <option value="default">Default</option>
-        <option value="descending">A-Z Desc</option>
-        <option value="due-date-ascending">DueDate Asc</option>
-        <option value="due-date-descending">DueDate Desc</option>
-    </select>
-    </div>
-    <div class="filter-container">
-        <label>Filter:</label>
-        <select @onchange="HandleFilter" multiple>
+    <div>
+        <label>Sort</label>
+        <select @onchange="HandleSort">
             <option value="default">Default</option>
-            @if (AllLabels != null)
-            {
-                @foreach (var label in AllLabels)
-                {
-                    <option value="@label.Name">@label.Name</option>
-                }
-            }
+            <option value="descending">A-Z Desc</option>
+            <option value="due-date-ascending">DueDate Asc</option>
+            <option value="due-date-descending">DueDate Desc</option>
         </select>
     </div>
-
+    <div>
+        <button @onclick="ToggleFilterVisibility" class="filter-button">Filter</button>
+        @if (IsFilterVisible)
+        {
+            <div class="checkboxes">
+                @foreach (var label in AllLabels)
+                {
+                    <div class="checkbox">
+                        <input type="checkbox" value="@label.Name"
+                               checked="@_selectedFilterOptions.Contains(label.Name)"
+                               @onchange="() => HandleFilter(label.Name)">
+                        <label style="background-color: @label.Color" class="checkbox-label">@label.Name</label>
+                    </div>
+                }
+            </div>
+        }
+    </div>
 
     @foreach (var task in TodoItems)
     {
@@ -75,14 +78,15 @@
 
 @code {
     [Parameter] public List<TodoItemDto> TodoItems { get; set; }
-    
+
     private TodoItemDto? _specificTodoItem { get; set; }
     private bool ViewTask { get; set; }
 
     private string _selectedSortOption { get; set; }
-    
-    private string[] _selectedFilterOptions { get; set; }
-    public List<LabelDto> AllLabels { get; set; }
+
+    private List<string> _selectedFilterOptions { get; set; } = new();
+    private bool IsFilterVisible { get; set; }
+    private List<LabelDto> AllLabels { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -123,22 +127,33 @@
         {
             "due-date-ascending" => TodoItems.OrderByDescending(todoItem => todoItem.DueDate.HasValue).ThenBy(todoItem => todoItem.DueDate).ToList(),
             "due-date-descending" => TodoItems.OrderByDescending(todoItem => todoItem.DueDate).ToList(),
-            "descending" =>TodoItems.OrderByDescending(todoItem => todoItem.Title).ToList(),
+            "descending" => TodoItems.OrderByDescending(todoItem => todoItem.Title).ToList(),
             _ => await TodoItemService.GetAllTodoItemsAsync()
         };
     }
 
-    private async Task HandleFilter(ChangeEventArgs e)
+    private async Task HandleFilter(string labelName)
     {
-        TodoItems = await TodoItemService.GetAllTodoItemsAsync();
-        
-        _selectedFilterOptions = e.Value as string[] ?? [e.Value?.ToString() ?? "default"];
-        
-        if (_selectedFilterOptions.Contains("default"))
+        if (_selectedFilterOptions.Contains(labelName))
         {
-            return;
+            _selectedFilterOptions.Remove(labelName);
+        }
+        else
+        {
+            _selectedFilterOptions.Add(labelName);
         }
 
-        TodoItems = TodoItems.Where(todoItem => _selectedFilterOptions.Any(filter => todoItem.Labels.Any(label => filter.Equals(label.Name)))).ToList();
+        TodoItems = await TodoItemService.GetAllTodoItemsAsync();
+        
+        if (_selectedFilterOptions.Any())
+        {
+            TodoItems = TodoItems.Where(todoItem => _selectedFilterOptions.Any(filter => todoItem.Labels.Any(label => filter.Equals(label.Name)))).ToList();
+        }
     }
+    
+    private void ToggleFilterVisibility()
+    {
+        IsFilterVisible = !IsFilterVisible;
+    }
+
 }

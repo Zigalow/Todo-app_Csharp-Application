@@ -125,6 +125,14 @@ public class AuthService : IAuthService
         }
     }
 
+    public async Task<bool> IsEmailConfirmedAsync(string email)
+    {
+        var response = await _httpClient.GetAsync($"api/auth/isemailconfirmed?email={Uri.EscapeDataString(email)}");
+        if (!response.IsSuccessStatusCode) return false;
+
+        return await response.Content.ReadFromJsonAsync<bool>();
+    }
+
     
 
 }

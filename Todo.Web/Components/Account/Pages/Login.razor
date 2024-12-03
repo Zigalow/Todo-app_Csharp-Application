@@ -58,7 +58,7 @@
                     <a href="Account/Register">Register as a new user</a>
                 </p>
                 <p>
-                    <a href="Account/RegisterConfirmation">Resend email confirmation</a>
+                    <a @onclick="NavigateToResendConfirmation">Resend email confirmation</a>
                 </p>
             </div>
         </EditForm>
@@ -75,6 +75,8 @@
 
 @code {
     private string errorMessage = "";
+    private string successMessage = "";
+
     private bool isLoading;
 
     [SupplyParameterFromForm]
@@ -87,7 +89,15 @@
             if (isLoading) return;
             isLoading = true;
             errorMessage = "";
+            successMessage = "";
             StateHasChanged();
+
+            var isEmailConfirmed = await AuthService.IsEmailConfirmedAsync(Input.Email);
+            if (!isEmailConfirmed)
+            {
+                errorMessage = "Please confirm your email address before logging in.";
+                return;
+            }
 
             var loginRequest = new LoginRequest
             {
@@ -117,7 +127,32 @@
             StateHasChanged();
         }
     }
-
+    private async Task NavigateToResendConfirmation()
+    {
+        try 
+        {
+            errorMessage = "";
+            successMessage = "";
+            var result = await AuthService.ResendConfirmationEmailAsync(Input.Email);
+            if (result.Succeeded)
+            {
+                successMessage = "Confirmation email has been resent.";
+            }
+            else
+            {
+                errorMessage = result.Error;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An error occurred while resending the email.";
+            Console.WriteLine($"Resend confirmation error: {ex.Message}");
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
     private sealed class InputModel
     {
         [Required]

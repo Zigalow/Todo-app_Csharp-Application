@@ -32,6 +32,15 @@ public class AuthController : ControllerBase
         _emailService = emailService;
     }
 
+    [HttpGet("isemailconfirmed")]
+    public async Task<IActionResult> IsEmailConfirmed(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null) return NotFound("User not found.");
+
+        var isConfirmed = await _userManager.IsEmailConfirmedAsync(user);
+        return Ok(isConfirmed);
+    }
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterDto registerDto)
     {

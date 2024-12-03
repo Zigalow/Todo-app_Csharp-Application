@@ -10,6 +10,8 @@ public interface IAuthService
     Task<bool> IsAuthenticatedAsync();
     Task<AuthResult> ResendConfirmationEmailAsync(string email);
     string? GetUserEmail();
+    public Task<bool> IsEmailConfirmedAsync(string email);
+
 
 
 }

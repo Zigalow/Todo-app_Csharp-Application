@@ -1,0 +1,57 @@
+@page "/Project/Shared"
+@using Todo.Core.Dtos.ProjectDtos
+@using Todo.Web.Services.interfaces
+
+@inject NavigationManager NavigationManager
+@inject IProjectService ProjectService
+
+<title>SharedProjects</title>
+
+<h3>Shared with me</h3>
+
+<div class="projects-container">
+    @if (_sharedProjects == null)
+    {
+        <p class="project">loading...</p>
+    }
+    else if (!_sharedProjects.Any())
+    {
+        <p class="project">No shared project found</p>
+    }
+    else
+    {
+        @foreach (var project in _sharedProjects)
+        {
+            <div class="project" @onclick="() => NavigateToProject(project.Id)">
+                
+                <div class="project-details">
+                <p class="project-name">@project.Name</p>
+                
+                <p class="project-owner">Admin: @project.AdminName</p>
+
+                </div>
+            </div>
+        }
+    }
+
+
+</div>
+
+@code {
+    private List<ProjectDto>? _sharedProjects;
+    
+    protected override async Task OnInitializedAsync()
+    {
+
+        _sharedProjects = await ProjectService.GetSharedProjectsAsync();
+    
+    }
+
+    
+    private void NavigateToProject(int projectId)
+    {
+        Console.WriteLine($"Navigating to project {projectId}");
+        NavigationManager.NavigateTo($"/project/{projectId}");
+    }
+
+}

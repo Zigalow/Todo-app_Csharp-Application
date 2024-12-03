@@ -72,8 +72,21 @@ public class AuthService : IAuthService
 
     public async Task LogoutAsync()
     {
-        await _httpContextAccessor.HttpContext!.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        ((CustomAuthenticationStateProvider)_authenticationStateProvider).NotifyUserLogout();
+        try
+        {
+            var response = await _httpClient.PostAsync("api/auth/logout", null);
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Backend logout failed");
+            }
+
+            await _httpContextAccessor.HttpContext!.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            ((CustomAuthenticationStateProvider)_authenticationStateProvider).NotifyUserLogout();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Logout error: {ex.Message}");
+        }
     }
 
     public async Task<AuthResult> RegisterAsync(RegisterRequest request)

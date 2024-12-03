@@ -40,18 +40,7 @@ else
                      @ondragover:preventDefault>
                     <div class="todo-list-title">
                         <h5>@todoList.Name</h5>
-                        <button class="todolist-dropdown" @onclick="() => ToggleTodoListMenu(todoList)">
-                            <img src="images/menu.png" alt="Menu"/>
-                        </button>
-                        
-                        @if (CurrentTodoListMenu == todoList)
-                        {
-                            <div class="todo-list-dropdown">
-                                <button>Rename List</button>
-                                <button>Delete List</button>
-                                <button>Duplicate List</button>
-                            </div>
-                        }
+                        <img src="images/menu.png" alt=""/>
                     </div>
                     @if (todoList.TodoItems.Count != 0)
                     {
@@ -92,7 +81,9 @@ else
                                         {
                                             <div class="modifiymenu">
                                                 <button @onclick="() => SpecificTodoItemHandler(task)">Open card</button>
-                                                <button @onclick="() => ToggleLabelEditor(task)">Edit label</button>
+                                                <button @onclick="() => ToggleLabelEditor(task)">
+                                                    Edit label
+                                                </button>
                                                 <button>Add date</button>
                                                 <button>Move</button>
                                                 <button>Copy</button>
@@ -226,7 +217,6 @@ else
 
     private bool _showError = false;
     private string _errorMessage = "";
-    private TodoListDto? CurrentTodoListMenu { get; set; }
 
     /*-----BEGIN: For drag and drop-----*/
     private TodoItemDto? DraggedItem { get; set; }
@@ -523,11 +513,6 @@ else
     {
         CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
         StateHasChanged();
-    }
-
-    private void ToggleTodoListMenu(TodoListDto todoList)
-    {
-        CurrentTodoListMenu = CurrentTodoListMenu == todoList ? null : todoList;
     }
     
 }

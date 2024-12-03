@@ -34,6 +34,26 @@ public class ProjectService : IProjectService
         }
     }
 
+    public async Task<List<ProjectDto>> GetSharedProjectsAsync()
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync("api/Projects/shared");
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Failed to get shared projects. Status: {StatusCode}", response.StatusCode);
+                return new List<ProjectDto>();
+            }
+
+            return await response.Content.ReadFromJsonAsync<List<ProjectDto>>() ?? new List<ProjectDto>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get shared projects");
+            return new List<ProjectDto>();
+        }
+    }
+
     public async Task<ProjectDto?> GetProjectByIdAsync(int id)
     {
         try

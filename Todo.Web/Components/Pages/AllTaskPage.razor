@@ -9,14 +9,15 @@
 @rendermode InteractiveServer
 
 
-<h3>All Task</h3>
+<h3>All Tasks</h3>
 @if (TodoItems?.Count > 0)
 {
     <div>
         <label>Sort</label>
         <select @onchange="HandleSort">
             <option value="default">Default</option>
-            <option value="descending">A-Z Desc</option>
+            <option value="ascending">A-Z</option>
+            <option value="descending">Z-A</option>
             <option value="due-date-ascending">DueDate Asc</option>
             <option value="due-date-descending">DueDate Desc</option>
         </select>
@@ -128,6 +129,7 @@
             "due-date-ascending" => TodoItems.OrderByDescending(todoItem => todoItem.DueDate.HasValue).ThenBy(todoItem => todoItem.DueDate).ToList(),
             "due-date-descending" => TodoItems.OrderByDescending(todoItem => todoItem.DueDate).ToList(),
             "descending" => TodoItems.OrderByDescending(todoItem => todoItem.Title).ToList(),
+            "ascending" => TodoItems.OrderBy(todoItem => todoItem.Title).ToList(),
             _ => await TodoItemService.GetAllTodoItemsAsync()
         };
     }

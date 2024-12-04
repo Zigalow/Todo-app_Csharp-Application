@@ -53,6 +53,24 @@ public class UserController: ControllerBase
         return Ok(userInfo);
     }
     
+    [HttpGet("userIdFromEmail")]
+    public async Task<IActionResult> GetUserIdFromEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return BadRequest("Email is required.");
+        }
+
+        var user = await _userManager.FindByEmailAsync(email);
+    
+        if (user == null)
+        {
+            return NotFound("User not found.");
+        }
+
+        return Ok(user.Id);
+    }
+    
     [HttpPost("updatePhoneNumber")]
     public async Task<IActionResult> UpdatePhoneNumberAsync(UpdatePhoneNumberDto phoneNumberDto)
     {

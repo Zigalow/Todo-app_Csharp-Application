@@ -7,6 +7,7 @@ namespace Todo.Web.Auth;
 public interface IUserService
 {
     Task<UserInfoResponse?> GetUserInfoAsync();
+    Task<string?> GetUserIdFromEmailAsync(string email);
     Task<bool> UpdatePhoneNumberAsync(string phoneNumber);
     Task<bool> HasExternalLoginsAsync();
     Task<bool> UpdateEmailAsync(UpdateEmailDto info);

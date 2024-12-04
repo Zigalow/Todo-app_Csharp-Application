@@ -8,7 +8,7 @@ html, body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    width: 100%;
 }
 
 h5 {
@@ -23,14 +23,10 @@ h5 {
 }
 
 .todolist-dropdown-button {
-    position: absolute;
-    top: 0;
-    right: 0;
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 0px;
-    z-index: 0;
+    padding: 0;
 }
 
 .todolist-dropdown-button img {
@@ -46,8 +42,8 @@ h5 {
 
 .todo-list-dropdown {
     position: absolute;
-    left: 5pt;
-    top: 20%;
+    left: 10px;
+    top: 80%;
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -82,7 +78,7 @@ span {
     padding: 20px;
     width: 1200px;
     min-height: 500px;
-    overflow-x: auto; /* Prevent horizontal scroll */
+    overflow-x: auto;
 }
 
 .todo-list-container {

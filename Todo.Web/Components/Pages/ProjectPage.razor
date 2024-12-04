@@ -48,9 +48,7 @@ else
                             @if (CurrentDropdownMenu == todoList)
                             {
                                 <div class="todo-list-dropdown">
-                                    <button>View list</button>
-                                    <button>Share list</button>
-                                    <button @onclick="() => DeleteTodoList(todoList.Id)">Delete todo-list</button>
+                                    <button @onclick="() => DeleteTodoList(todoList.Id)">Delete Project</button>
                                 </div>
                             }   
                         </div>

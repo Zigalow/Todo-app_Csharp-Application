@@ -25,23 +25,25 @@
     {
         @foreach (var project in _projects)
         {
-            <div class="project" @onclick="() => NavigateToProject(project.Id)">
-                <p class="project-name">@project.Name</p>
-                <div class="project-dropdown-menu" @onclick:stopPropagation>
-                    
-                    <button class="project-dropdown-button" @onclick="() => DropdownMenu(project)">
-                        <img src="images/menu.png" alt=""/>
-                    </button>
+                <div class="project-container" @onclick="() => NavigateToProject(project.Id)">
+                    <div class="project-name">
+                        <p>@project.Name</p>
+                    </div>
+
+                    <div class="project-dropdown-menu" @onclick:stopPropagation>
+                        <button class="project-dropdown-button" @onclick="() => DropdownMenu(project)">
+                            <img src="images/menu2.png" alt=""/>
+                        </button>
+                        
                         @if (CurrentDropdownMenu == project)
                         {
                         <div class="project-dropdown">
-                            <button>View project</button>
                                <button>Share project</button>
                             <button @onclick="() => DeleteProjectAsync(project.Id)">Delete todo-list</button>
                         </div>
                         } 
-</div>
-            </div>
+                    </div>
+                </div>
         }
     }
     @if (IsAddingProject)

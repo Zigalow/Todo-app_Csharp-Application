@@ -55,6 +55,26 @@ public class UserService: IUserService
         }
     }
     
+    public async Task<string?> GetUserEmailFromNameAsync(string name)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"api/user/userEmailFromName?name={name}");
+        
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Failed to get user email. Status: {response.StatusCode}");
+                return null;
+            }
+        
+            return await response.Content.ReadAsStringAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error getting user email from name: {ex.Message}");
+            return null;
+        }
+    }
     public async Task<bool> UpdatePhoneNumberAsync(string phoneNumber)
     {
         try

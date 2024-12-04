@@ -14,9 +14,8 @@
     <div class="share-container" @onclick:stopPropagation>
         <div class="share-header">
             <h3>Share '@Project.Name'</h3>
-               
         </div>
-        <div>
+        <div class="share-area">
             <input type="text" @bind="_collaboratorEmail" placeholder="Add people"/>
             <select @bind="_selectedRole">
                 <option value="@ProjectRole.ProjectOwner">Project Owner</option>
@@ -26,8 +25,9 @@
             
             
             <button class="share-button" @onclick="HandleShare">Share</button>
-            
-            
+        </div>
+        
+        <div>   
             @if (_showError)
             {
                 <b class="error-message">

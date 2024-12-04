@@ -3,6 +3,11 @@ html, body {
     width: 100%;
     overflow-x: hidden;
 }
+.project-title{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
 .todo-list-title {
     display: flex;

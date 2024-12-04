@@ -17,7 +17,7 @@
             <h3>Share '@Project.Name'</h3>
         </div>
         <div class="share-area">
-            <input type="text" @bind-Value="_collaboratorEmail" placeholder="Add people"/>
+            <input type="text" @bind="_collaboratorEmail" placeholder="Add people"/>
             
             <select @bind="_selectedRole">
                 <option value="@ProjectRole.ProjectOwner">Project Owner</option>
@@ -28,16 +28,22 @@
             
             <button class="share-button" @onclick="HandleShare">Share</button>
         </div>
-        
+        @if (_showError)
+        {
+            <b class="error-message">
+                @_errorMessage
+            </b>
+        }
         <div>   
-            @if (_showError)
+            @if (ProjectCollaborators == null)
             {
-                <b class="error-message">
-                    @_errorMessage
-                </b>
+                <p>Loading...</p>
             }
-            
-            @if (ProjectCollaborators != null && ProjectCollaborators.Any() )
+            else if (!ProjectCollaborators.Any())
+            {
+                <p>No collaborators found</p>
+            }
+            else
             {
                 <div>
                     <p class="shared-with-text">People with access</p>
@@ -58,10 +64,6 @@
                         }
                     </div>
                 </div>
-            }
-            else
-            {
-                <p>No collaborators</p>
             }
         </div>
         

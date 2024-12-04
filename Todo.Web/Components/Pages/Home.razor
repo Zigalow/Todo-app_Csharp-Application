@@ -134,20 +134,15 @@
     private async Task HandleViewSharedProjectComponent(bool value)
     {
         _viewSharedProjectComponent = value;
-        /*if (value == false)
+        if (value == false)
         {
             _selectedProject = null;
-        }*/
+        }
         
     }
     
     private void ToggleShareProject(ProjectDto project)
     {
-        if (project == null)
-        {
-            return;
-        }
-
         _selectedProject = project;
         _viewSharedProjectComponent = true;
     }

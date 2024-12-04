@@ -1,4 +1,5 @@
-﻿@page "/Account/RegisterConfirmation"
+﻿@rendermode InteractiveServer
+@page "/Account/RegisterConfirmation"
 @using Todo.Web.Auth
 @inject NavigationManager NavigationManager
 @inject IAuthService AuthService
@@ -12,7 +13,7 @@
 
     <div class="form-group">
         <label for="emailInput">Email Address</label>
-        <input id="emailInput" class="form-control" @bind="Email" placeholder="Enter your email" />
+        <input id="emailInput" class="form-control" @bind="Email" placeholder="Enter your email"/>
     </div>
 
     <button @onclick="() => ResendConfirmationEmail()">Resend Email</button>
@@ -55,6 +56,7 @@
                 ErrorMessage = result.Error;
                 Message = null;
             }
+
             Console.WriteLine($"Attempting to resend email to: {Email}");
         }
         catch (Exception ex)
@@ -64,4 +66,5 @@
             Message = null;
         }
     }
+
 }

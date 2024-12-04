@@ -1,0 +1,115 @@
+@using Microsoft.AspNetCore.Authorization
+@using Todo.Core.Dtos.ProjectCollaboratorDtos
+@using Todo.Core.Dtos.ProjectDtos
+@using Todo.Core.Entities
+@using Todo.Web.Auth
+@using Todo.Web.Services.interfaces
+
+@inject IProjectCollaboratorService ProjectCollaboratorService
+@inject IUserService UserService
+
+@attribute [Authorize]
+
+<div class="page-overlay @(_isVisible ? "visible" : "")" @onclick="CloseView">
+    <div class="share-container" @onclick:stopPropagation>
+        <div class="share-header">
+            <h3>Share '@Project.Name.'</h3>
+        
+            <input type="text" @bind="_collaboratorEmail" placeholder="Add people"/>
+            <select @bind="_selectedRole">
+                <option value="@ProjectRole.ProjectOwner">Project Owner</option>
+                <option value="@ProjectRole.ProjectMember">Project Member</option>
+                <option value="@ProjectRole.Viewer">Viewer</option>
+            </select>
+            
+            @if (_showError)
+            {
+                <b class="error-message">
+                    @_errorMessage
+                </b>
+            }
+            
+            <button @onclick="HandleShare">Share</button>
+        </div>
+        
+    </div>
+
+</div>
+
+
+
+@code {
+    [Parameter] public ProjectDto Project { get; set; }
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    private string _collaboratorEmail = "";
+    private ProjectRole _selectedRole = ProjectRole.Viewer;
+    
+    private bool _showError = false;
+    private string _errorMessage = "";
+    
+    private bool _isVisible;
+    
+    protected override void OnParametersSet()
+    {
+        _isVisible = IsVisible;
+        if (Project != null)
+        {
+            
+        }
+        else
+        {
+           
+        }
+    }
+    private async Task CloseView()
+    {
+        _isVisible = false;
+        
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+    
+
+    private async Task HandleShare()
+    {
+        
+        if (string.IsNullOrEmpty(_collaboratorEmail) || string.IsNullOrWhiteSpace(_collaboratorEmail))
+        {
+            await ShowErrorMessage("Failed to share project. Please try again.");
+            return;
+        }
+        
+        var userId = await UserService.GetUserIdFromEmailAsync(_collaboratorEmail);
+        if (userId == null)
+        {
+            await ShowErrorMessage("Failed to find user. Please try again.");
+            return;
+        }
+
+        var addProjectCollaboratorDto = new AddProjectCollaboratorDto()
+        {
+            UserId = userId,
+            Role = _selectedRole,
+        };
+
+        var result = await ProjectCollaboratorService.AddCollaboratorToProjectAsync(Project.Id, addProjectCollaboratorDto);
+        if (result)
+        {
+            await CloseView();
+            return;
+        }
+
+        await ShowErrorMessage("Failed to share project. Please try again.");
+    }
+    
+    private async Task ShowErrorMessage(string message)
+    {
+        _errorMessage = message;
+        _showError = true;
+
+        await Task.Delay(1000);
+        _errorMessage = "";
+        _showError = false;
+    }
+    
+}

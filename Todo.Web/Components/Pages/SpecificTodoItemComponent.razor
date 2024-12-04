@@ -24,7 +24,7 @@
 
             <div class="todo-item-info">
                 <div class="description-section">
-                    <h3>Description</h3>
+                    <h5>Description</h5>
                     @if (_isEditingDescription)
                     {
                         <textarea class="description-input" @bind="TodoItem.Description"
@@ -42,7 +42,7 @@
                 </div>
 
                 <div class="labels-section">
-                    <h3>Labels</h3>
+                    <h5>Labels</h5>
                     <div class="labels-container">
                         @foreach (var label in TodoItem.Labels)
                         {
@@ -54,7 +54,7 @@
                 </div>
 
                 <div class="details-section">
-                    <h3>Details</h3>
+                    <h5>Details</h5>
                     <div class="detail-container">
                         <span class="detail-label">Priority:</span>
                         <select @bind="Priority">
@@ -127,13 +127,6 @@
             _editedTitle = string.Empty;
             _editedDescription = string.Empty;
         }
-    }
-
-    private async Task CloseView()
-    {
-        _isVisible = false;
-        
-        await IsVisibleChanged.InvokeAsync(false);
     }
 
     private async Task SaveTitle()
@@ -220,5 +213,12 @@
             await OnTodoItemDeleted.InvokeAsync();
             await CloseView();
         }
+    }
+    
+    private async Task CloseView()
+    {
+        _isVisible = false;
+        
+        await IsVisibleChanged.InvokeAsync(false);
     }
 }

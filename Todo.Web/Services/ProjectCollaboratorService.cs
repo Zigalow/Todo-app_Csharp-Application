@@ -19,7 +19,7 @@ public class ProjectCollaboratorService : IProjectCollaboratorService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"api/projects/{projectId}/collaborators");
+            var response = await _httpClient.GetAsync($"api/projects/{projectId}/collaborators/collaboratorsFromProject");
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError("Failed to get collaborators from project {ProjectId}. Status: {StatusCode}",

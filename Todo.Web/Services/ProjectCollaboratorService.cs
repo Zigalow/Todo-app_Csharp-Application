@@ -9,9 +9,9 @@ public class ProjectCollaboratorService : IProjectCollaboratorService
     private readonly HttpClient _httpClient;
     private readonly ILogger<ProjectCollaborator> _logger;
 
-    public ProjectCollaboratorService(HttpClient httpClient, ILogger<ProjectCollaborator> logger)
+    public ProjectCollaboratorService(IHttpClientFactory httpClientFactory, ILogger<ProjectCollaborator> logger)
     {
-        _httpClient = httpClient;
+        _httpClient = httpClientFactory.CreateClient("TodoApi");
         _logger = logger;
     }
 

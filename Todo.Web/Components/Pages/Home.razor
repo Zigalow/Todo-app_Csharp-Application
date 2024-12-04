@@ -2,7 +2,9 @@
 @using Microsoft.AspNetCore.Authorization
 @using Todo.Core.Dtos.ProjectDtos
 @using Todo.Web.Services.interfaces
+
 @rendermode InteractiveServer
+
 @inject NavigationManager NavigationManager
 @inject IProjectService ProjectService
 
@@ -25,8 +27,11 @@
     {
         @foreach (var project in _projects)
         {
-            <div class="project" @onclick="() => NavigateToProject(project.Id)">
-                <p class="project-name">@project.Name</p>
+            <div>
+                <div class="project" @onclick="() => NavigateToProject(project.Id)">
+                    <p class="project-name">@project.Name</p>
+                </div>
+                <button @onclick="()=>ToggleShareProject(project)">Share @project.Name</button>
             </div>
         }
     }
@@ -51,6 +56,14 @@
 </b>
 }
 
+@if (_selectedProject != null)
+{
+    <ShareProjectComponent
+        Project="@_selectedProject"
+        IsVisible="@_viewSharedProjectComponent"
+        IsVisibleChanged="@HandleViewSharedProjectComponent"/>
+}
+
 @code {
     [Parameter] public bool IsAddingProject { get; set; }
     private string _newProjectName = ""; // Used too name the new project created
@@ -58,6 +71,9 @@
     private bool _showError = false;
     private string _errorMessage = "";
     
+    private bool _viewSharedProjectComponent { get; set; } = false;
+    private ProjectDto? _selectedProject;
+
     // Get all the project for the given user
     protected override async Task OnInitializedAsync()
     {
@@ -113,6 +129,27 @@
         await Task.Delay(1000);
         _errorMessage = "";
         _showError = false;
+    }
+    
+    private async Task HandleViewSharedProjectComponent(bool value)
+    {
+        _viewSharedProjectComponent = value;
+        /*if (value == false)
+        {
+            _selectedProject = null;
+        }*/
+        
+    }
+    
+    private void ToggleShareProject(ProjectDto project)
+    {
+        if (project == null)
+        {
+            return;
+        }
+
+        _selectedProject = project;
+        _viewSharedProjectComponent = true;
     }
     
 }

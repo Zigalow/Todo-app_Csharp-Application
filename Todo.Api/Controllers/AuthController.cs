@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Todo.Api.Interfaces;
+using Todo.Api.Services;
 using Todo.Core.Dtos.AuthDto;
 using Todo.Core.Entities;
 
@@ -18,14 +19,17 @@ public class AuthController : ControllerBase
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IConfiguration _configuration;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly EmailService _emailService;
+    
 
     public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
-        IConfiguration configuration, IUnitOfWork unitOfWork)
+        IConfiguration configuration, IUnitOfWork unitOfWork, EmailService emailService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _configuration = configuration;
         _unitOfWork = unitOfWork;
+        _emailService = emailService;
     }
 
     [HttpPost("register")]
@@ -60,18 +64,96 @@ public class AuthController : ControllerBase
 
         var result = await _userManager.CreateAsync(user, registerDto.Password);
         Console.WriteLine("Result " + result.Succeeded);
+
         if (!result.Succeeded)
         {
             Console.WriteLine(result.Errors.FirstOrDefault()?.Description);
             return BadRequest(result.Errors);
         }
+        
+        var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var confirmationLink = Url.Action(
+            "ConfirmEmail",
+            "Auth",
+            new { userId = user.Id, token = emailConfirmationToken },
+            Request.Scheme
+        );
 
-        //await _userManager.AddToRoleAsync(user, "User");
-        Console.WriteLine("User Created Token generate");
+        var emailContent = $@"
+            <h1>Welcome to Taskify!</h1>
+            <p>Please confirm your registration by clicking the link below:</p>
+            <a href='{confirmationLink}'>Confirm your email</a>";
+
+        await SendEmailWithExceptionHandling(user.Email, emailContent);
+
         var token = await GenerateJwtToken(user);
+        return Ok(new { Token = token, Message = "Registration successful! A confirmation email has been sent." });
 
-        return Ok(new { Token = token });
     }
+
+    [HttpPost("resend-confirmation-email")]
+public async Task<IActionResult> ResendConfirmationEmail(string email)
+{
+    var user = await _userManager.FindByEmailAsync(email);
+    
+    if (user == null)
+    {
+        return BadRequest("No user found with the provided email.");
+    }
+
+    if (await _userManager.IsEmailConfirmedAsync(user))
+    {
+        return BadRequest("This email has already been confirmed.");
+    }
+
+    var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var confirmationLink = Url.Action(
+            "ConfirmEmail",
+            "Auth",
+            new { userId = user.Id, token = emailConfirmationToken },
+            Request.Scheme
+        );
+
+        var emailContent = $@"
+            <h1>Welcome to Taskify!</h1>
+            <p>You have requested to resend the confirmation e-mail</p>
+            <p>Please confirm your registration by clicking the link below:</p>
+            <a href='{confirmationLink}'>Confirm your email</a>";
+
+        await SendEmailWithExceptionHandling(user.Email, emailContent);
+
+        return Ok("A new confirmation email has been sent.");
+}
+private async Task SendEmailWithExceptionHandling(string recipientEmail, string emailContent)
+    {
+        try
+        {
+            await _emailService.SendConfirmationEmail(recipientEmail, emailContent);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to send email to {recipientEmail}: {ex.Message}");
+            throw new InvalidOperationException("An error occurred while sending the email.", ex);
+        }
+    }
+    [HttpGet("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail(string userId, string token)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return BadRequest("Invalid user ID");
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (result.Succeeded)
+        {
+            return Ok("Email confirmed successfully!");
+        }
+
+        return BadRequest("Email confirmation failed.");
+    }
+
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginDto loginDto)
@@ -121,7 +203,6 @@ public class AuthController : ControllerBase
             new(ClaimTypes.Name, user.UserName),
         };
 
-        // Add roles to claims
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var key = new SymmetricSecurityKey(

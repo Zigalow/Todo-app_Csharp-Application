@@ -13,15 +13,17 @@
 <div class="page-overlay @(_isVisible ? "visible" : "")" @onclick="CloseView">
     <div class="share-container" @onclick:stopPropagation>
         <div class="share-header">
-            <h3>Share '@Project.Name.'</h3>
-        
+            <h3>Share '@Project.Name'</h3>
+               
+        </div>
+        <div>
             <input type="text" @bind="_collaboratorEmail" placeholder="Add people"/>
             <select @bind="_selectedRole">
                 <option value="@ProjectRole.ProjectOwner">Project Owner</option>
                 <option value="@ProjectRole.ProjectMember">Project Member</option>
                 <option value="@ProjectRole.Viewer">Viewer</option>
             </select>
-            
+
             @if (_showError)
             {
                 <b class="error-message">
@@ -29,6 +31,34 @@
                 </b>
             }
             
+            @if (ProjectCollaborators != null && ProjectCollaborators.Any() )
+            {
+                <div>
+                    <p>People with access</p>
+                    <div class="shared-with">
+                        @foreach (var info in Info)
+                        {
+                            <div class="user-info">
+                            <p>@info.Key</p>
+                            
+                            <select @onchange="(e) => UpdateCollaborator(info.Key, e)" value="@info.Value">
+                                <option value="@ProjectRole.ProjectOwner">Project Owner</option>
+                                <option value="@ProjectRole.ProjectMember">Project Member</option>
+                                <option value="@ProjectRole.Viewer">Viewer</option>
+                            </select>
+                            
+                            <button @onclick="()=>DeleteCollaborator(info.Key)">Delete</button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p>No collaborators</p>
+            }
+        </div>
+        <div>
             <button @onclick="HandleShare">Share</button>
         </div>
         
@@ -44,28 +74,36 @@
     [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
     private string _collaboratorEmail = "";
     private ProjectRole _selectedRole = ProjectRole.Viewer;
+
+    private List<ProjectCollaboratorDto>? ProjectCollaborators { get; set; }
+    private Dictionary<string, ProjectRole> Info = new();
     
     private bool _showError = false;
     private string _errorMessage = "";
     
     private bool _isVisible;
     
-    protected override void OnParametersSet()
+    protected async override void OnParametersSet()
     {
-        _isVisible = IsVisible;
-        if (Project != null)
+        try
         {
-            
+            _isVisible = IsVisible;
+            ProjectCollaborators = await ProjectCollaboratorService.GetCollaboratorsFromProjectAsync(Project.Id);
+            // Add logging
+            Console.WriteLine($"Fetched Collaborators: {ProjectCollaborators?.Count ?? 0}");
+            await UpdateCollaboratorsEmail();
+            StateHasChanged();
         }
-        else
+        catch (Exception e)
         {
-           
+            await ShowErrorMessage("Failed to get collaborators. Please try again.");   
         }
     }
     private async Task CloseView()
     {
         _isVisible = false;
-        
+        //_collaboratorsEmail = [];
+        Info.Clear();
         await IsVisibleChanged.InvokeAsync(false);
     }
     
@@ -110,6 +148,129 @@
         await Task.Delay(1000);
         _errorMessage = "";
         _showError = false;
+    }
+
+    private async Task OnCollaboratorRoleChanged(string? email, ChangeEventArgs e)
+    {
+        if (email == null)
+        {
+            return;
+        }
+        
+        var userId = await UserService.GetUserIdFromEmailAsync(email);
+        if (userId == null)
+        {
+            Console.WriteLine("UserId not found");
+            return;   
+        }
+
+        // Parse the selected role from the event
+        if (e.Value != null)
+        {
+            var selectedRole = (ProjectRole)Enum.Parse(typeof(ProjectRole), e.Value.ToString() ?? throw new InvalidOperationException());
+
+            var updateProjectCollaboratorDto = new UpdateProjectCollaboratorDto()
+            {
+                Role = selectedRole
+            };
+
+            var success = await ProjectCollaboratorService.UpdateCollaboratorFromProjectAsync(Project.Id, userId, updateProjectCollaboratorDto);
+            if (success)
+            {
+                ProjectCollaborators = await ProjectCollaboratorService.GetCollaboratorsFromProjectAsync(Project.Id);
+                await UpdateCollaboratorsEmail();
+                //StateHasChanged(); // Uncomment if needed
+            }
+            else
+            {
+                await ShowErrorMessage($"Failed to update Collaborator");
+            }
+        }
+    }
+    
+    private async Task UpdateCollaborator(string? email, ChangeEventArgs e)
+    {
+        Console.WriteLine($"Selected Role: {e.Value}");
+
+        if (email == null)
+        {
+            return;
+        }
+        
+        var userId = await UserService.GetUserIdFromEmailAsync(email);
+        if (userId == null)
+        {
+            Console.WriteLine("UserId not found");
+            return;   
+        }
+
+        // Parse the selected role from the event
+        if (e.Value != null)
+        {
+            var selectedRole = (ProjectRole)Enum.Parse(typeof(ProjectRole), e.Value.ToString() ?? throw new InvalidOperationException());
+
+            var updateProjectCollaboratorDto = new UpdateProjectCollaboratorDto()
+            {
+                Role = selectedRole
+            };
+
+            var success = await ProjectCollaboratorService.UpdateCollaboratorFromProjectAsync(Project.Id, userId, updateProjectCollaboratorDto);
+            if (success)
+            {
+                ProjectCollaborators = await ProjectCollaboratorService.GetCollaboratorsFromProjectAsync(Project.Id);
+                await UpdateCollaboratorsEmail();
+                //StateHasChanged(); // Uncomment if needed
+            }
+            else
+            {
+                await ShowErrorMessage($"Failed to update Collaborator");
+            }
+        }
+    }
+    
+    private async Task DeleteCollaborator(string? email)
+    {
+        if (email == null)
+        {
+            Console.WriteLine("email not found");
+         return;   
+        }
+        var userId = await UserService.GetUserIdFromEmailAsync(email);
+        if (userId == null)
+        {
+            Console.WriteLine("UserId not found");
+            return;
+        }
+        var success = await ProjectCollaboratorService.RemoveCollaboratorFromProjectAsync(Project.Id, userId);
+        if (success)
+        {
+            ProjectCollaborators = await ProjectCollaboratorService.GetCollaboratorsFromProjectAsync(Project.Id);
+            await UpdateCollaboratorsEmail();
+            //StateHasChanged();
+        }
+        else
+        {
+            await ShowErrorMessage("Failed to delete Collaborator");
+        }
+        
+    }
+
+    private async Task UpdateCollaboratorsEmail()
+    {
+        //_collaboratorsEmail.Clear();
+        Info.Clear();
+        if (ProjectCollaborators != null && ProjectCollaborators.Any())
+        {
+            foreach (var collaborator in ProjectCollaborators)
+            {
+                var email = await UserService.GetUserEmailFromNameAsync(collaborator.Name);
+                if (!string.IsNullOrEmpty(email))
+                {
+                    Info.Add(email, collaborator.Role);
+                    //_collaboratorsEmail.Add(email);
+                }
+            }
+        }
     }
     
 }

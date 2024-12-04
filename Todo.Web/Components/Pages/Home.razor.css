@@ -56,3 +56,55 @@ a .project-name {
 .error-message{
     color:red;
 }
+
+.project-dropdown-menu{
+    position: relative;
+}
+
+.project-dropdown-button{
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 0px;
+    z-index: 0;
+}
+
+.project-dropdown-button img{
+    width: 30px;
+    height: 30px;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+.project-dropdown-button img:hover {
+    opacity: 1;
+}
+
+.todo-list-dropdown{
+    position: absolute;
+    left: 5pt;
+    top: 20%;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgb(255, 255, 255);
+    min-width: 200px;
+}
+.project-dropdown button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    background: white;
+    border: none;
+    cursor: pointer;
+}
+
+.project-dropdown button:hover {
+    background-color: #f0f0f0;
+}

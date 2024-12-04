@@ -1,7 +1,11 @@
+@using Microsoft.AspNetCore.Authorization
 @using Todo.Core.Dtos.TodoItemDtos
 @using Todo.Core.Entities
 @using Todo.Web.Services.interfaces
 @inject ITodoItemService TodoItemService
+
+
+@attribute [Authorize]
 
 @*div for the outter *@
 <div class="page-overlay @(_isVisible ? "visible" : "")" @onclick="CloseView">

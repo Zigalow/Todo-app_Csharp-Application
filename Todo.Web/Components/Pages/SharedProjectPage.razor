@@ -1,10 +1,14 @@
 @page "/Project/Shared"
+@using Microsoft.AspNetCore.Authorization
 @using Todo.Core.Dtos.ProjectDtos
 @using Todo.Web.Services.interfaces
 
 @inject NavigationManager NavigationManager
 @inject IProjectService ProjectService
 
+@rendermode InteractiveServer
+
+@attribute [Authorize]
 <title>SharedProjects</title>
 
 <h3>Shared with me</h3>

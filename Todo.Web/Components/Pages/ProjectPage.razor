@@ -1,4 +1,5 @@
 @page "/project/{projectId:int}"
+@using Microsoft.AspNetCore.Authorization
 @using Todo.Core.Dtos.LabelDtos
 @using Todo.Core.Dtos.ProjectDtos
 @using Todo.Core.Dtos.TodoItemDtos
@@ -11,6 +12,8 @@
 @inject ILabelService LabelService
 
 @rendermode InteractiveServer
+
+@attribute [Authorize]
 
 @if (CurrentProject == null)
 {

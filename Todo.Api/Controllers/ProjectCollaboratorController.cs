@@ -21,7 +21,7 @@ public class ProjectCollaboratorController : BaseApiController
         _authorizationRepository = authorizationRepository;
     }
 
-    [HttpGet]
+    [HttpGet("collaboratorsFromProject")]
     public async Task<IActionResult> GetCollaboratorsFromProject(int projectId)
     {
         if (!ModelState.IsValid)

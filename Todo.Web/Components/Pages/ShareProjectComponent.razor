@@ -23,7 +23,11 @@
                 <option value="@ProjectRole.ProjectMember">Project Member</option>
                 <option value="@ProjectRole.Viewer">Viewer</option>
             </select>
-
+            
+            
+            <button class="share-button" @onclick="HandleShare">Share</button>
+            
+            
             @if (_showError)
             {
                 <b class="error-message">
@@ -34,20 +38,20 @@
             @if (ProjectCollaborators != null && ProjectCollaborators.Any() )
             {
                 <div>
-                    <p>People with access</p>
+                    <p class="shared-with-text">People with access</p>
                     <div class="shared-with">
                         @foreach (var info in Info)
                         {
                             <div class="user-info">
-                            <p>@info.Key</p>
-                            
-                            <select @onchange="(e) => UpdateCollaborator(info.Key, e)" value="@info.Value">
-                                <option value="@ProjectRole.ProjectOwner">Project Owner</option>
-                                <option value="@ProjectRole.ProjectMember">Project Member</option>
-                                <option value="@ProjectRole.Viewer">Viewer</option>
-                            </select>
-                            
-                            <button @onclick="()=>DeleteCollaborator(info.Key)">Delete</button>
+                                <p class="user-info-text">@info.Key</p>
+                                
+                                <select class="user-info-text"  @onchange="(e) => UpdateCollaborator(info.Key, e)" value="@info.Value">
+                                    <option value="@ProjectRole.ProjectOwner">Project Owner</option>
+                                    <option value="@ProjectRole.ProjectMember">Project Member</option>
+                                    <option value="@ProjectRole.Viewer">Viewer</option>
+                                </select>
+                                
+                                <button class="delete-button" @onclick="()=>DeleteCollaborator(info.Key)">Delete</button>
                             </div>
                         }
                     </div>
@@ -57,9 +61,6 @@
             {
                 <p>No collaborators</p>
             }
-        </div>
-        <div>
-            <button @onclick="HandleShare">Share</button>
         </div>
         
     </div>

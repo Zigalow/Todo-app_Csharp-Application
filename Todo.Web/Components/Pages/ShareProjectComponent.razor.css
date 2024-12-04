@@ -49,5 +49,38 @@
 .user-info{
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    /*align-items: flex-start;*/
+    align-items: center;
+    background-color: #f6f6f6;
+    margin-bottom: 1.2%;
+    text-align: center;
+}
+
+.user-info-text {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    text-align: center;
+}
+.shared-with-text{
+    display: flex;
+    font-weight: bold;
+}
+
+.share-button{
+    background-color: #1B6EC2;
+    color: white;
+    border-radius: 4px;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+    border-radius: 4px;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
 }

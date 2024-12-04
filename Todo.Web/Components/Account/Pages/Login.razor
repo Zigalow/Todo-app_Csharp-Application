@@ -58,7 +58,7 @@
                     <a href="Account/Register">Register as a new user</a>
                 </p>
                 <p>
-                    <a @onclick="NavigateToResendConfirmation">Resend email confirmation</a>
+                    <a href="Account/RegisterConfirmation">Resend confirmation email</a>
                 </p>
             </div>
         </EditForm>
@@ -127,32 +127,7 @@
             StateHasChanged();
         }
     }
-    private async Task NavigateToResendConfirmation()
-    {
-        try 
-        {
-            errorMessage = "";
-            successMessage = "";
-            var result = await AuthService.ResendConfirmationEmailAsync(Input.Email);
-            if (result.Succeeded)
-            {
-                successMessage = "Confirmation email has been resent.";
-            }
-            else
-            {
-                errorMessage = result.Error;
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = "An error occurred while resending the email.";
-            Console.WriteLine($"Resend confirmation error: {ex.Message}");
-        }
-        finally
-        {
-            StateHasChanged();
-        }
-    }
+    
     private sealed class InputModel
     {
         [Required]

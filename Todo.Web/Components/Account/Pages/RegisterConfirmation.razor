@@ -15,7 +15,7 @@
         <input id="emailInput" class="form-control" @bind="Email" placeholder="Enter your email" />
     </div>
 
-    <button class="btn btn-primary" @onclick="ResendConfirmationEmail">Resend Email</button>
+    <button @onclick="() => ResendConfirmationEmail()">Resend Email</button>
 
     @if (!string.IsNullOrWhiteSpace(Message))
     {
@@ -55,6 +55,7 @@
                 ErrorMessage = result.Error;
                 Message = null;
             }
+            Console.WriteLine($"Attempting to resend email to: {Email}");
         }
         catch (Exception ex)
         {

@@ -101,8 +101,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("resend-confirmation-email")]
-public async Task<IActionResult> ResendConfirmationEmail(string email)
+public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailRequest request)
 {
+    var email = request.Email;
     var user = await _userManager.FindByEmailAsync(email);
     
     if (user == null)

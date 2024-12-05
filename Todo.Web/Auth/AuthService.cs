@@ -1,5 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -121,7 +123,8 @@ public class AuthService : IAuthService
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("api/auth/resend-confirmation-email", new { email });
+            var response = await _httpClient.PostAsJsonAsync("api/auth/resend-confirmation-email", new { Email = email });
+
 
             if (response.IsSuccessStatusCode)
             {

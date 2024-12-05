@@ -9,9 +9,12 @@ using Todo.Api.Data;
 using Todo.Api.Interfaces;
 using Todo.Api.Repositories;
 using Todo.Api.Repositories.Interfaces;
+using Todo.Api.Services;
 using Todo.Core.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddTransient<EmailService>();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

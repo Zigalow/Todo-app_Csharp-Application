@@ -40,8 +40,21 @@ else
                      @ondragover:preventDefault>
                     <div class="todo-list-title">
                         <h5>@todoList.Name</h5>
-                        <img src="images/menu.png" alt=""/>
+                        
+                        <div class="todolist-dropdown" @onclick:stopPropagation>
+                            <button class="todolist-dropdown-button" @onclick="() => ToggleDropdownMenu(todoList)">
+                                <img src="images/menu.png" alt=""/>
+                            </button>
+                            @if (CurrentDropdownMenu == todoList)
+                            {
+                                <div class="todo-list-dropdown">
+                                    <button @onclick="() => DeleteTodoList(todoList.Id)">Delete Todo-list</button>
+                                </div>
+                            }   
+                        </div>
                     </div>
+
+
                     @if (todoList.TodoItems.Count != 0)
                     {
                         @foreach (var task in todoList.TodoItems)
@@ -214,6 +227,7 @@ else
 
     private bool _showError = false;
     private string _errorMessage = "";
+    private TodoListDto? CurrentDropdownMenu { get; set; }
 
     /*-----BEGIN: For drag and drop-----*/
     private TodoItemDto? DraggedItem { get; set; }
@@ -512,4 +526,23 @@ else
         StateHasChanged();
     }
     
+    private void ToggleDropdownMenu(TodoListDto todoList)
+    {
+    CurrentDropdownMenu = CurrentDropdownMenu == todoList ? null : todoList;
+    }
+
+    private async Task DeleteTodoList(int todoListId)
+{
+    var isDeleted = await TodoListService.DeleteTodoListAsync(todoListId);
+    if (isDeleted)
+    {
+        Console.WriteLine($"Deleted TodoList with ID: {todoListId}");
+        CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId); // Refresh project data
+    }
+    else
+    {
+        await ShowErrorMessage("Failed to delete TodoList. Please try again.");
+    }
+}
+
 }

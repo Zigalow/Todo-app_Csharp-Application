@@ -8,7 +8,7 @@ html, body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    width: 100%;
 }
 
 h5 {
@@ -18,11 +18,53 @@ h5 {
     cursor: pointer;
 }
 
-.todo-list-title img {
-    width: 26px;
-    height: 26px;
+.todolist-dropdown {
+    position: relative;
+}
+
+.todolist-dropdown-button {
+    background: transparent;
+    border: none;
     cursor: pointer;
-    grid-column: 2;
+    padding: 0;
+}
+
+.todolist-dropdown-button img {
+    width: 30px;
+    height: 30px;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+.todolist-dropdown-button img:hover {
+    opacity: 1;
+}
+
+.todo-list-dropdown {
+    position: absolute;
+    left: 10px;
+    top: 80%;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-width: 200px;
+}
+
+.todo-list-dropdown button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.todo-list-dropdown button:hover {
+    background-color: #f0f0f0;
 }
 
 span {
@@ -36,7 +78,7 @@ span {
     padding: 20px;
     width: 1500px;
     min-height: 500px;
-    overflow-x: auto; /* Prevent horizontal scroll */
+    overflow-x: auto;
     justify-content: flex-start;
 }
 

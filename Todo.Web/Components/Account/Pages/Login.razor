@@ -89,15 +89,7 @@
             if (isLoading) return;
             isLoading = true;
             errorMessage = "";
-            successMessage = "";
             StateHasChanged();
-
-            var isEmailConfirmed = await AuthService.IsEmailConfirmedAsync(Input.Email);
-            if (!isEmailConfirmed)
-            {
-                errorMessage = "Please confirm your email address before logging in.";
-                return;
-            }
 
             var loginRequest = new LoginRequest
             {

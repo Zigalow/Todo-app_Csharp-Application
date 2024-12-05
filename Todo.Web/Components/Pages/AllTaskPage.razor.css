@@ -1,0 +1,45 @@
+.task-container {
+    background-color: white;
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.task-container:hover {
+    stroke: #000000;
+    background-color: #ece6e6;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.task-label {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    margin-bottom: 8px;
+    color: white;
+}
+
+.checkbox-label{
+    display: inline-block;
+    border-radius: 4px;
+    padding: 2px 8px;
+    color: white;
+}
+
+.checkbox{
+    display: inline-block;
+    margin: 8px;
+}
+.filter-button{
+    display: inline-block;
+    border-radius: 4px;
+    color: white;
+    background-color: #1B6EC2;
+}
+
+span{
+    font-weight: bold;
+}

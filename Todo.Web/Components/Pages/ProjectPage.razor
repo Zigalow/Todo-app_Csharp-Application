@@ -7,9 +7,11 @@
 @using Todo.Web.Services.interfaces
 
 @inject IProjectService ProjectService
+@inject IProjectCollaboratorService ProjectCollaboratorService
 @inject ITodoListService TodoListService
 @inject ITodoItemService TodoItemService
 @inject ILabelService LabelService
+@inject NavigationManager NavigationManager
 
 @rendermode InteractiveServer
 
@@ -24,7 +26,7 @@ else
     <title>@CurrentProject.Name</title>
     <div class="project-title">
         <h1>@CurrentProject.Name</h1>
-        <img src="images/menu.png" alt=""/>
+        <img src="images/menu.png" alt="" @onclick="RemoveSelf"/>
     </div>
     @if (_showError)
     {
@@ -517,6 +519,20 @@ else
     {
         CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
         StateHasChanged();
+    }
+
+    private async Task RemoveSelf()
+    {
+        var success = await ProjectCollaboratorService.RemoveSelfFromProjectAsync(ProjectId);
+        if (success)
+        {
+            NavigationManager.NavigateTo($"/");
+        }
+        else
+        {
+            await ShowErrorMessage($"Failed to remove you from the project {CurrentProject?.Name}");
+        }
+
     }
     
 }

@@ -17,7 +17,7 @@
             <h3>Share '@Project.Name'</h3>
         </div>
         <div class="share-area">
-            <input type="text" @bind="_collaboratorEmail" placeholder="Add people"/>
+            <input type="text" @bind="_collaboratorEmail" placeholder="Write email"/>
             
             <select @bind="_selectedRole">
                 <option value="@ProjectRole.ProjectOwner">Project Owner</option>
@@ -140,10 +140,12 @@
         var result = await ProjectCollaboratorService.AddCollaboratorToProjectAsync(Project.Id, addProjectCollaboratorDto);
         if (result)
         {
-            await CloseView();
+            ProjectCollaborators = await ProjectCollaboratorService.GetCollaboratorsFromProjectAsync(Project.Id);
+            await UpdateCollaboratorsEmail();
+            _collaboratorEmail = "";
+            _selectedRole = ProjectRole.Viewer;
             return;
         }
-
         await ShowErrorMessage("Failed to share project. Please try again.");
     }
     

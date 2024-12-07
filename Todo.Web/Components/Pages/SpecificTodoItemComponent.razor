@@ -3,7 +3,7 @@
 @using Todo.Core.Entities
 @using Todo.Web.Services.interfaces
 @inject ITodoItemService TodoItemService
-
+@inject IProjectCollaboratorService ProjectCollaboratorService
 
 @attribute [Authorize]
 
@@ -20,7 +20,7 @@
                     }
                     else
                     {
-                        <h2 @onclick="() => _isEditingTitle = true">@TodoItem.Title</h2>
+                        <h2 @onclick="() => { if (!IsViewer) _isEditingTitle = true; }">@TodoItem.Title</h2>
                     }
                 </div>
                 <img class="x-icon" src="images/x-icon.png" alt="" @onclick="CloseView"/>
@@ -39,7 +39,7 @@
                     }
                     else
                     {
-                        <p @onclick="() => _isEditingDescription = true" class="description-text">
+                        <p @onclick="() => { if (!IsViewer) _isEditingDescription = true; }" class="description-text">
                             @(string.IsNullOrWhiteSpace(TodoItem.Description) ? "Add a more detailed description..." : TodoItem.Description)
                         </p>
                     }
@@ -61,23 +61,44 @@
                     <h3>Details</h3>
                     <div class="detail-container">
                         <span class="detail-label">Priority:</span>
-                        <select @bind="Priority">
-                            <option value="@Priority.VeryLow">VeryLow</option>
-                            <option value="@Priority.Low">Low</option>
-                            <option value="@Priority.Medium">Medium</option>
-                            <option value="@Priority.High">High</option>
-                            <option value="@Priority.VeryHigh">VeryHigh</option>
-                        </select>
+                        @if (!IsViewer)
+                        {
+                            <select @bind="Priority">
+                                <option value="@Priority.VeryLow">VeryLow</option>
+                                <option value="@Priority.Low">Low</option>
+                                <option value="@Priority.Medium">Medium</option>
+                                <option value="@Priority.High">High</option>
+                                <option value="@Priority.VeryHigh">VeryHigh</option>
+                            </select>
+                        }
+                        else
+                        {
+                            <span>@Priority</span>
+                        }
                     </div>
 
                     <div class="detail-container">
                         <span class="detail-label">Due Date:</span>
-                        <input type="date" @bind="DueDate"/>
+                        @if (!IsViewer)
+                        {
+                            <input type="date" @bind="DueDate"/>
+                        }
+                        else
+                        {
+                            <span>@(DueDate?.ToString("mm/dd/yyyy") ?? "No due date")</span>
+                        }
                     </div>
                 </div>
 
                 <div class="bottom-section">
-                    <button class="delete-button" @onclick="DeleteTodoItemAsync">Delete Task</button>
+                    @if (!IsViewer)
+                    {
+                        <button class="delete-button" @onclick="DeleteTodoItemAsync">Delete Task</button>
+                    }
+                    else
+                    {
+                        <button class="delete-button" @onclick="DeleteTodoItemAsync" disabled>Delete Task</button>
+                    }
                 </div>
             </div>
         </div>
@@ -86,6 +107,7 @@
 
 @code {
     [Parameter] public TodoItemDto TodoItem { get; set; }
+    [Parameter] public int ProjectId { get; set; }
     [Parameter] public bool IsVisible { get; set; }
     /*Learned this way from here:https://stackoverflow.com/questions/56831266/passing-method-to-component*/
     [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
@@ -116,6 +138,8 @@
     private bool _isEditingDescription;
     private string _editedTitle;
     private string _editedDescription;
+
+    private bool IsViewer { get; set; } = false;
     
     protected override void OnParametersSet()
     {
@@ -125,6 +149,7 @@
             _editedTitle = TodoItem.Title;
             _editedDescription = TodoItem.Description;
             Priority = TodoItem.Priority;
+            DueDate = TodoItem.DueDate;
         }
         else
         {
@@ -132,6 +157,13 @@
             _editedDescription = string.Empty;
         }
     }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userRole = await ProjectCollaboratorService.GetCurrentUserRoleInProjectAsync(ProjectId);
+        IsViewer = userRole == ProjectRole.Viewer;   
+    }
+
 
     private async Task CloseView()
     {
@@ -142,6 +174,7 @@
 
     private async Task SaveTitle()
     {
+        if(IsViewer) return;
         if (string.IsNullOrWhiteSpace(_editedTitle)) return;
 
         var updateDto = new UpdateTodoItemDto
@@ -162,6 +195,7 @@
 
     private async Task SaveDescription()
     {
+        if(IsViewer) return;
         var updateDto = new UpdateTodoItemDto
         {
             Title = TodoItem.Title,
@@ -180,10 +214,7 @@
 
     private async Task SavePriority()
     {
-        if (TodoItem == null)
-        {
-         return;   
-        }
+        if(IsViewer) return;
         var updateDto = new UpdateTodoItemDto
         {
             Title = TodoItem.Title,
@@ -201,6 +232,7 @@
 
     private async Task SaveDueDate()
     {
+        if(IsViewer) return;
         var updateDto = new UpdateTodoItemDto
         {
             Title = TodoItem.Title,
@@ -218,6 +250,7 @@
 
     private async Task DeleteTodoItemAsync()
     {
+        if(IsViewer) return;
         var success = await TodoItemService.DeleteTodoItemAsync(TodoItem.Id);
         if (success)
         {

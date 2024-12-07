@@ -1,5 +1,6 @@
 using Todo.Core.Dtos.ProjectCollaboratorDtos;
 using Todo.Core.Entities;
+using Todo.Web.Auth.Models;
 using Todo.Web.Services.interfaces;
 
 namespace Todo.Web.Services;
@@ -115,6 +116,27 @@ public class ProjectCollaboratorService : IProjectCollaboratorService
         {
             _logger.LogError(e, "Failed to remove self from project {ProjectId}", projectId);
             return false;
+        }
+    }
+    
+    public async Task<ProjectRole?> GetCurrentUserRoleInProjectAsync(int projectId)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"api/projects/{projectId}/collaborators/currentUserRole");
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Failed to get Current Users role for project {ProjectId}. Status: {StatusCode}",
+                    projectId, response.StatusCode);
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<ProjectRole>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get Current Users role for project {ProjectId}", projectId);
+            return null;
         }
     }
 }

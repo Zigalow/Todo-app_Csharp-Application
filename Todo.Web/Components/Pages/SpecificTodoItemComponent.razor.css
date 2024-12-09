@@ -148,6 +148,7 @@ h3 {
 
 .delete-button:disabled {
     background-color: #ccc;
+    cursor: default;
 }
 
 select, input[type="date"] {

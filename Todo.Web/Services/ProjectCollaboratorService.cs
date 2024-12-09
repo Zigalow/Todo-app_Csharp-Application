@@ -124,14 +124,11 @@ public class ProjectCollaboratorService : IProjectCollaboratorService
         try
         {
             var response = await _httpClient.GetAsync($"api/projects/{projectId}/collaborators/currentUserRole");
-            if (!response.IsSuccessStatusCode)
-            {
-                _logger.LogError("Failed to get Current Users role for project {ProjectId}. Status: {StatusCode}",
-                    projectId, response.StatusCode);
-                return null;
-            }
+            if (response.IsSuccessStatusCode) return await response.Content.ReadFromJsonAsync<ProjectRole>();
+            _logger.LogError("Failed to get Current Users role for project {ProjectId}. Status: {StatusCode}",
+                projectId, response.StatusCode);
+            return null;
 
-            return await response.Content.ReadFromJsonAsync<ProjectRole>();
         }
         catch (Exception ex)
         {

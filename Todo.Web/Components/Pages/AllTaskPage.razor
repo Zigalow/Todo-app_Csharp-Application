@@ -1,0 +1,161 @@
+@page "/AllTask"
+@using Todo.Core.Dtos.LabelDtos
+@using Todo.Web.Services.interfaces
+@using Todo.Core.Dtos.TodoItemDtos
+
+@inject ITodoItemService TodoItemService
+@inject ILabelService LabelService
+
+@rendermode InteractiveServer
+
+
+<h3>All Tasks</h3>
+@if (TodoItems?.Count > 0)
+{
+    <div>
+        <label>Sort</label>
+        <select @onchange="HandleSort">
+            <option value="default">Default</option>
+            <option value="ascending">A-Z</option>
+            <option value="descending">Z-A</option>
+            <option value="due-date-ascending">DueDate Asc</option>
+            <option value="due-date-descending">DueDate Desc</option>
+        </select>
+    </div>
+    <div>
+        <button @onclick="ToggleFilterVisibility" class="filter-button">Filter</button>
+        @if (IsFilterVisible)
+        {
+            <div class="checkboxes">
+                @foreach (var label in AllLabels)
+                {
+                    <div class="checkbox">
+                        <input type="checkbox" value="@label.Name"
+                               checked="@_selectedFilterOptions.Contains(label.Name)"
+                               @onchange="() => HandleFilter(label.Name)">
+                        <label style="background-color: @label.Color" class="checkbox-label">@label.Name</label>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    @foreach (var task in TodoItems)
+    {
+        <div class="task-container"
+             @onclick="() => SpecificTodoItemHandler(task)">
+            @if (task.Labels.Any())
+            {
+                @foreach (var label in task.Labels)
+                {
+                    <div class="task-label" style="background-color: @label.Color;">
+                        @label.Name
+                    </div>
+                }
+            }
+            <p>
+                <span>@task.Title</span>
+            </p>
+            <p>Priority: @task.Priority</p>
+
+            <div class="task-lower-part">
+                <div class="todo-date">
+                    @if (task.DueDate.HasValue)
+                    {
+                        <p>Due: @task.DueDate.Value.ToShortDateString()</p>
+                    }
+                </div>
+                <div class="dropdown-container" @onclick:stopPropagation>
+
+                </div>
+            </div>
+        </div>
+    }
+}
+
+<SpecificTodoItemComponent TodoItem="@_specificTodoItem" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged"
+                           OnTodoItemDeleted="@HandleTodoItemDeleted"/>
+
+
+@code {
+    [Parameter] public List<TodoItemDto> TodoItems { get; set; }
+
+    private TodoItemDto? _specificTodoItem { get; set; }
+    private bool ViewTask { get; set; }
+
+    private string _selectedSortOption { get; set; }
+
+    private List<string> _selectedFilterOptions { get; set; } = new();
+    private bool IsFilterVisible { get; set; }
+    private List<LabelDto> AllLabels { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        TodoItems = await TodoItemService.GetAllTodoItemsAsync();
+        AllLabels = await LabelService.GetAllLabelsAsync();
+    }
+
+    private void SpecificTodoItemHandler(TodoItemDto todoItemDto)
+    {
+        _specificTodoItem = todoItemDto;
+        ViewTask = true;
+    }
+
+    private async Task HandleViewTaskChanged(bool value)
+    {
+        ViewTask = value;
+        if (!value)
+        {
+            _specificTodoItem = null;
+            TodoItems = await TodoItemService.GetAllTodoItemsAsync();
+        }
+    }
+
+    /*
+     * Refresh the project after a todoItem is deleted
+     */
+    private async Task HandleTodoItemDeleted()
+    {
+        TodoItems = await TodoItemService.GetAllTodoItemsAsync();
+        StateHasChanged();
+    }
+
+    private async Task HandleSort(ChangeEventArgs e)
+    {
+        _selectedSortOption = e.Value?.ToString() ?? "default";
+
+        TodoItems = _selectedSortOption switch
+        {
+            "due-date-ascending" => TodoItems.OrderByDescending(todoItem => todoItem.DueDate.HasValue).ThenBy(todoItem => todoItem.DueDate).ToList(),
+            "due-date-descending" => TodoItems.OrderByDescending(todoItem => todoItem.DueDate).ToList(),
+            "descending" => TodoItems.OrderByDescending(todoItem => todoItem.Title).ToList(),
+            "ascending" => TodoItems.OrderBy(todoItem => todoItem.Title).ToList(),
+            _ => await TodoItemService.GetAllTodoItemsAsync()
+        };
+    }
+
+    private async Task HandleFilter(string labelName)
+    {
+        if (_selectedFilterOptions.Contains(labelName))
+        {
+            _selectedFilterOptions.Remove(labelName);
+        }
+        else
+        {
+            _selectedFilterOptions.Add(labelName);
+        }
+
+        TodoItems = await TodoItemService.GetAllTodoItemsAsync();
+        
+        if (_selectedFilterOptions.Any())
+        {
+            TodoItems = TodoItems.Where(todoItem => _selectedFilterOptions.Any(filter => todoItem.Labels.Any(label => filter.Equals(label.Name)))).ToList();
+        }
+    }
+    
+    private void ToggleFilterVisibility()
+    {
+        IsFilterVisible = !IsFilterVisible;
+    }
+
+}

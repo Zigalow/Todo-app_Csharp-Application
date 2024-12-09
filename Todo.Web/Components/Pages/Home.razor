@@ -27,12 +27,25 @@
     {
         @foreach (var project in _projects)
         {
-            <div>
-                <div class="project" @onclick="() => NavigateToProject(project.Id)">
-                    <p class="project-name">@project.Name</p>
+                <div class="project-container" @onclick="() => NavigateToProject(project.Id)">
+                    <div class="project-name">
+                        <p>@project.Name</p>
+                    </div>
+
+                    <div class="project-dropdown-menu" @onclick:stopPropagation>
+                        <button class="project-dropdown-button" @onclick="() => DropdownMenu(project)">
+                            <img src="images/menu2.png" alt=""/>
+                        </button>
+                        
+                        @if (CurrentDropdownMenu == project)
+                        {
+                        <div class="project-dropdown">
+                            <button @onclick="() => ToggleShareProject(project)">Share @project.Name</button>
+                            <button @onclick="() => DeleteProjectAsync(project.Id)">Delete project</button>
+                        </div>
+                        } 
+                    </div>
                 </div>
-                <button @onclick="()=>ToggleShareProject(project)">Share @project.Name</button>
-            </div>
         }
     }
     @if (IsAddingProject)
@@ -70,6 +83,7 @@
     private List<ProjectDto>? _projects;
     private bool _showError = false;
     private string _errorMessage = "";
+    private ProjectDto? CurrentDropdownMenu { get; set; }
     
     private bool _viewSharedProjectComponent { get; set; } = false;
     private ProjectDto? _selectedProject;
@@ -129,6 +143,24 @@
         await Task.Delay(1000);
         _errorMessage = "";
         _showError = false;
+    }
+    private void DropdownMenu(ProjectDto project)
+    {
+    CurrentDropdownMenu = CurrentDropdownMenu == project ? null : project;
+    }
+
+    private async Task DeleteProjectAsync(int projectId)
+    {
+        var isDeleted = await ProjectService.DeleteProjectAsync(projectId);
+
+        if (isDeleted)
+        {
+            _projects = _projects.Where(p => p.Id != projectId).ToList();
+        }
+        else
+        {
+            await ShowErrorMessage("Failed to delete project. Please try again.");
+        }
     }
     
     private async Task HandleViewSharedProjectComponent(bool value)

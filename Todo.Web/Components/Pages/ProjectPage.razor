@@ -30,6 +30,7 @@ else
     <title>@CurrentProject.Name</title>
     <div class="project-title">
         <h1>@CurrentProject.Name</h1>
+        @*TODO-use dropDown*@
         <img src="images/menu.png" alt="" @onclick="RemoveSelf"/>
         @if (!IsOwner && !IsViewer && !IsMember)
         {
@@ -60,14 +61,23 @@ else
                      @ondragover:preventDefault>
                     <div class="todo-list-title">
                         <h5>@todoList.Name</h5>
-                        <img src="images/menu.png" alt=""/>
-                        @if (!IsViewer)
-                        {
-                            <button @onclick="() => DeleteTodoList(todoList.Id)">Delete</button>
-                            <input type="text" @bind="_newTodoItemTitle" placeholder="@todoList.Name"/>
-                            <button @onclick="() => UpdateTodoList(todoList.Id)">Update</button>
-                        }
+                        @*TODO-use dropDown*@
+                        <div class="todolist-dropdown" @onclick:stopPropagation>
+                            <button class="todolist-dropdown-button" @onclick="() => ToggleDropdownMenu(todoList)">
+                                <img src="images/menu.png" alt=""/>
+                            </button>
+                            @if (CurrentDropdownMenu == todoList && !IsViewer)
+                            {
+                                <div class="todo-list-dropdown">
+                                    <button @onclick="() => DeleteTodoList(todoList.Id)">Delete Todo-list</button>
+                                    <input type="text" @bind="_newTodoItemTitle" placeholder="@todoList.Name"/>
+                                    <button @onclick="() => UpdateTodoList(todoList.Id)">Update</button>
+                                </div>
+                            }   
+                        </div>
                     </div>
+
+
                     @if (todoList.TodoItems.Count != 0)
                     {
                         @foreach (var task in todoList.TodoItems)
@@ -105,17 +115,14 @@ else
                                                 Modify
                                             </button>
 
-                                            @if (CurrentTodoItem == task)
-                                            {
-                                                <div class="modifiymenu">
-                                                    <button @onclick="() => SpecificTodoItemHandler(task)">Open card</button>
-                                                    <button @onclick="ToggleLabelEditor">
-                                                        Edit label
-                                                    </button>
-                                                    <button>Add date</button>
-                                                    <button>Move</button>
-                                                    <button>Copy</button>
-                                                </div>
+                                        @if (CurrentTodoItem == task)
+                                        {
+                                            <div class="modifiymenu">
+                                                <button @onclick="() => SpecificTodoItemHandler(task)">Open card</button>
+                                                <button @onclick="() => ToggleLabelEditor(task)">
+                                                    Edit label
+                                                </button>
+                                            </div>
 
                                                 @if (IsHandleLabel)
                                                 {
@@ -257,6 +264,8 @@ else
     
     private bool _showError = false;
     private string _errorMessage = "";
+    
+    private TodoListDto? CurrentDropdownMenu { get; set; }
 
     /*-----BEGIN: For drag and drop-----*/
     private TodoItemDto? DraggedItem { get; set; }
@@ -720,4 +729,23 @@ else
         _viewSharedProjectComponent = value;
     }
     
+    private void ToggleDropdownMenu(TodoListDto todoList)
+    {
+    CurrentDropdownMenu = CurrentDropdownMenu == todoList ? null : todoList;
+    }
+
+    private async Task DeleteTodoList(int todoListId)
+{
+    var isDeleted = await TodoListService.DeleteTodoListAsync(todoListId);
+    if (isDeleted)
+    {
+        Console.WriteLine($"Deleted TodoList with ID: {todoListId}");
+        CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId); // Refresh project data
+    }
+    else
+    {
+        await ShowErrorMessage("Failed to delete TodoList. Please try again.");
+    }
+}
+
 }

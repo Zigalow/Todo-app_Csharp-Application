@@ -202,7 +202,7 @@ else
         }
     </div>
 
-    <SpecificTodoItemComponent TodoItem="@SpecificTodoItem" ProjectId="@ProjectId" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged" OnTodoItemDeleted="@HandleTodoItemDeleted"/>
+    <SpecificTodoItemComponent TodoItem="@SpecificTodoItem" Project="@CurrentProject" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged" OnTodoItemDeleted="@HandleTodoItemDeleted"/>
 }
 
 @code {
@@ -280,13 +280,12 @@ else
     private async Task CheckUserRole()
     {
         var user = await UserService.GetUserInfoAsync();
-        Console.WriteLine(user?.Username);
-        Console.WriteLine(CurrentProject?.AdminName);
+        if (user == null)
+        {
+            return;
+        }
         
-        var test = user.Username.Equals(CurrentProject.AdminName);
-        Console.WriteLine($"bool is: {test}");
-        
-        if (test == false)
+        if (!user.Username.Equals(CurrentProject.AdminName))
         {
             var userRole = await ProjectCollaboratorService.GetCurrentUserRoleInProjectAsync(ProjectId);
             IsViewer = userRole == ProjectRole.Viewer;

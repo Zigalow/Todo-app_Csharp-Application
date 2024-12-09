@@ -1,9 +1,12 @@
 @using Microsoft.AspNetCore.Authorization
+@using Todo.Core.Dtos.ProjectDtos
 @using Todo.Core.Dtos.TodoItemDtos
 @using Todo.Core.Entities
+@using Todo.Web.Auth
 @using Todo.Web.Services.interfaces
 @inject ITodoItemService TodoItemService
 @inject IProjectCollaboratorService ProjectCollaboratorService
+@inject IUserService UserService
 
 @attribute [Authorize]
 
@@ -107,7 +110,7 @@
 
 @code {
     [Parameter] public TodoItemDto TodoItem { get; set; }
-    [Parameter] public int ProjectId { get; set; }
+    [Parameter] public ProjectDto Project { get; set; }
     [Parameter] public bool IsVisible { get; set; }
     /*Learned this way from here:https://stackoverflow.com/questions/56831266/passing-method-to-component*/
     [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
@@ -160,8 +163,18 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var userRole = await ProjectCollaboratorService.GetCurrentUserRoleInProjectAsync(ProjectId);
-        IsViewer = userRole == ProjectRole.Viewer;   
+        var user = await UserService.GetUserInfoAsync();
+        if (user == null)
+        {
+            return;
+        }
+        
+        if (!user.Username.Equals(Project.AdminName))
+        {
+            /*await ProjectCollaboratorService.GetCollaboratorFromProjectAsync(Project.Id, user.Id);*/
+            var userRole = await ProjectCollaboratorService.GetCurrentUserRoleInProjectAsync(Project.Id);
+            IsViewer = userRole == ProjectRole.Viewer;
+        }
     }
 
 

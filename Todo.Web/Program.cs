@@ -22,7 +22,7 @@ builder.Services.AddAuthentication(options =>
         options.Cookie.Name = "TodoApp.Auth";
         options.LoginPath = "/Account/Login";
         options.LogoutPath = "/Account/Logout";
-        options.ExpireTimeSpan = TimeSpan.FromDays(1);
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
     });
 builder.Services.AddAuthorization();
 

@@ -60,7 +60,15 @@ else
                      @ondrop="@(async () => await HandleDrop(todoList))"
                      @ondragover:preventDefault>
                     <div class="todo-list-title">
-                        <h5>@todoList.Name</h5>
+                        @if (_editTodoListId == todoList.Id)
+                        {
+                            <input class="title-input" type="text" @bind="_editedTodoListTitle" @onblur="() => UpdateTodoList(todoList)"/>
+                        }
+                        else
+                        {
+                            <h5 @onclick="() => { if (!IsViewer) HandleTodoListTitle(todoList); }">@todoList.Name</h5>
+                        }
+                        
                         @*TODO-use dropDown*@
                         <div class="todolist-dropdown" @onclick:stopPropagation>
                             <button class="todolist-dropdown-button" @onclick="() => ToggleDropdownMenu(todoList)">
@@ -70,8 +78,8 @@ else
                             {
                                 <div class="todo-list-dropdown">
                                     <button @onclick="() => DeleteTodoList(todoList.Id)">Delete Todo-list</button>
-                                    <input type="text" @bind="_newTodoItemTitle" placeholder="@todoList.Name"/>
-                                    <button @onclick="() => UpdateTodoList(todoList.Id)">Update</button>
+                                    @*<input type="text" @bind="_newTodoItemTitle" placeholder="@todoList.Name"/>
+                                    <button @onclick="() => UpdateTodoList(todoList.Id)">Update</button>*@
                                 </div>
                             }   
                         </div>
@@ -119,7 +127,7 @@ else
                                         {
                                             <div class="modifiymenu">
                                                 <button @onclick="() => SpecificTodoItemHandler(task)">Open card</button>
-                                                <button @onclick="() => ToggleLabelEditor(task)">
+                                                <button @onclick="ToggleLabelEditor">
                                                     Edit label
                                                 </button>
                                             </div>
@@ -230,6 +238,9 @@ else
    
     private TodoItemDto? SpecificTodoItem { get; set; }
     
+    private string _editedTodoListTitle { get; set;}
+    private int? _editTodoListId { get; set; }
+    
     private string SelectedColor { get; set; } = "4A90E2";
     private bool IsLabelVisible { get; set; } = false;
     private List<string> ColorOptions = new()
@@ -254,7 +265,7 @@ else
     private bool IsAddingTask { get; set; } = false;
     private TodoListDto CurrentListAddingTask { get; set; }
     private TodoItemDto CurrentTodoItem { get; set; }
-    private string _newTodoItemTitle = "";
+    
     private string _newTodoItemName = "";
     private bool ViewTask { get; set; } = false;
 
@@ -473,18 +484,19 @@ else
     private async Task DeleteTodoList(int todoListId)
     {
         if(IsViewer) return;
-        var success =  await TodoListService.DeleteTodoListAsync(todoListId);
-        if (success)
+        var isDeleted =  await TodoListService.DeleteTodoListAsync(todoListId);
+        if (isDeleted)
         {
+            Console.WriteLine($"Deleted TodoList with ID: {todoListId}");
             CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
         }
         else
         {
-            await ShowErrorMessage("Failed to delete TodoList");
+            await ShowErrorMessage("Failed to delete TodoList. Please try again.");
         }
     }
 
-    private async Task UpdateTodoList(int todoListId)
+    private async Task UpdateTodoList(TodoListDto todoList)
     {
         if (IsViewer)
         {
@@ -492,7 +504,7 @@ else
             return;
         }
 
-        if (string.IsNullOrEmpty(_newTodoItemTitle) || string.IsNullOrWhiteSpace(_newTodoItemTitle))
+        if (string.IsNullOrEmpty(_editedTodoListTitle) || string.IsNullOrWhiteSpace(_editedTodoListTitle))
         {
             await ShowErrorMessage("TodoList Title is empty");
             return;
@@ -500,19 +512,20 @@ else
 
         var updateTodoListDto = new UpdateTodoListDto
         {
-            Name = _newTodoItemTitle
+            Name = _editedTodoListTitle
         };
-        var success = await TodoListService.UpdateTodoListAsync(todoListId, updateTodoListDto);
+        var success = await TodoListService.UpdateTodoListAsync(todoList.Id, updateTodoListDto);
         if (success)
         {
+            todoList.Name = _editedTodoListTitle;
             CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
-            _newTodoItemTitle = "";
         }
         else
         {
             await ShowErrorMessage("Failed to update TodoList");
         }
-
+        _editTodoListId = null;
+        
     }
 
     private async Task ShowErrorMessage(string message)
@@ -733,19 +746,10 @@ else
     {
     CurrentDropdownMenu = CurrentDropdownMenu == todoList ? null : todoList;
     }
-
-    private async Task DeleteTodoList(int todoListId)
-{
-    var isDeleted = await TodoListService.DeleteTodoListAsync(todoListId);
-    if (isDeleted)
+    
+    private void HandleTodoListTitle(TodoListDto todoList)
     {
-        Console.WriteLine($"Deleted TodoList with ID: {todoListId}");
-        CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId); // Refresh project data
+        _editTodoListId = todoList.Id;
+        _editedTodoListTitle = todoList.Name;
     }
-    else
-    {
-        await ShowErrorMessage("Failed to delete TodoList. Please try again.");
-    }
-}
-
 }

@@ -40,7 +40,7 @@
                         @if (CurrentDropdownMenu == project)
                         {
                         <div class="project-dropdown">
-                            <button @onclick="() => ToggleShareProject(project)">Share @project.Name</button>
+                            <button @onclick="() => ToggleShareProject(project)">Share project</button>
                             <button @onclick="() => DeleteProjectAsync(project.Id)">Delete project</button>
                         </div>
                         } 

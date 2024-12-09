@@ -1,6 +1,7 @@
 @page "/project/{projectId:int}"
 @using Microsoft.AspNetCore.Authorization
 @using Todo.Core.Dtos.LabelDtos
+@using Todo.Core.Dtos.ProjectCollaboratorDtos
 @using Todo.Core.Dtos.ProjectDtos
 @using Todo.Core.Dtos.TodoItemDtos
 @using Todo.Core.Dtos.TodoListDtos
@@ -30,10 +31,15 @@ else
     <div class="project-title">
         <h1>@CurrentProject.Name</h1>
         <img src="images/menu.png" alt="" @onclick="RemoveSelf"/>
+        @if (!IsOwner && !IsViewer && !IsMember)
+        {
+            <input type="text" @bind="_removingUserByEmail" placeholder="Enter Users email..."/>
+            <button @onclick="RemoveUser">Remove User</button>
+            <button @onclick="DeleteProject">Delete Project</button>
+        }
         @if (IsOwner)
         {
-            <input type="text" @bind="_removingUserName" placeholder="Enter user name..."/>
-            <button @onclick="RemoveUser">Remove User</button>
+            <button @onclick="ToggleShareProject">Add user</button>
         }
     </div>
     @if (_showError)
@@ -201,7 +207,12 @@ else
             </div>
         }
     </div>
-
+    
+    <ShareProjectComponent
+            Project="@CurrentProject"
+            IsVisible="@_viewSharedProjectComponent"
+            IsVisibleChanged="@HandleViewSharedProjectComponent"/>
+    
     <SpecificTodoItemComponent TodoItem="@SpecificTodoItem" Project="@CurrentProject" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged" OnTodoItemDeleted="@HandleTodoItemDeleted"/>
 }
 
@@ -259,7 +270,11 @@ else
     private bool IsMember { get; set; } = false;
     /*-----END: User Role-----*/
     
-    private string _removingUserName { get; set;}
+    private string _removingUserByEmail { get; set;}
+   
+    
+   private bool _viewSharedProjectComponent { get; set; } = false;
+    
 
     protected override async Task OnInitializedAsync()
     {
@@ -284,7 +299,7 @@ else
         {
             return;
         }
-        
+
         if (!user.Username.Equals(CurrentProject.AdminName))
         {
             var userRole = await ProjectCollaboratorService.GetCurrentUserRoleInProjectAsync(ProjectId);
@@ -331,17 +346,25 @@ else
         IsAddingTask = false;
     }
     
-    private void HandleDragStart(TodoItemDto item, TodoListDto sourceList)
+    private async void HandleDragStart(TodoItemDto item, TodoListDto sourceList)
     {
-        if (IsViewer) return;
+        if (IsViewer)
+        {
+            await ShowErrorMessage("Permission denied");
+            return;
+        }
         DraggedItem = item;
         SourceList = sourceList;
         DraggedItemOriginalIndex = sourceList.TodoItems.IndexOf(item);
     }
 
-    private void HandleDragEnd()
+    private async void HandleDragEnd()
     {
-        if (IsViewer) return;
+        if (IsViewer)
+        {
+            await ShowErrorMessage("Permission denied");
+            return;
+        }
         DraggedItem = null;
         SourceList = null;
         DraggedItemOriginalIndex = null;
@@ -349,7 +372,11 @@ else
 
     private async Task HandleDrop(TodoListDto targetList)
     {
-        if (IsViewer) return;
+        if (IsViewer)
+        {
+            await ShowErrorMessage("Permission denied");
+            return;
+        }
         if (DraggedItem == null || SourceList == null) return;
 
         //If Two different lists
@@ -384,7 +411,11 @@ else
      */
     private async Task HandleTodoItemDeleted()
     {
-        if(IsViewer) return;
+        if (IsViewer)
+        {
+            await ShowErrorMessage("Permission denied");
+            return;
+        }
         CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
         StateHasChanged();
     }
@@ -392,6 +423,11 @@ else
 
     private async Task CreateTodoListAsync()
     {
+        if (IsViewer)
+        {
+            await ShowErrorMessage("Permission denied");
+            return;
+        }
         if (!IsAddingTodoList)
         {
             IsAddingTodoList = true;
@@ -441,7 +477,17 @@ else
 
     private async Task UpdateTodoList(int todoListId)
     {
-        if(IsViewer) return;
+        if (IsViewer)
+        {
+            await ShowErrorMessage("Permission denied");
+            return;
+        }
+
+        if (string.IsNullOrEmpty(_newTodoListName) || string.IsNullOrWhiteSpace(_newTodoListName))
+        {
+            await ShowErrorMessage("TodoList Title is empty");
+            return;
+        }
 
         var updateTodoListDto = new UpdateTodoListDto
         {
@@ -464,16 +510,19 @@ else
     {
         _errorMessage = message;
         _showError = true;
-
-        await Task.Delay(1000);
+        await Task.Delay(1200);
 
         _errorMessage = "";
         _showError = false;
     }
 
-    private void HandleIsModifier(TodoItemDto todoItem)
+    private async void HandleIsModifier(TodoItemDto todoItem)
     {
-        if(IsViewer) return;
+        if (IsViewer)
+        {
+            await ShowErrorMessage("Permission denied");
+            return;
+        }
         CurrentTodoItem = CurrentTodoItem == todoItem ? null : todoItem;
         IsHandleLabel = false;
         _newLabelName = "";
@@ -623,7 +672,7 @@ else
     private async Task RemoveUser()
     {
         if(IsViewer || IsMember) return;
-        var userEmail = await UserService.GetUserEmailFromNameAsync(_removingUserName);
+        var userEmail = await UserService.GetUserEmailFromNameAsync(_removingUserByEmail);
         if (userEmail == null)
         {
             return;
@@ -643,6 +692,30 @@ else
         {
             await ShowErrorMessage($"Failed to remove you from the project {CurrentProject?.Name}");
         }
+    }
+    
+    
+    private async Task DeleteProject()
+    {
+        var success = await ProjectService.DeleteProjectAsync(ProjectId);
+        if (success)
+        {
+            
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            await ShowErrorMessage($"Failed to delete project {CurrentProject?.Name}");
+        }
+    }
+    
+    private void ToggleShareProject()
+    {
+        _viewSharedProjectComponent = true;
+    }
+    private async Task HandleViewSharedProjectComponent(bool value)
+    {
+        _viewSharedProjectComponent = value;
     }
     
 }

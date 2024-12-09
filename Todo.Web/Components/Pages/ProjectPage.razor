@@ -37,7 +37,7 @@ else
             <button @onclick="RemoveUser">Remove User</button>
             <button @onclick="DeleteProject">Delete Project</button>
         }
-        @if (IsOwner)
+        @if (!IsViewer && !IsMember)
         {
             <button @onclick="ToggleShareProject">Add user</button>
         }
@@ -483,7 +483,7 @@ else
             return;
         }
 
-        if (string.IsNullOrEmpty(_newTodoListName) || string.IsNullOrWhiteSpace(_newTodoListName))
+        if (string.IsNullOrEmpty(_newTodoItemTitle) || string.IsNullOrWhiteSpace(_newTodoItemTitle))
         {
             await ShowErrorMessage("TodoList Title is empty");
             return;
@@ -501,7 +501,7 @@ else
         }
         else
         {
-            await ShowErrorMessage($"Failed to update TodoList");
+            await ShowErrorMessage("Failed to update TodoList");
         }
 
     }
@@ -510,7 +510,7 @@ else
     {
         _errorMessage = message;
         _showError = true;
-        await Task.Delay(1200);
+        await Task.Delay(1500);
 
         _errorMessage = "";
         _showError = false;
@@ -700,11 +700,12 @@ else
         var success = await ProjectService.DeleteProjectAsync(ProjectId);
         if (success)
         {
-            
+            Console.WriteLine("deleted project");
             NavigationManager.NavigateTo("/");
         }
         else
         {
+            Console.WriteLine("didn't delete Project");
             await ShowErrorMessage($"Failed to delete project {CurrentProject?.Name}");
         }
     }
@@ -713,6 +714,7 @@ else
     {
         _viewSharedProjectComponent = true;
     }
+    
     private async Task HandleViewSharedProjectComponent(bool value)
     {
         _viewSharedProjectComponent = value;

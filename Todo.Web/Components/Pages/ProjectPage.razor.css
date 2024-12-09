@@ -3,12 +3,18 @@ html, body {
     width: 100%;
     overflow-x: hidden;
 }
+.project-title{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
 .todo-list-title {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    margin-bottom: 16px; /*TODO - MAYBE REMOVE*/
 }
 
 h5 {
@@ -112,7 +118,7 @@ span {
 .task-container:hover {
     stroke: #000000;
     background-color: #ece6e6;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .todo-date {
@@ -148,7 +154,7 @@ span {
     border-radius: 4px;
     padding: 8px;
     z-index: 100;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     min-width: 200px;
 }
 
@@ -187,7 +193,7 @@ span {
     z-index: 1100;
     min-width: 250px;
     max-width: 300px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .label-editor input {
@@ -320,7 +326,18 @@ span {
 }
 
 .error-message {
-    color: red;
+    display: flex;
+    position: fixed;
+    background-color:#0C2364;
+    bottom: 1.5%;
+    right: 1.5%;
+    width: 250px;
+    height: 150px;
+    color:white;
+    border-radius: 5%;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
 .x-icon {

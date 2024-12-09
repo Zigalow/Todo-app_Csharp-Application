@@ -14,7 +14,7 @@ public static class ProjectCollaboratorMapper
         {
             UserId = projectCollaborator.UserId,
             Name = projectCollaborator.ApplicationUser.UserName,
-            Role = projectCollaborator.Role.GetDisplayName()
+            Role = projectCollaborator.Role
         };
     }
 

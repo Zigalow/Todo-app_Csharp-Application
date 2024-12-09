@@ -1,5 +1,6 @@
 using Todo.Core.Dtos.ProjectCollaboratorDtos;
 using Todo.Core.Entities;
+using Todo.Web.Auth.Models;
 using Todo.Web.Services.interfaces;
 
 namespace Todo.Web.Services;
@@ -9,9 +10,9 @@ public class ProjectCollaboratorService : IProjectCollaboratorService
     private readonly HttpClient _httpClient;
     private readonly ILogger<ProjectCollaborator> _logger;
 
-    public ProjectCollaboratorService(HttpClient httpClient, ILogger<ProjectCollaborator> logger)
+    public ProjectCollaboratorService(IHttpClientFactory httpClientFactory, ILogger<ProjectCollaborator> logger)
     {
-        _httpClient = httpClient;
+        _httpClient = httpClientFactory.CreateClient("TodoApi");
         _logger = logger;
     }
 
@@ -19,7 +20,7 @@ public class ProjectCollaboratorService : IProjectCollaboratorService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"api/projects/{projectId}/collaborators");
+            var response = await _httpClient.GetAsync($"api/projects/{projectId}/collaborators/collaboratorsFromProject");
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError("Failed to get collaborators from project {ProjectId}. Status: {StatusCode}",
@@ -115,6 +116,24 @@ public class ProjectCollaboratorService : IProjectCollaboratorService
         {
             _logger.LogError(e, "Failed to remove self from project {ProjectId}", projectId);
             return false;
+        }
+    }
+    
+    public async Task<ProjectRole?> GetCurrentUserRoleInProjectAsync(int projectId)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"api/projects/{projectId}/collaborators/currentUserRole");
+            if (response.IsSuccessStatusCode) return await response.Content.ReadFromJsonAsync<ProjectRole>();
+            _logger.LogError("Failed to get Current Users role for project {ProjectId}. Status: {StatusCode}",
+                projectId, response.StatusCode);
+            return null;
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get Current Users role for project {ProjectId}", projectId);
+            return null;
         }
     }
 }

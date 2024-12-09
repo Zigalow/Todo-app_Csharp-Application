@@ -1,7 +1,14 @@
+@using Microsoft.AspNetCore.Authorization
+@using Todo.Core.Dtos.ProjectDtos
 @using Todo.Core.Dtos.TodoItemDtos
 @using Todo.Core.Entities
+@using Todo.Web.Auth
 @using Todo.Web.Services.interfaces
 @inject ITodoItemService TodoItemService
+@inject IProjectCollaboratorService ProjectCollaboratorService
+@inject IUserService UserService
+
+@attribute [Authorize]
 
 @*div for the outter *@
 <div class="page-overlay @(_isVisible ? "visible" : "")" @onclick="CloseView">
@@ -16,7 +23,7 @@
                     }
                     else
                     {
-                        <h2 @onclick="() => _isEditingTitle = true">@TodoItem.Title</h2>
+                        <h2 @onclick="() => { if (!IsViewer) _isEditingTitle = true; }">@TodoItem.Title</h2>
                     }
                 </div>
                 <img class="x-icon" src="images/x-icon.png" alt="" @onclick="CloseView"/>
@@ -24,7 +31,7 @@
 
             <div class="todo-item-info">
                 <div class="description-section">
-                    <h5>Description</h5>
+                    <h3>Description</h3>
                     @if (_isEditingDescription)
                     {
                         <textarea class="description-input" @bind="TodoItem.Description"
@@ -35,14 +42,14 @@
                     }
                     else
                     {
-                        <p @onclick="() => _isEditingDescription = true" class="description-text">
+                        <p @onclick="() => { if (!IsViewer) _isEditingDescription = true; }" class="description-text">
                             @(string.IsNullOrWhiteSpace(TodoItem.Description) ? "Add a more detailed description..." : TodoItem.Description)
                         </p>
                     }
                 </div>
 
                 <div class="labels-section">
-                    <h5>Labels</h5>
+                    <h3>Labels</h3>
                     <div class="labels-container">
                         @foreach (var label in TodoItem.Labels)
                         {
@@ -54,26 +61,47 @@
                 </div>
 
                 <div class="details-section">
-                    <h5>Details</h5>
+                    <h3>Details</h3>
                     <div class="detail-container">
                         <span class="detail-label">Priority:</span>
-                        <select @bind="Priority">
-                            <option value="@Priority.VeryLow">VeryLow</option>
-                            <option value="@Priority.Low">Low</option>
-                            <option value="@Priority.Medium">Medium</option>
-                            <option value="@Priority.High">High</option>
-                            <option value="@Priority.VeryHigh">VeryHigh</option>
-                        </select>
+                        @if (!IsViewer)
+                        {
+                            <select @bind="Priority">
+                                <option value="@Priority.VeryLow">VeryLow</option>
+                                <option value="@Priority.Low">Low</option>
+                                <option value="@Priority.Medium">Medium</option>
+                                <option value="@Priority.High">High</option>
+                                <option value="@Priority.VeryHigh">VeryHigh</option>
+                            </select>
+                        }
+                        else
+                        {
+                            <span>@Priority</span>
+                        }
                     </div>
 
                     <div class="detail-container">
                         <span class="detail-label">Due Date:</span>
-                        <input type="date" @bind="DueDate"/>
+                        @if (!IsViewer)
+                        {
+                            <input type="date" @bind="DueDate"/>
+                        }
+                        else
+                        {
+                            <span>@(DueDate?.ToString("mm/dd/yyyy") ?? "No due date")</span>
+                        }
                     </div>
                 </div>
 
                 <div class="bottom-section">
-                    <button class="delete-button" @onclick="DeleteTodoItemAsync">Delete Task</button>
+                    @if (!IsViewer)
+                    {
+                        <button class="delete-button" @onclick="DeleteTodoItemAsync">Delete Task</button>
+                    }
+                    else
+                    {
+                        <button class="delete-button" @onclick="DeleteTodoItemAsync" disabled>Delete Task</button>
+                    }
                 </div>
             </div>
         </div>
@@ -82,6 +110,7 @@
 
 @code {
     [Parameter] public TodoItemDto TodoItem { get; set; }
+    [Parameter] public ProjectDto Project { get; set; }
     [Parameter] public bool IsVisible { get; set; }
     /*Learned this way from here:https://stackoverflow.com/questions/56831266/passing-method-to-component*/
     [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
@@ -112,6 +141,8 @@
     private bool _isEditingDescription;
     private string _editedTitle;
     private string _editedDescription;
+
+    private bool IsViewer { get; set; } = false;
     
     protected override void OnParametersSet()
     {
@@ -121,6 +152,7 @@
             _editedTitle = TodoItem.Title;
             _editedDescription = TodoItem.Description;
             Priority = TodoItem.Priority;
+            DueDate = TodoItem.DueDate;
         }
         else
         {
@@ -129,8 +161,32 @@
         }
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await UserService.GetUserInfoAsync();
+        if (user == null)
+        {
+            return;
+        }
+        
+        if (!user.Username.Equals(Project.AdminName))
+        {
+            var userRole = await ProjectCollaboratorService.GetCurrentUserRoleInProjectAsync(Project.Id);
+            IsViewer = userRole == ProjectRole.Viewer;
+        }
+    }
+
+
+    private async Task CloseView()
+    {
+        _isVisible = false;
+        
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+
     private async Task SaveTitle()
     {
+        if(IsViewer) return;
         if (string.IsNullOrWhiteSpace(_editedTitle)) return;
 
         var updateDto = new UpdateTodoItemDto
@@ -151,6 +207,7 @@
 
     private async Task SaveDescription()
     {
+        if(IsViewer) return;
         var updateDto = new UpdateTodoItemDto
         {
             Title = TodoItem.Title,
@@ -169,10 +226,7 @@
 
     private async Task SavePriority()
     {
-        if (TodoItem == null)
-        {
-         return;   
-        }
+        if(IsViewer) return;
         var updateDto = new UpdateTodoItemDto
         {
             Title = TodoItem.Title,
@@ -190,6 +244,7 @@
 
     private async Task SaveDueDate()
     {
+        if(IsViewer) return;
         var updateDto = new UpdateTodoItemDto
         {
             Title = TodoItem.Title,
@@ -207,18 +262,12 @@
 
     private async Task DeleteTodoItemAsync()
     {
+        if(IsViewer) return;
         var success = await TodoItemService.DeleteTodoItemAsync(TodoItem.Id);
         if (success)
         {
             await OnTodoItemDeleted.InvokeAsync();
             await CloseView();
         }
-    }
-    
-    private async Task CloseView()
-    {
-        _isVisible = false;
-        
-        await IsVisibleChanged.InvokeAsync(false);
     }
 }

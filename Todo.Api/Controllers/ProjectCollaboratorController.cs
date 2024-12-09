@@ -21,7 +21,7 @@ public class ProjectCollaboratorController : BaseApiController
         _authorizationRepository = authorizationRepository;
     }
 
-    [HttpGet]
+    [HttpGet("collaboratorsFromProject")]
     public async Task<IActionResult> GetCollaboratorsFromProject(int projectId)
     {
         if (!ModelState.IsValid)
@@ -222,5 +222,36 @@ public class ProjectCollaboratorController : BaseApiController
     private async Task<ProjectCollaborator?> GetCollaboratorFromUserId(int projectId, string userId)
     {
         return await _unitOfWork.ProjectCollaborators.GetProjectCollaboratorByIdAsync(projectId, userId);
+    }
+    
+    [HttpGet("currentUserRole")]
+    public async Task<IActionResult> GetCurrentUserRoleInProject(int projectId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var projectExists = await _unitOfWork.Projects.ExistsAsync(projectId);
+
+        if (!projectExists)
+        {
+            return NotFound("Project not found");
+        }
+        
+        
+        var currentUserId = GetCurrentUserId();
+        if (!await _authorizationRepository.CanAccessProjectAsync(currentUserId, projectId))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to this project");
+        }
+        var collaborator = await _unitOfWork.ProjectCollaborators.GetProjectCollaboratorByIdAsync(projectId, currentUserId);
+
+        if (collaborator == null)
+        {
+            return NotFound("Collaborator not found");
+        }
+        Console.WriteLine(collaborator.Role);
+        return Ok(collaborator.Role);
     }
 }

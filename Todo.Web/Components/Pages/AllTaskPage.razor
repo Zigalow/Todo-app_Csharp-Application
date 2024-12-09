@@ -73,13 +73,12 @@
     }
 }
 
-<SpecificTodoItemComponent TodoItem="@_specificTodoItem" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged"
+<SpecificTodoItemComponent TodoItem="@_specificTodoItem" @*Project="@_"*@ IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged"
                            OnTodoItemDeleted="@HandleTodoItemDeleted"/>
 
 
 @code {
     [Parameter] public List<TodoItemDto> TodoItems { get; set; }
-
     private TodoItemDto? _specificTodoItem { get; set; }
     private bool ViewTask { get; set; }
 

@@ -150,6 +150,11 @@ h3 {
     background-color: #c82333;
 }
 
+.delete-button:disabled {
+    background-color: #ccc;
+    cursor: default;
+}
+
 select, input[type="date"] {
     padding: 6px;
     border: 1px solid #ddd;

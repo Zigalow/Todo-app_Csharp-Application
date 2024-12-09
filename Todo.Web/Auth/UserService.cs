@@ -33,6 +33,48 @@ public class UserService: IUserService
         }
     }
     
+    //Learned to send parameter with HttpGet from this: https://stackoverflow.com/questions/59671959/send-a-parameter-with-http-getjsonasync
+    public async Task<string?> GetUserIdFromEmailAsync(string email)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"api/user/userIdFromEmail?email={email}");
+        
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Failed to get user ID. Status: {response.StatusCode}");
+                return null;
+            }
+        
+            return await response.Content.ReadAsStringAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error getting user ID by email: {ex.Message}");
+            return null;
+        }
+    }
+    
+    public async Task<string?> GetUserEmailFromNameAsync(string name)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"api/user/userEmailFromName?name={name}");
+        
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Failed to get user email. Status: {response.StatusCode}");
+                return null;
+            }
+        
+            return await response.Content.ReadAsStringAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error getting user email from name: {ex.Message}");
+            return null;
+        }
+    }
     public async Task<bool> UpdatePhoneNumberAsync(string phoneNumber)
     {
         try

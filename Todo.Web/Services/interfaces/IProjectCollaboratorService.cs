@@ -1,4 +1,6 @@
 using Todo.Core.Dtos.ProjectCollaboratorDtos;
+using Todo.Core.Entities;
+using Todo.Web.Auth.Models;
 
 namespace Todo.Web.Services.interfaces;
 
@@ -14,4 +16,5 @@ public interface IProjectCollaboratorService
     Task<bool> RemoveCollaboratorFromProjectAsync(int projectId, string userId);
     
     Task<bool> RemoveSelfFromProjectAsync(int projectId);
+    Task<ProjectRole?> GetCurrentUserRoleInProjectAsync(int projectId);
 }

@@ -2,7 +2,9 @@
 @using Microsoft.AspNetCore.Authorization
 @using Todo.Core.Dtos.ProjectDtos
 @using Todo.Web.Services.interfaces
+
 @rendermode InteractiveServer
+
 @inject NavigationManager NavigationManager
 @inject IProjectService ProjectService
 
@@ -38,7 +40,7 @@
                         @if (CurrentDropdownMenu == project)
                         {
                         <div class="project-dropdown">
-                               <button>Share project</button>
+                            <button @onclick="() => ToggleShareProject(project)">Share @project.Name</button>
                             <button @onclick="() => DeleteProjectAsync(project.Id)">Delete project</button>
                         </div>
                         } 
@@ -67,6 +69,14 @@
 </b>
 }
 
+@if (_selectedProject != null)
+{
+    <ShareProjectComponent
+        Project="@_selectedProject"
+        IsVisible="@_viewSharedProjectComponent"
+        IsVisibleChanged="@HandleViewSharedProjectComponent"/>
+}
+
 @code {
     [Parameter] public bool IsAddingProject { get; set; }
     private string _newProjectName = ""; // Used too name the new project created
@@ -75,6 +85,9 @@
     private string _errorMessage = "";
     private ProjectDto? CurrentDropdownMenu { get; set; }
     
+    private bool _viewSharedProjectComponent { get; set; } = false;
+    private ProjectDto? _selectedProject;
+
     // Get all the project for the given user
     protected override async Task OnInitializedAsync()
     {
@@ -148,6 +161,22 @@
         {
             await ShowErrorMessage("Failed to delete project. Please try again.");
         }
+    }
+    
+    private async Task HandleViewSharedProjectComponent(bool value)
+    {
+        _viewSharedProjectComponent = value;
+        if (value == false)
+        {
+            _selectedProject = null;
+        }
+        
+    }
+    
+    private void ToggleShareProject(ProjectDto project)
+    {
+        _selectedProject = project;
+        _viewSharedProjectComponent = true;
     }
     
 }

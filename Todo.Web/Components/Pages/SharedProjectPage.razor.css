@@ -1,0 +1,35 @@
+.projects-container{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    row-gap: 10px;
+    justify-content: flex-start;
+}
+
+.project{
+    display: flex;
+    width: 250px;
+    height: 150px;
+    background: linear-gradient(#0C2364, #3A0647);
+    background-color:#0C2364;
+    color:white;
+    border-radius: 5%;
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+}
+
+.project-name {
+    color: white;
+    text-align: center;
+    margin: 0;
+
+}
+
+p {
+    text-decoration: none;
+}
+
+a .project-name {
+    text-decoration: none;
+}

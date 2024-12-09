@@ -1,10 +1,13 @@
 @page "/Project/Shared"
 @using Microsoft.AspNetCore.Authorization
 @using Todo.Core.Dtos.ProjectDtos
+@using Todo.Core.Entities
+@using Todo.Web.Auth
 @using Todo.Web.Services.interfaces
 
 @inject NavigationManager NavigationManager
 @inject IProjectService ProjectService
+@inject IProjectCollaboratorService ProjectCollaboratorService
 
 @rendermode InteractiveServer
 
@@ -32,6 +35,8 @@
                     <p class="project-name">@project.Name</p>
                     
                     <p class="project-owner">Admin: @project.AdminName</p>
+                    
+                    <p class="project-user-role">Role: @GetUserRoleInProject(project.Id) </p>
 
                 </div>
             </div>
@@ -44,13 +49,33 @@
 @code {
     private List<ProjectDto>? _sharedProjects;
     
+    private Dictionary<int, ProjectRole?> _projectRoles = new();
+    
     protected override async Task OnInitializedAsync()
     {
-
         _sharedProjects = await ProjectService.GetSharedProjectsAsync();
-    
+        
+        if (_sharedProjects == null)
+        {
+            return;
+        }
+        
+        foreach (var project in _sharedProjects)
+        {
+            var role = await ProjectCollaboratorService.GetCurrentUserRoleInProjectAsync(project.Id);
+            _projectRoles[project.Id] = role;
+        }
     }
+    
+    private string? GetUserRoleInProject(int projectId)
+    {
+        if (!_projectRoles.TryGetValue(projectId, out var role))
+        {
+            return "Not Found";
+        }
 
+        return role == null ? "Undefined" : role.ToString();
+    }
     
     private void NavigateToProject(int projectId)
     {

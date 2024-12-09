@@ -30,18 +30,29 @@ else
     <title>@CurrentProject.Name</title>
     <div class="project-title">
         <h1>@CurrentProject.Name</h1>
-        @*TODO-use dropDown*@
-        <img src="images/menu.png" alt="" @onclick="RemoveSelf"/>
-        @if (!IsOwner && !IsViewer && !IsMember)
-        {
-            <input type="text" @bind="_removingUserByEmail" placeholder="Enter Users email..."/>
-            <button @onclick="RemoveUser">Remove User</button>
-            <button @onclick="DeleteProject">Delete Project</button>
-        }
-        @if (!IsViewer && !IsMember)
-        {
-            <button @onclick="ToggleShareProject">Add user</button>
-        }
+
+        <div class="todolist-dropdown" @onclick:stopPropagation>
+            <button class="todolist-dropdown-button" @onclick="() => ToggleDropdownMenu(CurrentProject)">
+                <img src="images/menu.png" alt=""/>
+            </button>
+            @if (CurrentProjectDropdownMenu == CurrentProject && !IsViewer)
+            {
+                <div class="todo-list-dropdown">
+                    <button @onclick="RemoveSelf">Leave Project</button>
+
+                    @if (!IsOwner && !IsViewer && !IsMember)
+                    {
+                        <button @onclick="DeleteProject">Delete Project</button>
+                    }
+                    @if (!IsViewer && !IsMember)
+                    {
+                        <input type="text" @bind="_removingUserByEmail" placeholder="Enter Users email..."/>
+                        <button @onclick="RemoveUser">Remove User</button>
+                        <button @onclick="ToggleShareProject">Add user</button>
+                    }
+                </div>
+            }
+        </div>
     </div>
     @if (_showError)
     {
@@ -78,8 +89,6 @@ else
                             {
                                 <div class="todo-list-dropdown">
                                     <button @onclick="() => DeleteTodoList(todoList.Id)">Delete Todo-list</button>
-                                    @*<input type="text" @bind="_newTodoItemTitle" placeholder="@todoList.Name"/>
-                                    <button @onclick="() => UpdateTodoList(todoList.Id)">Update</button>*@
                                 </div>
                             }   
                         </div>
@@ -277,6 +286,7 @@ else
     private string _errorMessage = "";
     
     private TodoListDto? CurrentDropdownMenu { get; set; }
+    private ProjectDto? CurrentProjectDropdownMenu { get; set; }
 
     /*-----BEGIN: For drag and drop-----*/
     private TodoItemDto? DraggedItem { get; set; }
@@ -751,5 +761,10 @@ else
     {
         _editTodoListId = todoList.Id;
         _editedTodoListTitle = todoList.Name;
+    }
+    
+    private void ToggleDropdownMenu(ProjectDto project)
+    {
+        CurrentProjectDropdownMenu = CurrentProjectDropdownMenu == project ? null : project;
     }
 }

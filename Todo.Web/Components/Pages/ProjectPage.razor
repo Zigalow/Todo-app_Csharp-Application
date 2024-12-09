@@ -4,6 +4,8 @@
 @using Todo.Core.Dtos.ProjectDtos
 @using Todo.Core.Dtos.TodoItemDtos
 @using Todo.Core.Dtos.TodoListDtos
+@using Todo.Core.Entities
+@using Todo.Web.Auth
 @using Todo.Web.Services.interfaces
 
 @inject IProjectService ProjectService
@@ -11,6 +13,7 @@
 @inject ITodoListService TodoListService
 @inject ITodoItemService TodoItemService
 @inject ILabelService LabelService
+@inject IUserService UserService
 @inject NavigationManager NavigationManager
 
 @rendermode InteractiveServer
@@ -27,6 +30,11 @@ else
     <div class="project-title">
         <h1>@CurrentProject.Name</h1>
         <img src="images/menu.png" alt="" @onclick="RemoveSelf"/>
+        @if (IsOwner)
+        {
+            <input type="text" @bind="_removingUserName" placeholder="Enter user name..."/>
+            <button @onclick="RemoveUser">Remove User</button>
+        }
     </div>
     @if (_showError)
     {
@@ -47,6 +55,12 @@ else
                     <div class="todo-list-title">
                         <h5>@todoList.Name</h5>
                         <img src="images/menu.png" alt=""/>
+                        @if (!IsViewer)
+                        {
+                            <button @onclick="() => DeleteTodoList(todoList.Id)">Delete</button>
+                            <input type="text" @bind="_newTodoItemTitle" placeholder="@todoList.Name"/>
+                            <button @onclick="() => UpdateTodoList(todoList.Id)">Update</button>
+                        }
                     </div>
                     @if (todoList.TodoItems.Count != 0)
                     {
@@ -78,120 +92,128 @@ else
                                             <span>Due: @task.DueDate.Value.ToShortDateString()</span>
                                         }
                                     </div>
-                                    <div class="dropdown-container" @onclick:stopPropagation>
-                                        <button class="modify-button" @onclick="() => HandleIsModifier(task)">
-                                            Modify
-                                        </button>
+                                    @if(!IsViewer)
+                                    {
+                                        <div class="dropdown-container" @onclick:stopPropagation>
+                                            <button class="modify-button" @onclick="() => HandleIsModifier(task)">
+                                                Modify
+                                            </button>
 
-                                        @if (CurrentTodoItem == task)
-                                        {
-                                            <div class="modifiymenu">
-                                                <button @onclick="() => SpecificTodoItemHandler(task)">Open card</button>
-                                                <button @onclick="() => ToggleLabelEditor(task)">
-                                                    Edit label
-                                                </button>
-                                                <button>Add date</button>
-                                                <button>Move</button>
-                                                <button>Copy</button>
-                                            </div>
-
-                                            @if (IsHandleLabel)
+                                            @if (CurrentTodoItem == task)
                                             {
-                                                <div class="label-editor">
-                                                    <h5>Labels</h5>
-                                                    @if (ProjectLabels.Any())
-                                                    {
-                                                        <div class="saved-labels">
-                                                            <h6>Project Labels</h6>
-                                                            @foreach (var label in ProjectLabels)
-                                                            {
-                                                                <div class="saved-label-item"
-                                                                     @onclick="() => ApplyExistingLabel(task, label)"
-                                                                     style="background-color: @label.Color">
-                                                                    @label.Name
-                                                                    <span class="label-count">(@label.TodoCount)</span>
-
-                                                                    @if (task.Labels.Any(l => l.Name == label.Name))
-                                                                    {
-                                                                        <button class="remove-label" @onclick:stopPropagation="true"
-                                                                                @onclick="() => RemoveLabel(task, label)">
-                                                                            ×
-                                                                        </button>
-
-                                                                        <button class="delete-label" @onclick:stopPropagation="true"
-                                                                                @onclick="() => DeleteLabel(label)">
-                                                                            Delete
-                                                                        </button>
-                                                                    }
-                                                                </div>
-                                                            }
-                                                        </div>
-                                                    }
-
-                                                    <div class="create-label-section">
-                                                        <h6>Create New Label</h6>
-                                                        <input type="text" @bind="_newLabelName" placeholder="Enter label name..."/>
-                                                        <div class="color-picker">
-                                                            @foreach (var color in ColorOptions)
-                                                            {
-                                                                <div class="color-option @(SelectedColor == color ? "selected" : "")"
-                                                                     style="background-color: @color"
-                                                                     @onclick="() => SelectColor(color)">
-                                                                </div>
-                                                            }
-                                                        </div>
-                                                        <button @onclick="() => CreateLabel(task)" class="create-label-button">
-                                                            Create New Label
-                                                        </button>
-                                                    </div>
+                                                <div class="modifiymenu">
+                                                    <button @onclick="() => SpecificTodoItemHandler(task)">Open card</button>
+                                                    <button @onclick="ToggleLabelEditor">
+                                                        Edit label
+                                                    </button>
+                                                    <button>Add date</button>
+                                                    <button>Move</button>
+                                                    <button>Copy</button>
                                                 </div>
+
+                                                @if (IsHandleLabel)
+                                                {
+                                                    <div class="label-editor">
+                                                        <h5>Labels</h5>
+                                                        @if (ProjectLabels.Any())
+                                                        {
+                                                            <div class="saved-labels">
+                                                                <h6>Project Labels</h6>
+                                                                @foreach (var label in ProjectLabels)
+                                                                {
+                                                                    <div class="saved-label-item"
+                                                                         @onclick="() => ApplyExistingLabel(task, label)"
+                                                                         style="background-color: @label.Color">
+                                                                        @label.Name
+                                                                        <span class="label-count">(@label.TodoCount)</span>
+
+                                                                        @if (task.Labels.Any(l => l.Name == label.Name))
+                                                                        {
+                                                                            <button class="remove-label" @onclick:stopPropagation="true"
+                                                                                    @onclick="() => RemoveLabel(task, label)">
+                                                                                ×
+                                                                            </button>
+
+                                                                            <button class="delete-label" @onclick:stopPropagation="true"
+                                                                                    @onclick="() => DeleteLabel(label)">
+                                                                                Delete
+                                                                            </button>
+                                                                        }
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        }
+
+                                                        <div class="create-label-section">
+                                                            <h6>Create New Label</h6>
+                                                            <input type="text" @bind="_newLabelName" placeholder="Enter label name..."/>
+                                                            <div class="color-picker">
+                                                                @foreach (var color in ColorOptions)
+                                                                {
+                                                                    <div class="color-option @(SelectedColor == color ? "selected" : "")"
+                                                                         style="background-color: @color"
+                                                                         @onclick="() => SelectColor(color)">
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                            <button @onclick="() => CreateLabel(task)" class="create-label-button">
+                                                                Create New Label
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                }
                                             }
-                                        }
-                                    </div>
+                                        </div>
+                                    }
                                 </div>
                             </div>
                         }
                     }
-                    @if (IsAddingTask && CurrentListAddingTask == todoList)
+                    @if (!IsViewer)
                     {
-                        <input type="text" @bind="_newTodoItemName" placeholder="Enter task name..."/>
-                        <button @onclick="() => CreateTask(todoList)">Create Task</button>
-                        <img class="x-icon" src="images/x-icon.png" alt="" @onclick="() => { IsAddingTask = !IsAddingTask; }"/>
-                    }
-                    else
-                    {
-                        <button @onclick="() => ShowInputField(todoList)">Add Task</button>
+                        @if (IsAddingTask && CurrentListAddingTask == todoList)
+                        {
+                            <input type="text" @bind="_newTodoItemName" placeholder="Enter task name..."/>
+                            <button @onclick="() => CreateTask(todoList)">Create Task</button>
+                            <img class="x-icon" src="images/x-icon.png" alt="" @onclick="() => { IsAddingTask = !IsAddingTask; }"/>
+                        }
+                        else
+                        {
+                            <button @onclick="() => ShowInputField(todoList)">Add Task</button>
+                        }
                     }
                 </div>
             }
         }
-        <div class="todo-list-container">
-            @if (IsAddingTodoList)
-            {
-                <input type="text" @bind="_newTodoListName" placeholder="Enter Todolist name..."/>
-            }
+        @if (!IsViewer)
+        {
+            <div class="todo-list-container">
+                @if (IsAddingTodoList)
+                {
+                    <input type="text" @bind="_newTodoListName" placeholder="Enter Todolist name..."/>
+                }
 
-            <button @onclick="CreateTodoListAsync">Create new List</button>
-            @if (IsAddingTodoList)
-            {
-                <img class="x-icon" src="images/x-icon.png" alt="" @onclick="() => { IsAddingTodoList = !IsAddingTodoList; }"/>
-            }
-        </div>
+                <button @onclick="CreateTodoListAsync">Create new List</button>
+                @if (IsAddingTodoList)
+                {
+                    <img class="x-icon" src="images/x-icon.png" alt="" @onclick="() => { IsAddingTodoList = !IsAddingTodoList; }"/>
+                }
+            </div>
+        }
     </div>
 
-    <SpecificTodoItemComponent TodoItem="@SpecificTodoItem" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged" OnTodoItemDeleted="@HandleTodoItemDeleted"/>
+    <SpecificTodoItemComponent TodoItem="@SpecificTodoItem" ProjectId="@ProjectId" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged" OnTodoItemDeleted="@HandleTodoItemDeleted"/>
 }
 
 @code {
     [Parameter] public int ProjectId { get; set; }
     public required ProjectDto? CurrentProject { get; set; }
     private List<LabelDto?> ProjectLabels { get; set; } = new();
-    private string SelectedColor { get; set; } = "4A90E2";
-    private bool IsColorPickerVisible { get; set; } = false;
-    private bool IsLabelVisible { get; set; } = false;
-
+   
     private TodoItemDto? SpecificTodoItem { get; set; }
     
+    private string SelectedColor { get; set; } = "4A90E2";
+    private bool IsLabelVisible { get; set; } = false;
     private List<string> ColorOptions = new()
     {
         "#4A90E2", // Blue
@@ -214,13 +236,14 @@ else
     private bool IsAddingTask { get; set; } = false;
     private TodoListDto CurrentListAddingTask { get; set; }
     private TodoItemDto CurrentTodoItem { get; set; }
+    private string _newTodoItemTitle = "";
     private string _newTodoItemName = "";
     private bool ViewTask { get; set; } = false;
 
     private bool IsAddingTodoList { get; set; }
     private string _newTodoListName = "";
     private string _newLabelName = "";
-
+    
     private bool _showError = false;
     private string _errorMessage = "";
 
@@ -229,6 +252,14 @@ else
     private TodoListDto? SourceList { get; set; }
     private int? DraggedItemOriginalIndex { get; set; }
     /*-----END: For drag and drop-----*/
+    
+    /*-----BEGIN: User Role-----*/
+    private bool IsViewer { get; set; } = false;
+    private bool IsOwner { get; set; } = false;
+    private bool IsMember { get; set; } = false;
+    /*-----END: User Role-----*/
+    
+    private string _removingUserName { get; set;}
 
     protected override async Task OnInitializedAsync()
     {
@@ -241,12 +272,29 @@ else
             Console.WriteLine("No labels found for the project.");
         }
 
-        foreach (var label in ProjectLabels)
+        await CheckUserRole();
+        
+        StateHasChanged();
+    }
+
+    private async Task CheckUserRole()
+    {
+        var user = await UserService.GetUserInfoAsync();
+        Console.WriteLine(user?.Username);
+        Console.WriteLine(CurrentProject?.AdminName);
+        
+        var test = user.Username.Equals(CurrentProject.AdminName);
+        Console.WriteLine($"bool is: {test}");
+        
+        if (test == false)
         {
-            Console.WriteLine($"Label: {label.Name}");
+            var userRole = await ProjectCollaboratorService.GetCurrentUserRoleInProjectAsync(ProjectId);
+            IsViewer = userRole == ProjectRole.Viewer;
+            IsOwner = userRole == ProjectRole.ProjectOwner;
+            IsMember = userRole == ProjectRole.ProjectMember;
+            Console.WriteLine(userRole);
         }
 
-        StateHasChanged();
     }
 
     private void ShowInputField(TodoListDto todoList)
@@ -283,6 +331,64 @@ else
         _newTodoItemName = "";
         IsAddingTask = false;
     }
+    
+    private void HandleDragStart(TodoItemDto item, TodoListDto sourceList)
+    {
+        if (IsViewer) return;
+        DraggedItem = item;
+        SourceList = sourceList;
+        DraggedItemOriginalIndex = sourceList.TodoItems.IndexOf(item);
+    }
+
+    private void HandleDragEnd()
+    {
+        if (IsViewer) return;
+        DraggedItem = null;
+        SourceList = null;
+        DraggedItemOriginalIndex = null;
+    }
+
+    private async Task HandleDrop(TodoListDto targetList)
+    {
+        if (IsViewer) return;
+        if (DraggedItem == null || SourceList == null) return;
+
+        //If Two different lists
+        if (SourceList.Id != targetList.Id)
+        {
+            await TodoItemService.MoveTodoItemAsync(DraggedItem.Id, targetList.Id);
+        }
+
+        // Refresh the project
+        CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
+        StateHasChanged();
+    }
+
+    private void SpecificTodoItemHandler(TodoItemDto todoItemDto)
+    {
+        SpecificTodoItem = todoItemDto;
+        ViewTask = true;
+    }
+
+    private async Task HandleViewTaskChanged(bool value)
+    {
+        ViewTask = value;
+        if (!value)
+        {
+            SpecificTodoItem = null;
+            CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
+        }
+    }
+    
+    /*
+     * Refresh the project after a todoItem is deleted
+     */
+    private async Task HandleTodoItemDeleted()
+    {
+        if(IsViewer) return;
+        CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
+        StateHasChanged();
+    }
 
 
     private async Task CreateTodoListAsync()
@@ -292,12 +398,10 @@ else
             IsAddingTodoList = true;
             return;
         }
-
-        //IsAddingTodoList = !IsAddingTodoList;
+        
         if (string.IsNullOrEmpty(_newTodoListName) || string.IsNullOrWhiteSpace(_newTodoListName))
         {
             await ShowErrorMessage("Failed to create TodoList. Please try again.");
-            //IsAddingTodoList = false;
             return;
         }
 
@@ -321,6 +425,41 @@ else
         _newTodoListName = "";
         IsAddingTodoList = false;
     }
+    
+    private async Task DeleteTodoList(int todoListId)
+    {
+        if(IsViewer) return;
+        var success =  await TodoListService.DeleteTodoListAsync(todoListId);
+        if (success)
+        {
+            CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
+        }
+        else
+        {
+            await ShowErrorMessage("Failed to delete TodoList");
+        }
+    }
+
+    private async Task UpdateTodoList(int todoListId)
+    {
+        if(IsViewer) return;
+
+        var updateTodoListDto = new UpdateTodoListDto
+        {
+            Name = _newTodoItemTitle
+        };
+        var success = await TodoListService.UpdateTodoListAsync(todoListId, updateTodoListDto);
+        if (success)
+        {
+            CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
+            _newTodoItemTitle = "";
+        }
+        else
+        {
+            await ShowErrorMessage($"Failed to update TodoList");
+        }
+
+    }
 
     private async Task ShowErrorMessage(string message)
     {
@@ -335,12 +474,13 @@ else
 
     private void HandleIsModifier(TodoItemDto todoItem)
     {
+        if(IsViewer) return;
         CurrentTodoItem = CurrentTodoItem == todoItem ? null : todoItem;
         IsHandleLabel = false;
         _newLabelName = "";
     }
 
-    private void ToggleLabelEditor(TodoItemDto todoItem)
+    private void ToggleLabelEditor()
     {
         if (IsHandleLabel == false)
         {
@@ -466,73 +606,44 @@ else
 
         IsLabelVisible = false;
     }
-    
-    private void HandleDragStart(TodoItemDto item, TodoListDto sourceList)
-    {
-        DraggedItem = item;
-        SourceList = sourceList;
-        DraggedItemOriginalIndex = sourceList.TodoItems.IndexOf(item);
-    }
-
-    private void HandleDragEnd()
-    {
-        DraggedItem = null;
-        SourceList = null;
-        DraggedItemOriginalIndex = null;
-    }
-
-    private async Task HandleDrop(TodoListDto targetList)
-    {
-        if (DraggedItem == null || SourceList == null) return;
-
-        //If Two different lists
-        if (SourceList.Id != targetList.Id)
-        {
-            await TodoItemService.MoveTodoItemAsync(DraggedItem.Id, targetList.Id);
-        }
-
-        // Refresh the project
-        CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
-        StateHasChanged();
-    }
-
-    private void SpecificTodoItemHandler(TodoItemDto todoItemDto)
-    {
-        SpecificTodoItem = todoItemDto;
-        ViewTask = true;
-    }
-
-    private async Task HandleViewTaskChanged(bool value)
-    {
-        ViewTask = value;
-        if (!value)
-        {
-            SpecificTodoItem = null;
-            CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
-        }
-    }
-    
-    /*
-     * Refresh the project after a todoItem is deleted
-     */
-    private async Task HandleTodoItemDeleted()
-    {
-        CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
-        StateHasChanged();
-    }
 
     private async Task RemoveSelf()
     {
         var success = await ProjectCollaboratorService.RemoveSelfFromProjectAsync(ProjectId);
         if (success)
         {
-            NavigationManager.NavigateTo($"/");
+            NavigationManager.NavigateTo("/");
         }
         else
         {
             await ShowErrorMessage($"Failed to remove you from the project {CurrentProject?.Name}");
         }
 
+    }
+
+    private async Task RemoveUser()
+    {
+        if(IsViewer || IsMember) return;
+        var userEmail = await UserService.GetUserEmailFromNameAsync(_removingUserName);
+        if (userEmail == null)
+        {
+            return;
+        }
+        var userId = await UserService.GetUserIdFromEmailAsync(userEmail);
+        if (userId == null)
+        {
+            return;
+            
+        }
+        var success = await ProjectCollaboratorService.RemoveCollaboratorFromProjectAsync(ProjectId, userId);
+        if (success)
+        {
+           /*TODO*/
+        }
+        else
+        {
+            await ShowErrorMessage($"Failed to remove you from the project {CurrentProject?.Name}");
+        }
     }
     
 }

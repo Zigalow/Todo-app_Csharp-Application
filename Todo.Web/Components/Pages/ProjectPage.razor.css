@@ -276,7 +276,18 @@ span {
 }
 
 .error-message{
-    color:red;
+    display: flex;
+    position: fixed;
+    background-color:#0C2364;
+    bottom: 1.5%;
+    right: 1.5%;
+    width: 250px;
+    height: 150px;
+    color:white;
+    border-radius: 5%;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
 .x-icon {

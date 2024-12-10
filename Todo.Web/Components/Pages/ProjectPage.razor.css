@@ -30,8 +30,8 @@ h5 {
 
 .remove-user-dropdown {
     position: absolute;
-    left: 10px;
     top: 80%;
+    right: 10px;
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -41,6 +41,32 @@ h5 {
     min-width: 200px;
 }
 
+.project-dropdown {
+    position: absolute;
+    right: 25px;
+    top: 10%;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+}
+
+.project-dropdown button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.project-dropdown button:hover {
+    background-color: #f0f0f0;
+}
 
 .todolist-dropdown {
     position: relative;

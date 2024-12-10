@@ -108,7 +108,10 @@
     }
 </div>
 
-<StatusMessageComponent Message="@_statusMessage" IsError="@_isError" IsVisible = "@_viewStatusComponent"IsVisibleChanged="@HandleStatusMessageVisibility"/>
+@if (_viewStatusComponent && string.IsNullOrWhiteSpace(_statusMessage))
+{
+    <StatusMessageComponent Message="@_statusMessage" IsError="@_isError" IsVisible="@_viewStatusComponent"IsVisibleChanged="@HandleStatusMessageVisibility"/>
+}
 
 @code {
     [Parameter] public TodoItemDto TodoItem { get; set; }

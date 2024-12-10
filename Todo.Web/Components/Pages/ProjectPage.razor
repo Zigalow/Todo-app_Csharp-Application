@@ -53,11 +53,10 @@ else
             }
         </div>
     </div>
-    <StatusMessageComponent 
-        Message="@_statusMessage" 
-        IsError="@_isError" 
-        IsVisible = "@_viewStatusComponent"
-        IsVisibleChanged="@HandleStatusMessageVisibility"/>
+    @if (_viewStatusComponent && string.IsNullOrWhiteSpace(_statusMessage))
+    {
+        <StatusMessageComponent Message="@_statusMessage" IsError="@_isError" IsVisible="@_viewStatusComponent"IsVisibleChanged="@HandleStatusMessageVisibility"/>
+    }
 
     <div class="todo-lists-container">
         @if (CurrentProject.TodoLists.Count != 0)
@@ -233,8 +232,10 @@ else
     {
         <ShareProjectComponent Project="@CurrentProject" IsVisible="@_viewSharedProjectComponent" IsVisibleChanged="@HandleViewSharedProjectComponent"/>
     }
-
+    @if (SpecificTodoItem != null && ViewTask)
+    {
     <SpecificTodoItemComponent TodoItem="@SpecificTodoItem" IsViewer="@IsViewer" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged" OnTodoItemDeleted="@HandleTodoItemDeleted"/>
+    }
 }
 
 @code {

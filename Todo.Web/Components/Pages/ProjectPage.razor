@@ -112,8 +112,8 @@ else
                         {
                             <div class="task-container"
                                  draggable="true"
-                                 @ondragstart="@(() => HandleDragStart(task, todoList))"
-                                 @ondragend="@(() => HandleDragEnd())"
+                                 @ondragstart="() => HandleDragStart(task, todoList)"
+                                 @ondragend="HandleDragEnd"
                                  @onclick="() => SpecificTodoItemHandler(task)">
                                 @if (task.Labels.Any())
                                 {
@@ -302,7 +302,6 @@ else
     /*-----BEGIN: For drag and drop-----*/
     private TodoItemDto? DraggedItem { get; set; }
     private TodoListDto? SourceList { get; set; }
-    private int? DraggedItemOriginalIndex { get; set; }
     /*-----END: For drag and drop-----*/
     
     /*-----BEGIN: User Role-----*/
@@ -398,7 +397,6 @@ else
         }
         DraggedItem = item;
         SourceList = sourceList;
-        DraggedItemOriginalIndex = sourceList.TodoItems.IndexOf(item);
     }
 
     private async void HandleDragEnd()
@@ -410,7 +408,6 @@ else
         }
         DraggedItem = null;
         SourceList = null;
-        DraggedItemOriginalIndex = null;
     }
 
     private async Task HandleDrop(TodoListDto targetList)

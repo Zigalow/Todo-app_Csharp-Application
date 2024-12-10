@@ -34,7 +34,7 @@ else
             <button class="todolist-dropdown-button" @onclick="() => ToggleDropdownMenu(CurrentProject)">
                 <img src="images/menu.png" alt=""/>
             </button>
-            @if (CurrentProjectDropdownMenu == CurrentProject && !IsViewer)
+            @if (CurrentProjectDropdownMenu == CurrentProject)
             {
                 <div class="todo-list-dropdown">
                     @if (!IsViewer && !IsMember)
@@ -243,10 +243,7 @@ else
         }
     </div>
     
-    <ShareProjectComponent
-            Project="@CurrentProject"
-            IsVisible="@_viewSharedProjectComponent"
-            IsVisibleChanged="@HandleViewSharedProjectComponent"/>
+    <ShareProjectComponent Project="@CurrentProject" IsVisible="@_viewSharedProjectComponent" IsVisibleChanged="@HandleViewSharedProjectComponent"/>
     
     <SpecificTodoItemComponent TodoItem="@SpecificTodoItem" IsViewer="@IsViewer" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged" OnTodoItemDeleted="@HandleTodoItemDeleted"/>
 }

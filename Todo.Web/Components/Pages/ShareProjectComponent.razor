@@ -28,12 +28,6 @@
             
             <button class="share-button" @onclick="HandleShare">Share</button>
         </div>
-        @if (_showError)
-        {
-            <b class="error-message">
-                @_errorMessage
-            </b>
-        }
         <div>   
             @if (ProjectCollaborators == null)
             {
@@ -68,9 +62,11 @@
         </div>
         
     </div>
-
+    
 </div>
 
+
+<StatusMessageComponent Message="@_statusMessage" IsError="@_isError" IsVisible = "@_viewStatusComponent"IsVisibleChanged="@HandleStatusMessageVisibility"/>
 
 
 @code {
@@ -86,8 +82,9 @@
     private List<ProjectCollaboratorDto>? ProjectCollaborators { get; set; }
     private Dictionary<string, ProjectRole> _info = new();
     
-    private bool _showError = false;
-    private string _errorMessage = "";
+    private bool _isError = false;
+    private string _statusMessage = "";
+    private bool _viewStatusComponent { get; set; } = false;
     
     private bool _isVisible;
     
@@ -103,7 +100,7 @@
         }
         catch (Exception e)
         {
-            await ShowErrorMessage("Failed to get collaborators. Please try again.");   
+            await ShowStatusMessage("Failed to get collaborators. Please try again.");   
         }
     }
     private async Task CloseView()
@@ -117,17 +114,16 @@
 
     private async Task HandleShare()
     {
-        
         if (string.IsNullOrEmpty(_collaboratorEmail) || string.IsNullOrWhiteSpace(_collaboratorEmail))
         {
-            await ShowErrorMessage("Failed to share project. Please try again.");
+            await ShowStatusMessage("Failed to share project. Please try again.");
             return;
         }
         
         var userId = await UserService.GetUserIdFromEmailAsync(_collaboratorEmail);
         if (userId == null)
         {
-            await ShowErrorMessage("Failed to find user. Please try again.");
+            await ShowStatusMessage("Failed to find user. Please try again.");
             return;
         }
 
@@ -144,34 +140,25 @@
             await UpdateCollaboratorsEmail();
             _collaboratorEmail = "";
             _selectedRole = ProjectRole.Viewer;
+
+            await ShowStatusMessage($"Project shared with {_collaboratorEmail}", false);
             return;
         }
-        await ShowErrorMessage("Failed to share project. Please try again.");
-    }
-    
-    private async Task ShowErrorMessage(string message)
-    {
-        _errorMessage = message;
-        _showError = true;
-
-        await Task.Delay(1000);
-        _errorMessage = "";
-        _showError = false;
+        await ShowStatusMessage("Failed to share project. Please try again.");
     }
     
     private async Task UpdateCollaborator(string? email, ChangeEventArgs e)
     {
-        Console.WriteLine($"Selected Role: {e.Value}");
-
         if (email == null)
         {
+            await ShowStatusMessage($"Failed to update Collaborator {email}");
             return;
         }
         
         var userId = await UserService.GetUserIdFromEmailAsync(email);
         if (userId == null)
         {
-            Console.WriteLine("UserId not found");
+            await ShowStatusMessage($"Failed to update Collaborator {email}");
             return;   
         }
         
@@ -179,7 +166,7 @@
         {
             var selectedRole = (ProjectRole)Enum.Parse(typeof(ProjectRole), e.Value.ToString() ?? throw new InvalidOperationException());
 
-            var updateProjectCollaboratorDto = new UpdateProjectCollaboratorDto()
+            var updateProjectCollaboratorDto = new UpdateProjectCollaboratorDto
             {
                 Role = selectedRole
             };
@@ -188,11 +175,12 @@
             if (success)
             {
                 ProjectCollaborators = await ProjectCollaboratorService.GetCollaboratorsFromProjectAsync(Project.Id);
+                await ShowStatusMessage($"Successfully Updated Collaborator {email}", false);
                 await UpdateCollaboratorsEmail();
             }
             else
             {
-                await ShowErrorMessage($"Failed to update Collaborator {email}");
+                await ShowStatusMessage($"Failed to update Collaborator {email}");
             }
         }
     }
@@ -201,14 +189,14 @@
     {
         if (email == null)
         {
-            await ShowErrorMessage("Failed to find email");
+            await ShowStatusMessage("Failed to find email");
             Console.WriteLine("email not found");
          return;   
         }
         var userId = await UserService.GetUserIdFromEmailAsync(email);
         if (userId == null)
         {
-            await ShowErrorMessage("Failed to find User");
+            await ShowStatusMessage("Failed to find User");
             Console.WriteLine("UserId not found");
             return;
         }
@@ -217,10 +205,12 @@
         {
             ProjectCollaborators = await ProjectCollaboratorService.GetCollaboratorsFromProjectAsync(Project.Id);
             await UpdateCollaboratorsEmail();
+            
+            await ShowStatusMessage($"Successfully deleted Collaborator {email}", false);
         }
         else
         {
-            await ShowErrorMessage("Failed to delete Collaborator");
+            await ShowStatusMessage("Failed to delete Collaborator");
         }
         
     }
@@ -239,6 +229,20 @@
                 }
             }
         }
+    }
+    
+    private Task ShowStatusMessage(string message, bool isError = true)
+    {
+        _statusMessage = message;
+        _isError = isError;
+        _viewStatusComponent = true;
+        return Task.CompletedTask;
+    }
+
+    private Task HandleStatusMessageVisibility(bool isVisible)
+    {
+        _viewStatusComponent = isVisible;
+        return Task.CompletedTask;
     }
     
 }

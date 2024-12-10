@@ -64,18 +64,11 @@
 </div>
 
 
-<StatusMessageComponent 
-    Message="@_statusMessage" 
-    IsError="@_isError" 
-    IsVisible = "@_viewStatusComponent"
-    IsVisibleChanged="@HandleStatusMessageVisibility"/>
+<StatusMessageComponent Message="@_statusMessage" IsError="@_isError" IsVisible = "@_viewStatusComponent"IsVisibleChanged="@HandleStatusMessageVisibility"/>
 
 @if (_selectedProject != null)
 {
-    <ShareProjectComponent
-        Project="@_selectedProject"
-        IsVisible="@_viewSharedProjectComponent"
-        IsVisibleChanged="@HandleViewSharedProjectComponent"/>
+    <ShareProjectComponent Project="@_selectedProject" IsVisible="@_viewSharedProjectComponent" IsVisibleChanged="@HandleViewSharedProjectComponent"/>
 }
 
 @code {
@@ -154,7 +147,7 @@
         if (isDeleted)
         {
             _projects = _projects.Where(p => p.Id != projectId).ToList();
-            await ShowStatusMessage("Delete project.", false);
+            await ShowStatusMessage("Project Deleted", false);
         }
         else
         {
@@ -162,14 +155,15 @@
         }
     }
     
-    private async Task HandleViewSharedProjectComponent(bool value)
+    private Task HandleViewSharedProjectComponent(bool value)
     {
         _viewSharedProjectComponent = value;
         if (value == false)
         {
             _selectedProject = null;
         }
-        
+
+        return Task.CompletedTask;
     }
     
     private void ToggleShareProject(ProjectDto project)
@@ -178,15 +172,17 @@
         _viewSharedProjectComponent = true;
     }
     
-    private async Task ShowStatusMessage(string message, bool isError = true)
+    private Task ShowStatusMessage(string message, bool isError = true)
     {
         _statusMessage = message;
         _isError = isError;
         _viewStatusComponent = true;
+        return Task.CompletedTask;
     }
 
-    private async Task HandleStatusMessageVisibility(bool isVisible)
+    private Task HandleStatusMessageVisibility(bool isVisible)
     {
         _viewStatusComponent = isVisible;
+        return Task.CompletedTask;
     }
 }

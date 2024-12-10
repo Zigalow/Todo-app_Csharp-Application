@@ -39,19 +39,7 @@ else
                 <div class="project-dropdown">
                     @if (!IsViewer && !IsMember)
                     {
-                        <div class="todolist-dropdown" @onclick:stopPropagation>
-                                @if (_showRemoveUserInput)
-                                {
-                                    <div class="remove-user-dropdown">
-                                        <input type="text" @bind="_removingUserByEmail" placeholder="Enter User's email..." style="margin-bottom: 1.2%"/>
-                                        <button @onclick="RemoveUser" style="background-color: #dc3545; color: white;">Confirm Remove User</button>
-                                        <button @onclick="ToggleRemoveUserInput">Cancel</button>
-                                    </div>
-                                }
-                                <button @onclick="ToggleRemoveUserInput">Remove User</button>
-                                
-                        </div>
-                        <button @onclick="ToggleShareProject">Add user</button>
+                        <button @onclick="ToggleShareProject">Manage Users</button>
                     }
                     @if (!IsAdmin)
                     {
@@ -312,9 +300,6 @@ else
     private string _statusMessage = "";
     private bool _viewStatusComponent { get; set; } = false;
     /*-----END: Status Message-----*/
-    
-    private string _removingUserByEmail { get; set;}
-    private bool _showRemoveUserInput { get; set; } = false;
     
    private bool _viewSharedProjectComponent { get; set; } = false;
     
@@ -696,7 +681,6 @@ else
         var success = await ProjectCollaboratorService.RemoveSelfFromProjectAsync(ProjectId);
         if (success)
         {
-            await ShowStatusMessage("You have been removed from project",false);
             NavigationManager.NavigateTo("/");
         }
         else
@@ -705,34 +689,6 @@ else
         }
 
     }
-
-    private async Task RemoveUser()
-    {
-        if (IsViewer || IsMember)
-        {
-            await ShowStatusMessage("Permission denied");
-            return;
-        }
-
-
-        var userId = await UserService.GetUserIdFromEmailAsync(_removingUserByEmail);
-        if (userId == null)
-        {
-            await ShowStatusMessage($"Failed to remove {_removingUserByEmail} {CurrentProject?.Name}");
-            return;
-            
-        }
-        var success = await ProjectCollaboratorService.RemoveCollaboratorFromProjectAsync(ProjectId, userId);
-        if (success)
-        {
-            await ShowStatusMessage($"{_removingUserByEmail} has been removed",false);
-        }
-        else
-        {
-            await ShowStatusMessage($"Failed to remove {_removingUserByEmail} {CurrentProject?.Name}");
-        }
-    }
-    
     
     private async Task DeleteProject()
     {
@@ -772,26 +728,19 @@ else
     private void ToggleDropdownMenu(ProjectDto project)
     {
         CurrentProjectDropdownMenu = CurrentProjectDropdownMenu == project ? null : project;
-        if (!_showRemoveUserInput) return;
-        _removingUserByEmail = string.Empty;
-        _showRemoveUserInput = false;
     }
     
-    private void ToggleRemoveUserInput()
-    {
-        _showRemoveUserInput = !_showRemoveUserInput;
-        _removingUserByEmail = string.Empty;
-    }
-    
-    private async Task ShowStatusMessage(string message, bool isError = true)
+    private Task ShowStatusMessage(string message, bool isError = true)
     {
         _statusMessage = message;
         _isError = isError;
         _viewStatusComponent = true;
+        return Task.CompletedTask;
     }
 
-    private async Task HandleStatusMessageVisibility(bool isVisible)
+    private Task HandleStatusMessageVisibility(bool isVisible)
     {
         _viewStatusComponent = isVisible;
+        return Task.CompletedTask;
     }
 }

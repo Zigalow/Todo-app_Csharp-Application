@@ -59,12 +59,9 @@
             </div>
         }
     }
-    @if (_showError)
-    {
-        <b class="error-message">
-            @_errorMessage
-        </b>
-    }
+
+    <StatusMessageComponent Message="@_statusMessage" IsError="@_isError" IsVisible = "@_viewStatusComponent" IsVisibleChanged="@HandleStatusMessageVisibility"/>
+    
     @if (CurrentProject != null)
     {
         <ShareProjectComponent Project="CurrentProject" IsVisible="@_viewSharedProjectComponent" IsVisibleChanged="@HandleViewSharedProjectComponent"/>
@@ -79,8 +76,11 @@
     private ProjectDto? CurrentProject { get; set; }
     private bool _viewSharedProjectComponent { get; set; } = false;
     
-    private bool _showError = false;
-    private string _errorMessage = "";
+    
+    private bool _isError = false;
+    private string _statusMessage = "";
+    private bool _viewStatusComponent { get; set; } = false;
+    
     
     protected override async Task OnInitializedAsync()
     {
@@ -128,18 +128,9 @@
         }
         else
         {
-            await ShowErrorMessage("Failed to remove you from the project");
+            await ShowStatusMessage("Failed to remove you from the project");
         }
 
-    }
-    private async Task ShowErrorMessage(string message)
-    {
-        _errorMessage = message;
-        _showError = true;
-        await Task.Delay(1500);
-
-        _errorMessage = "";
-        _showError = false;
     }
     
     private void ToggleShareProject()
@@ -152,5 +143,17 @@
         _viewSharedProjectComponent = value;
     }
     
+    private Task ShowStatusMessage(string message, bool isError = true)
+    {
+        _statusMessage = message;
+        _isError = isError;
+        _viewStatusComponent = true;
+        return Task.CompletedTask;
+    }
 
+    private Task HandleStatusMessageVisibility(bool isVisible)
+    {
+        _viewStatusComponent = isVisible;
+        return Task.CompletedTask;
+    }
 }

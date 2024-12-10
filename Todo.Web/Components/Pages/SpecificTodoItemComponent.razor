@@ -108,10 +108,13 @@
     }
 </div>
 
+<StatusMessageComponent Message="@_statusMessage" IsError="@_isError" IsVisible = "@_viewStatusComponent"IsVisibleChanged="@HandleStatusMessageVisibility"/>
+
 @code {
     [Parameter] public TodoItemDto TodoItem { get; set; }
     [Parameter] public bool IsViewer { get; set; }
     [Parameter] public bool IsVisible { get; set; }
+    
     /*Learned this way from here:https://stackoverflow.com/questions/56831266/passing-method-to-component*/
     [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
     [Parameter] public EventCallback OnTodoItemDeleted { get; set; }
@@ -142,7 +145,10 @@
     private string _editedTitle;
     private string _editedDescription;
 
-    //private bool IsViewer { get; set; } = false;
+    private bool _isError = false;
+    private string _statusMessage = "";
+    private bool _viewStatusComponent { get; set; } = false;
+    
     
     protected override void OnParametersSet()
     {
@@ -170,7 +176,11 @@
 
     private async Task SaveTitle()
     {
-        if(IsViewer) return;
+        if (IsViewer)
+        {
+            await ShowStatusMessage("Permission denied");
+            return;
+        }
         if (string.IsNullOrWhiteSpace(_editedTitle)) return;
 
         var updateDto = new UpdateTodoItemDto
@@ -185,13 +195,18 @@
         if (success)
         {
             TodoItem.Title = _editedTitle;
+            await ShowStatusMessage("Updated Title", false);
         }
         _isEditingTitle = false;
     }
 
     private async Task SaveDescription()
     {
-        if(IsViewer) return;
+        if (IsViewer)
+        {
+            await ShowStatusMessage("Permission denied");
+            return;
+        }
         var updateDto = new UpdateTodoItemDto
         {
             Title = TodoItem.Title,
@@ -204,13 +219,22 @@
         if (success)
         {
             await TodoItemService.GetTodoItemByIdAsync(TodoItem.Id);
+            await ShowStatusMessage("Updated Description", false);
+        }
+        else
+        {
+            await ShowStatusMessage("Failed to updated Description");
         }
         _isEditingDescription = false;
     }
 
     private async Task SavePriority()
     {
-        if(IsViewer) return;
+        if (IsViewer)
+        {
+            await ShowStatusMessage("Permission denied");
+            return;
+        }
         var updateDto = new UpdateTodoItemDto
         {
             Title = TodoItem.Title,
@@ -223,12 +247,21 @@
         if (success)
         {
             await TodoItemService.GetTodoItemByIdAsync(TodoItem.Id);
+            await ShowStatusMessage("Updated Priority", false);
+        }
+        else
+        {
+            await ShowStatusMessage("Failed to updated Priority");
         }
     }
 
     private async Task SaveDueDate()
     {
-        if(IsViewer) return;
+        if (IsViewer)
+        {
+            await ShowStatusMessage("Permission denied");
+            return;
+        }
         var updateDto = new UpdateTodoItemDto
         {
             Title = TodoItem.Title,
@@ -241,17 +274,43 @@
         if (success)
         {
             await TodoItemService.GetTodoItemByIdAsync(TodoItem.Id);
+        } 
+        else
+        {
+            await ShowStatusMessage("Failed to updated DueDate");
         }
     }
 
     private async Task DeleteTodoItemAsync()
     {
-        if(IsViewer) return;
+        if (IsViewer)
+        {
+            await ShowStatusMessage("Permission denied");
+            return;
+        }
         var success = await TodoItemService.DeleteTodoItemAsync(TodoItem.Id);
         if (success)
         {
             await OnTodoItemDeleted.InvokeAsync();
             await CloseView();
         }
+        else
+        {
+            await ShowStatusMessage("Failed to get delete TodoItem. Please try again.");
+        }
+    }
+    
+    private Task ShowStatusMessage(string message, bool isError = true)
+    {
+        _statusMessage = message;
+        _isError = isError;
+        _viewStatusComponent = true;
+        return Task.CompletedTask;
+    }
+
+    private Task HandleStatusMessageVisibility(bool isVisible)
+    {
+        _viewStatusComponent = isVisible;
+        return Task.CompletedTask;
     }
 }

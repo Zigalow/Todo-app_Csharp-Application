@@ -44,7 +44,7 @@
                             <div class="project-dropdown">
                                 @if (GetUserRoleInProject(project.Id) != ProjectRole.Viewer && GetUserRoleInProject(project.Id) != ProjectRole.ProjectMember)
                                 {
-                                    <button @onclick="() => ToggleShareProject()">Share Project</button>
+                                    <button @onclick="ToggleShareProject">Share Project</button>
                                 }
                                 <button @onclick="() => RemoveSelf(project.Id)">Leave Project</button>
                             </div>

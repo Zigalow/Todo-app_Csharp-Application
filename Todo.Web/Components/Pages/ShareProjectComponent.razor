@@ -88,18 +88,31 @@
     
     private bool _isVisible;
     
-    protected override async void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
         try
         {
             _isVisible = IsVisible;
-            ProjectCollaborators = await ProjectCollaboratorService.GetCollaboratorsFromProjectAsync(Project.Id);
-            
-            await UpdateCollaboratorsEmail();
+            if (_isVisible)
+            {
+                
+                ProjectCollaborators = await ProjectCollaboratorService.GetCollaboratorsFromProjectAsync(Project.Id);
+
+                if (ProjectCollaborators != null && ProjectCollaborators.Any())
+                {
+                    await UpdateCollaboratorsEmail();
+                }
+                else
+                {
+                    ProjectCollaborators = [];
+                }
+            }
+
             StateHasChanged();
         }
         catch (Exception e)
         {
+            Console.WriteLine("Here");
             await ShowStatusMessage("Failed to get collaborators. Please try again.");   
         }
     }

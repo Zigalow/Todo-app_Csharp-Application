@@ -229,9 +229,11 @@ else
             </div>
         }
     </div>
-    
-    <ShareProjectComponent Project="@CurrentProject" IsVisible="@_viewSharedProjectComponent" IsVisibleChanged="@HandleViewSharedProjectComponent"/>
-    
+    if (_viewSharedProjectComponent)
+    {
+        <ShareProjectComponent Project="@CurrentProject" IsVisible="@_viewSharedProjectComponent" IsVisibleChanged="@HandleViewSharedProjectComponent"/>
+    }
+
     <SpecificTodoItemComponent TodoItem="@SpecificTodoItem" IsViewer="@IsViewer" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged" OnTodoItemDeleted="@HandleTodoItemDeleted"/>
 }
 

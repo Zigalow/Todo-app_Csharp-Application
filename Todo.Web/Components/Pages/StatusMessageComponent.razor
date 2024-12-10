@@ -1,0 +1,51 @@
+@using System.Timers
+
+<div class="status-message @(_isVisible ? "visible" : "")" style="@(_isVisible ? "display: block;" : "display: none;")">
+    @if (_isError)
+    {
+        <img src="images/error-icon.png" class="status-img" alt=""/>
+    }
+    else
+    {
+        <img src="images/success-icon.png" class="status-img" alt=""/>
+    }
+    
+    <b>@_message</b>
+</div>
+
+@code {
+    private bool _isVisible = false;
+    private bool _isError = true;
+    private string _message = "";
+    private Timer? _timer;
+
+    [Parameter]
+    public string Message { get; set; } = "";
+
+    [Parameter]
+    public bool IsError { get; set; } = true;
+    
+    [Parameter] public bool IsVisible { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsVisibleChanged { get; set; }
+
+    protected async override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(Message))
+        {
+            await ShowMessage(Message, IsError);
+        }
+    }
+
+    private async Task ShowMessage(string message, bool isError = true)
+    {
+        _message = message;
+        _isError = isError;
+        _isVisible = IsVisible;
+        await Task.Delay(2000);
+        
+        await IsVisibleChanged.InvokeAsync(false);
+        
+    }
+}

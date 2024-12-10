@@ -1,6 +1,7 @@
 ﻿@page "/Account/Manage/PersonalData"
+@using Todo.Web.Auth
 
-@inject IdentityUserAccessor UserAccessor
+@inject IUserService UserService
 
 <PageTitle>Personal Data</PageTitle>
 
@@ -30,7 +31,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _ = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        _ = await UserService.GetUserInfoAsync();
+        //UserAccessor.GetRequiredUserAsync(HttpContext);
     }
 
 }

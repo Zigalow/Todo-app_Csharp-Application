@@ -1,9 +1,9 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using Todo.Web.Auth;
 using Todo.Web.Components;
-using Todo.Web.Components.Account;
-using Todo.Web.Data;
+using Todo.Web.Services;
+using Todo.Web.Services.interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,30 +11,43 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<IdentityUserAccessor>();
-builder.Services.AddScoped<IdentityRedirectManager>();
-builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-
+// Add authentication and authorization
 builder.Services.AddAuthentication(options =>
     {
-        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     })
-    .AddIdentityCookies();
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "TodoApp.Auth";
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    });
+builder.Services.AddAuthorization();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
-                       throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+// Add custom auth state provider and auth service
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<IProjectCollaboratorService, ProjectCollaboratorService>();
+builder.Services.AddScoped<ITodoListService, TodoListService>();
+builder.Services.AddScoped<ITodoItemService, TodoItemService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ILabelService, LabelService>();
+builder.Services.AddScoped<AuthHeaderHandler>();
+builder.Services.AddTransient<AuthenticationInterceptor>();
 
-builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddSignInManager()
-    .AddDefaultTokenProviders();
+builder.Services.AddAntiforgery();
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+//Connect with todoApi
+builder.Services
+    .AddHttpClient("TodoApi", client => { client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!); })
+    .AddHttpMessageHandler<AuthHeaderHandler>()
+    .AddHttpMessageHandler<AuthenticationInterceptor>();
+
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
@@ -46,19 +59,18 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
-app.UseAntiforgery();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-// Add additional endpoints required by the Identity /Account Razor components.
-app.MapAdditionalIdentityEndpoints();
+app.UseAntiforgery();
 
 app.Run();

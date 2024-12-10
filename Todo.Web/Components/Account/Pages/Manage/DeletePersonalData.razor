@@ -1,14 +1,10 @@
 ﻿@page "/Account/Manage/DeletePersonalData"
-
 @using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Identity
-@using Todo.Web.Data
+@using Todo.Web.Auth
 
-@inject UserManager<ApplicationUser> UserManager
-@inject SignInManager<ApplicationUser> SignInManager
-@inject IdentityUserAccessor UserAccessor
-@inject IdentityRedirectManager RedirectManager
-@inject ILogger<DeletePersonalData> Logger
+@inject IUserService UserService
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Delete Personal Data</PageTitle>
 
@@ -40,11 +36,7 @@
 
 @code {
     private string? message;
-    private ApplicationUser user = default!;
     private bool requirePassword;
-
-    [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
@@ -52,30 +44,26 @@
     protected override async Task OnInitializedAsync()
     {
         Input ??= new();
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        requirePassword = await UserManager.HasPasswordAsync(user);
+        requirePassword = await UserService.HasPasswordAsync();
     }
 
     private async Task OnValidSubmitAsync()
     {
-        if (requirePassword && !await UserManager.CheckPasswordAsync(user, Input.Password))
+        var result = await UserService.DeleteAccountAsync(requirePassword ? Input.Password : null);
+        
+        if (!result)
         {
-            message = "Error: Incorrect password.";
+            message = "Error: Failed to delete account. Please check your password if provided.";
             return;
         }
-
-        var result = await UserManager.DeleteAsync(user);
-        if (!result.Succeeded)
+        
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
         {
-            throw new InvalidOperationException("Unexpected error occurred deleting user.");
+           
         }
 
-        await SignInManager.SignOutAsync();
-
-        var userId = await UserManager.GetUserIdAsync(user);
-        Logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);
-
-        RedirectManager.RedirectToCurrentPage();
+        NavigationManager.NavigateTo("/");
     }
 
     private sealed class InputModel
@@ -83,5 +71,4 @@
         [DataType(DataType.Password)]
         public string Password { get; set; } = "";
     }
-
 }

@@ -1,0 +1,53 @@
+@page "/Account/Logout"
+@using Todo.Web.Auth
+@using Todo.Web.Components.Layout
+@layout EmptyLayout
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <h2 class="card-title mb-4">You've Been Logged Out</h2>
+
+                    <p class="lead mb-4">
+                        You have successfully logged out of your account.
+                        For security reasons, we recommend closing all browser windows.
+                    </p>
+
+                    <div class="d-flex justify-content-center gap-3">
+                        <button
+                            class="btn btn-primary"
+                            @onclick="NavigateToLogin">
+                            Return to Login
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await AuthService.LogoutAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Logout failed: {ex.Message}");
+        }
+    }
+
+    private void NavigateToLogin()
+    {
+        NavigationManager.NavigateTo("/Account/Login", true);
+    }
+
+}

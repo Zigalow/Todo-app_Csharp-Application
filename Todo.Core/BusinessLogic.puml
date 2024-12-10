@@ -36,8 +36,8 @@ class Project {
     -int Id
     -string Name
     -List<TodoList> TodoLists
-    -User Owner
-    -List<UserProjectRole> UserRoles
+    -User Admin
+    -List<UserProjectAssignment> UserRoles
     +void AddTodoList(TodoList list)
     +void RemoveTodoList(TodoList list)
     +void ShareWithUser(User user)
@@ -63,15 +63,11 @@ class Label {
 class Role {
     -int id
     -string Name
-    -List<Permission> permissions
+    -HashSet<PermissionType> permissions
 }
 
-class Permission {
-    -int id
-    -string Name
-}
 
-class UserProjectRole {
+class UserProjectAssignment {
     -int UserId
     -int ProjectId
     -Role Role
@@ -86,14 +82,13 @@ class Calendar {
 
 User "1" -- "*" Project : participates in >
 User "1" -- "*" Project : owns >
-User "*" -- "*" Role : Has >
-User "1" -- "*" UserProjectRole : Has <
+User "1" -- "*" UserProjectAssignment : Has <
 TodoItem "*" -- "*" Label : Contains
 TodoItem --  Calendar : manages
 TodoItem "1" -- "*" Priority : 1 >
-Role "*" -- "*" Permission : Has >
-Role "1" -- "*" UserProjectRole : assigned to >
-Project "1" -- "*" UserProjectRole : Has >
+Role "*" -- "*" PermissionType : Has >
+Role "1" -- "*" UserProjectAssignment : assigned to >
+Project "1" -- "*" UserProjectAssignment : Has >
 
 
 TodoList "1" -- "*" TodoItem : contains >
@@ -136,6 +131,33 @@ ISpecification <|.. PrioritySpecification: implements <
 ISpecification <|.. LabelSpecification: implements <
 ISpecification <|.. CompletionStatusSpecification: implements <
 ISpecification <|.. UserSpecification: implements <
+
+
+class PermissionManager {
+        {static} +bool CheckPermission(User user, PermissionType permission)
+        {static} +void AddPermission(Role role, PermissionType permission)
+        {static} +void RemovePermission(Role role, PermissionType permission)
+}
+
+class PermissionType {
+None = 0,
+        ViewTodos = 1 << 0,
+        CreateTodos = 1 << 1,
+        UpdateTodos = 1 << 2,
+        DeleteTodos = 1 << 3,
+        ManageProjects = 1 << 4,
+        AssignProjectMembers = 1 << 5,
+        ManageTodoLists = 1 << 6,
+        ShareTodoLists = 1 << 7,
+        ManageLabels = 1 << 8,
+        ViewUsers = 1 << 9,
+        ManageUsers = 1 << 10,
+        ManageRoles = 1 << 11,
+        ManageAdmin = 1 << 12,
+        All = ~0
+}
+
+PermissionManager "1" --o "1" PermissionType : Has >
 
 
 @enduml

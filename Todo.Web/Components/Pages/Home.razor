@@ -1,7 +1,188 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Authorization
+@using Todo.Core.Dtos.ProjectDtos
+@using Todo.Web.Services.interfaces
 
-<PageTitle>Home</PageTitle>
+@rendermode InteractiveServer
 
-<h1>Hello, world!</h1>
+@inject NavigationManager NavigationManager
+@inject IProjectService ProjectService
 
-Welcome to your new app.
+@attribute [Authorize]
+
+<title>Projects</title>
+
+<h1>My Projects</h1>
+
+<div class="projects-container">
+    @if (_projects == null)
+    {
+        <p class="project">loading...</p>
+    }
+    else if (!_projects.Any())
+    {
+        <p class="project">No project found</p>
+    }
+    else
+    {
+        @foreach (var project in _projects)
+        {
+            <div class="project-container" @onclick="() => NavigateToProject(project.Id)">
+                <div class="project-name">
+                    <p>@project.Name</p>
+                </div>
+
+                <div class="project-dropdown-menu" @onclick:stopPropagation>
+                    <button class="project-dropdown-button" @onclick="() => DropdownMenu(project)">
+                        <img src="images/menu2.png" alt=""/>
+                    </button>
+                        
+                    @if (CurrentDropdownMenu == project)
+                    {
+                        <div class="project-dropdown">
+                            <button @onclick="() => ToggleShareProject(project)">Share project</button>
+                            <button @onclick="() => DeleteProjectAsync(project.Id)">Delete project</button>
+                        </div>
+                    } 
+                </div>
+            </div>
+        }
+    }
+    @if (IsAddingProject)
+    {
+        <div class="new-project">
+            <input type="text" @bind="_newProjectName" placeholder="Project Name"/>
+            <button @onclick="CreateProjectAsync">Create Project</button>
+            <button @onclick="() => IsAddingProject = false">Cancel</button>
+        </div>
+    }
+    else
+    {
+        <button class="new-project" @onclick="ShowInputProject">Create new project</button>
+    }
+    
+</div>
+
+
+<StatusMessageComponent Message="@_statusMessage" IsError="@_isError" IsVisible = "@_viewStatusComponent"IsVisibleChanged="@HandleStatusMessageVisibility"/>
+
+@if (_selectedProject != null)
+{
+    <ShareProjectComponent Project="@_selectedProject" IsVisible="@_viewSharedProjectComponent" IsVisibleChanged="@HandleViewSharedProjectComponent"/>
+}
+
+@code {
+    [Parameter] public bool IsAddingProject { get; set; }
+    private string _newProjectName = ""; // Used too name the new project created
+    private List<ProjectDto>? _projects;
+
+    
+    private ProjectDto? CurrentDropdownMenu { get; set; }
+    
+    private bool _viewSharedProjectComponent { get; set; } = false;
+    private ProjectDto? _selectedProject;
+    
+    private bool _isError = false;
+    private string _statusMessage = "";
+    private bool _viewStatusComponent { get; set; } = false;
+
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _projects = await ProjectService.GetAllProjectsAsync();
+    }
+
+    private async Task CreateProjectAsync()
+    {
+        if (string.IsNullOrEmpty(_newProjectName) || string.IsNullOrWhiteSpace(_newProjectName))
+        {
+            await ShowStatusMessage("Failed to create project. Please try again.");
+            return;
+        }
+
+        // Create a new project DTO to send to the API
+        var createProjectDto = new CreateProjectDto
+        {
+            Name = _newProjectName
+        };
+
+        // Create the project in the database
+        var isCreated = await ProjectService.CreateProjectAsync(createProjectDto);
+        if (isCreated)
+        {
+            //Load all projects again
+            _projects = await ProjectService.GetAllProjectsAsync();
+            
+            await ShowStatusMessage("Project created", false);
+        }
+        else
+        {
+            await ShowStatusMessage("Failed to create project. Please try again.");
+        }
+
+        _newProjectName = "";
+        IsAddingProject = false;
+    }
+
+    private void NavigateToProject(int projectId)
+    {
+        NavigationManager.NavigateTo($"/project/{projectId}");
+    }
+
+    private void ShowInputProject()
+    {
+        IsAddingProject = true;
+    }
+    
+
+    private void DropdownMenu(ProjectDto project)
+    {
+    CurrentDropdownMenu = CurrentDropdownMenu == project ? null : project;
+    }
+
+    private async Task DeleteProjectAsync(int projectId)
+    {
+        var isDeleted = await ProjectService.DeleteProjectAsync(projectId);
+
+        if (isDeleted)
+        {
+            _projects = _projects.Where(p => p.Id != projectId).ToList();
+            await ShowStatusMessage("Project Deleted", false);
+        }
+        else
+        {
+            await ShowStatusMessage("Failed to delete project. Please try again.");
+        }
+    }
+    
+    private Task HandleViewSharedProjectComponent(bool value)
+    {
+        _viewSharedProjectComponent = value;
+        if (value == false)
+        {
+            _selectedProject = null;
+        }
+
+        return Task.CompletedTask;
+    }
+    
+    private void ToggleShareProject(ProjectDto project)
+    {
+        _selectedProject = project;
+        _viewSharedProjectComponent = true;
+    }
+    
+    private Task ShowStatusMessage(string message, bool isError = true)
+    {
+        _statusMessage = message;
+        _isError = isError;
+        _viewStatusComponent = true;
+        return Task.CompletedTask;
+    }
+
+    private Task HandleStatusMessageVisibility(bool isVisible)
+    {
+        _viewStatusComponent = isVisible;
+        return Task.CompletedTask;
+    }
+}

@@ -1,7 +1,6 @@
-﻿@using Microsoft.AspNetCore.Identity
-@using Todo.Web.Data
+﻿@using Todo.Web.Auth
 
-@inject SignInManager<ApplicationUser> SignInManager
+@inject IUserService UserService
 
 <ul class="nav nav-pills flex-column">
     <li class="nav-item">
@@ -32,7 +31,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+        hasExternalLogins = await UserService.HasExternalLoginsAsync();
     }
 
 }

@@ -1,10 +1,13 @@
-﻿@implements IDisposable
-
+﻿@using Todo.Web.Auth
+@implements IDisposable
+@inject IAuthService AuthService
 @inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Todo.Web</a>
+        <a class="navbar-brand" href="">Taskify</a>
     </div>
 </div>
 
@@ -14,43 +17,31 @@
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="auth">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> My Projects
             </NavLink>
         </div>
 
         <AuthorizeView>
             <Authorized>
                 <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="AllTask">
+                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> All Tasks
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Project/Shared">
+                        <img class="bi sharedWithMe" src="images/sharedWithMe-icon.png" alt=""/> Shared Projects
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Manage">
                         <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
-                    <form action="Account/Logout" method="post">
-                        <AntiforgeryToken/>
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl"/>
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                        </button>
-                    </form>
+                    <NavLink class="nav-link" href="/Account/Logout">
+                        <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                    </NavLink>
                 </div>
             </Authorized>
             <NotAuthorized>

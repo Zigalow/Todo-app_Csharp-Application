@@ -1,0 +1,159 @@
+@page "/Project/Shared"
+@using Microsoft.AspNetCore.Authorization
+@using Todo.Core.Dtos.ProjectDtos
+@using Todo.Core.Entities
+@using Todo.Web.Auth
+@using Todo.Web.Services.interfaces
+
+@inject NavigationManager NavigationManager
+@inject IProjectService ProjectService
+@inject IProjectCollaboratorService ProjectCollaboratorService
+
+@rendermode InteractiveServer
+
+@attribute [Authorize]
+<title>SharedProjects</title>
+
+<h3>Shared with me</h3>
+
+<div class="projects-container">
+    @if (_sharedProjects == null)
+    {
+        <p class="project">loading...</p>
+    }
+    else if (!_sharedProjects.Any())
+    {
+        <p class="project">No shared project found</p>
+    }
+    else
+    {
+        @foreach (var project in _sharedProjects)
+        {
+            <div class="project" @onclick="() => NavigateToProject(project.Id)">
+                
+                <div class="project-details">
+                    <p class="project-name">@project.Name</p>
+                    
+                    <div class="project-dropdown-menu" @onclick:stopPropagation>
+                        <button class="project-dropdown-button" @onclick="() => DropdownMenu(project)">
+                            <img src="images/menu2.png" alt=""/>
+                        </button>
+
+                        @if (CurrentProject == project)
+                        {
+                            <div class="project-dropdown">
+                                @if (GetUserRoleInProject(project.Id) != ProjectRole.Viewer && GetUserRoleInProject(project.Id) != ProjectRole.ProjectMember)
+                                {
+                                    <button @onclick="ToggleShareProject">Share Project</button>
+                                }
+                                <button @onclick="() => RemoveSelf(project.Id)">Leave Project</button>
+                            </div>
+                        }
+                    </div>
+                    
+                    <p class="project-owner">Admin: @project.AdminName</p>
+                    
+                    <p class="project-user-role">Role: @GetUserRoleInProject(project.Id) </p>
+
+                </div>
+            </div>
+        }
+    }
+
+    <StatusMessageComponent Message="@_statusMessage" IsError="@_isError" IsVisible = "@_viewStatusComponent" IsVisibleChanged="@HandleStatusMessageVisibility"/>
+    
+    @if (CurrentProject != null)
+    {
+        <ShareProjectComponent Project="CurrentProject" IsVisible="@_viewSharedProjectComponent" IsVisibleChanged="@HandleViewSharedProjectComponent"/>
+    }
+</div>
+
+@code {
+    private List<ProjectDto>? _sharedProjects;
+    
+    private Dictionary<int, ProjectRole?> _projectRoles = new();
+    
+    private ProjectDto? CurrentProject { get; set; }
+    private bool _viewSharedProjectComponent { get; set; } = false;
+    
+    
+    private bool _isError = false;
+    private string _statusMessage = "";
+    private bool _viewStatusComponent { get; set; } = false;
+    
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _sharedProjects = await ProjectService.GetSharedProjectsAsync();
+        
+        if (_sharedProjects == null)
+        {
+            return;
+        }
+        
+        foreach (var project in _sharedProjects)
+        {
+            var role = await ProjectCollaboratorService.GetCurrentUserRoleInProjectAsync(project.Id);
+            _projectRoles[project.Id] = role;
+        }
+    }
+    
+    private ProjectRole? GetUserRoleInProject(int projectId)
+    {
+        if (!_projectRoles.TryGetValue(projectId, out var role))
+        {
+            return ProjectRole.Viewer;
+        }
+
+        return role ?? ProjectRole.Viewer;
+    }
+    
+    private void NavigateToProject(int projectId)
+    {
+        Console.WriteLine($"Navigating to project {projectId}");
+        NavigationManager.NavigateTo($"/project/{projectId}");
+    }
+    
+    private void DropdownMenu(ProjectDto project)
+    {
+        CurrentProject = CurrentProject == project ? null : project;
+    }
+    
+    private async Task RemoveSelf(int projectId)
+    {
+        var success = await ProjectCollaboratorService.RemoveSelfFromProjectAsync(projectId);
+        if (success)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            await ShowStatusMessage("Failed to remove you from the project");
+        }
+
+    }
+    
+    private void ToggleShareProject()
+    {
+        _viewSharedProjectComponent = true;
+    }
+    
+    private async Task HandleViewSharedProjectComponent(bool value)
+    {
+        _viewSharedProjectComponent = value;
+    }
+    
+    private Task ShowStatusMessage(string message, bool isError = true)
+    {
+        _statusMessage = message;
+        _isError = isError;
+        _viewStatusComponent = true;
+        return Task.CompletedTask;
+    }
+
+    private Task HandleStatusMessageVisibility(bool isVisible)
+    {
+        _viewStatusComponent = isVisible;
+        return Task.CompletedTask;
+    }
+}

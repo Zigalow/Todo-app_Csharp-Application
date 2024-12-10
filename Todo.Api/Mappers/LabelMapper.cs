@@ -23,7 +23,7 @@ public static class LabelMapper
         {
             Name = createLabelDto.Name,
             ProjectId = projectId,
-            Color = createLabelDto.Color ?? "#000000",
+            Color = createLabelDto.Color ?? "#000000"
         };
     }
 

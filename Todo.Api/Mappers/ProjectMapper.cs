@@ -39,7 +39,7 @@ public static class ProjectMapper
         return new Project
         {
             Name = createProjectDto.Name,
-            AdminId = userId,
+            AdminId = userId
         };
     }
 

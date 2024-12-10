@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Microsoft.OpenApi.Extensions;
 using Todo.Core.Dtos.ProjectCollaboratorDtos;
 using Todo.Core.Entities;
 
@@ -9,7 +8,8 @@ public static class ProjectCollaboratorMapper
 {
     public static ProjectCollaboratorDto ToProjectCollaboratorDto(this ProjectCollaborator projectCollaborator)
     {
-        Debug.Assert(projectCollaborator.ApplicationUser.UserName != null, "projectCollaborator.ApplicationUser.UserName != null");
+        Debug.Assert(projectCollaborator.ApplicationUser.UserName != null,
+            "projectCollaborator.ApplicationUser.UserName != null");
         return new ProjectCollaboratorDto
         {
             UserId = projectCollaborator.UserId,

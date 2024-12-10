@@ -72,8 +72,12 @@
         </div>
     }
 }
+else
+{
+    <p>No Tasks</p>
+}
 
-<SpecificTodoItemComponent TodoItem="@_specificTodoItem" @*Project="@_"*@ IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged"
+<SpecificTodoItemComponent TodoItem="@_specificTodoItem" IsViewer="@IsViewer" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged"
                            OnTodoItemDeleted="@HandleTodoItemDeleted"/>
 
 
@@ -87,7 +91,9 @@
     private List<string> _selectedFilterOptions { get; set; } = new();
     private bool IsFilterVisible { get; set; }
     private List<LabelDto> AllLabels { get; set; }
-
+    
+    private bool IsViewer { get; set; } = false;
+    
     protected override async Task OnInitializedAsync()
     {
         TodoItems = await TodoItemService.GetAllTodoItemsAsync();

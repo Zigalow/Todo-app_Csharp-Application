@@ -110,7 +110,7 @@
 
 @code {
     [Parameter] public TodoItemDto TodoItem { get; set; }
-    [Parameter] public ProjectDto Project { get; set; }
+    [Parameter] public bool IsViewer { get; set; }
     [Parameter] public bool IsVisible { get; set; }
     /*Learned this way from here:https://stackoverflow.com/questions/56831266/passing-method-to-component*/
     [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
@@ -142,7 +142,7 @@
     private string _editedTitle;
     private string _editedDescription;
 
-    private bool IsViewer { get; set; } = false;
+    //private bool IsViewer { get; set; } = false;
     
     protected override void OnParametersSet()
     {
@@ -160,23 +160,7 @@
             _editedDescription = string.Empty;
         }
     }
-
-    protected override async Task OnInitializedAsync()
-    {
-        var user = await UserService.GetUserInfoAsync();
-        if (user == null)
-        {
-            return;
-        }
-        
-        if (!user.Username.Equals(Project.AdminName))
-        {
-            var userRole = await ProjectCollaboratorService.GetCurrentUserRoleInProjectAsync(Project.Id);
-            IsViewer = userRole == ProjectRole.Viewer;
-        }
-    }
-
-
+    
     private async Task CloseView()
     {
         _isVisible = false;

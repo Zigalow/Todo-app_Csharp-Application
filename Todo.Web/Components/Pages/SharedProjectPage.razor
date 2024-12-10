@@ -34,6 +34,23 @@
                 <div class="project-details">
                     <p class="project-name">@project.Name</p>
                     
+                    <div class="project-dropdown-menu" @onclick:stopPropagation>
+                        <button class="project-dropdown-button" @onclick="() => DropdownMenu(project)">
+                            <img src="images/menu2.png" alt=""/>
+                        </button>
+
+                        @if (CurrentProject == project)
+                        {
+                            <div class="project-dropdown">
+                                @if (GetUserRoleInProject(project.Id) != ProjectRole.Viewer && GetUserRoleInProject(project.Id) != ProjectRole.ProjectMember)
+                                {
+                                    <button @onclick="() => ToggleShareProject()">Share Project</button>
+                                }
+                                <button @onclick="() => RemoveSelf(project.Id)">Leave Project</button>
+                            </div>
+                        }
+                    </div>
+                    
                     <p class="project-owner">Admin: @project.AdminName</p>
                     
                     <p class="project-user-role">Role: @GetUserRoleInProject(project.Id) </p>
@@ -42,14 +59,28 @@
             </div>
         }
     }
-
-
+    @if (_showError)
+    {
+        <b class="error-message">
+            @_errorMessage
+        </b>
+    }
+    @if (CurrentProject != null)
+    {
+        <ShareProjectComponent Project="CurrentProject" IsVisible="@_viewSharedProjectComponent" IsVisibleChanged="@HandleViewSharedProjectComponent"/>
+    }
 </div>
 
 @code {
     private List<ProjectDto>? _sharedProjects;
     
     private Dictionary<int, ProjectRole?> _projectRoles = new();
+    
+    private ProjectDto? CurrentProject { get; set; }
+    private bool _viewSharedProjectComponent { get; set; } = false;
+    
+    private bool _showError = false;
+    private string _errorMessage = "";
     
     protected override async Task OnInitializedAsync()
     {
@@ -67,14 +98,14 @@
         }
     }
     
-    private string? GetUserRoleInProject(int projectId)
+    private ProjectRole? GetUserRoleInProject(int projectId)
     {
         if (!_projectRoles.TryGetValue(projectId, out var role))
         {
-            return "Not Found";
+            return ProjectRole.Viewer;
         }
 
-        return role == null ? "Undefined" : role.ToString();
+        return role ?? ProjectRole.Viewer;
     }
     
     private void NavigateToProject(int projectId)
@@ -82,5 +113,44 @@
         Console.WriteLine($"Navigating to project {projectId}");
         NavigationManager.NavigateTo($"/project/{projectId}");
     }
+    
+    private void DropdownMenu(ProjectDto project)
+    {
+        CurrentProject = CurrentProject == project ? null : project;
+    }
+    
+    private async Task RemoveSelf(int projectId)
+    {
+        var success = await ProjectCollaboratorService.RemoveSelfFromProjectAsync(projectId);
+        if (success)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            await ShowErrorMessage("Failed to remove you from the project");
+        }
+
+    }
+    private async Task ShowErrorMessage(string message)
+    {
+        _errorMessage = message;
+        _showError = true;
+        await Task.Delay(1500);
+
+        _errorMessage = "";
+        _showError = false;
+    }
+    
+    private void ToggleShareProject()
+    {
+        _viewSharedProjectComponent = true;
+    }
+    
+    private async Task HandleViewSharedProjectComponent(bool value)
+    {
+        _viewSharedProjectComponent = value;
+    }
+    
 
 }

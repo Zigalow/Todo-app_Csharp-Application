@@ -6,17 +6,19 @@
     justify-content: flex-start;
 }
 
+
 .project{
     display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
     width: 250px;
     height: 150px;
     background: linear-gradient(#0C2364, #3A0647);
-    background-color:#0C2364;
-    color:white;
+    background-color: #0C2364;
+    color: white;
     border-radius: 5%;
     cursor: pointer;
-    justify-content: center;
-    align-items: center;
 }
 
 .project-name {
@@ -32,4 +34,69 @@ p {
 
 a .project-name {
     text-decoration: none;
+}
+
+.project-dropdown-menu {
+    position: absolute;
+    top: 0;
+    right: 5px;
+    z-index: 10;
+}
+
+.project-dropdown-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.project-dropdown-button img {
+    width: 30px;
+    height: 30px;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+.project-dropdown-button img:hover {
+    opacity: 1;
+}
+
+.project-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.16);
+    min-width: 150px;
+    padding: 8px;
+}
+
+.project-dropdown button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+}
+
+.project-dropdown button:hover {
+    background-color: #f0f0f0;
+}
+
+.error-message {
+    display: flex;
+    position: fixed;
+    background-color:#0C2364;
+    bottom: 1.5%;
+    right: 1.5%;
+    width: 250px;
+    height: 150px;
+    color:white;
+    border-radius: 5%;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }

@@ -79,7 +79,7 @@ else
             {
                 <div class="todo-list-container" 
                      ondragover="event.preventDefault()"
-                     @ondrop="@(async () => await HandleDrop(todoList))"
+                     @ondrop="() => HandleDrop(todoList)"
                      @ondragover:preventDefault>
                     <div class="todo-list-title">
                         @if (_editTodoListId == todoList.Id)

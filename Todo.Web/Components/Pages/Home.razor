@@ -27,47 +27,48 @@
     {
         @foreach (var project in _projects)
         {
-                <div class="project-container" @onclick="() => NavigateToProject(project.Id)">
-                    <div class="project-name">
-                        <p>@project.Name</p>
-                    </div>
+            <div class="project-container" @onclick="() => NavigateToProject(project.Id)">
+                <div class="project-name">
+                    <p>@project.Name</p>
+                </div>
 
-                    <div class="project-dropdown-menu" @onclick:stopPropagation>
-                        <button class="project-dropdown-button" @onclick="() => DropdownMenu(project)">
-                            <img src="images/menu2.png" alt=""/>
-                        </button>
+                <div class="project-dropdown-menu" @onclick:stopPropagation>
+                    <button class="project-dropdown-button" @onclick="() => DropdownMenu(project)">
+                        <img src="images/menu2.png" alt=""/>
+                    </button>
                         
-                        @if (CurrentDropdownMenu == project)
-                        {
+                    @if (CurrentDropdownMenu == project)
+                    {
                         <div class="project-dropdown">
                             <button @onclick="() => ToggleShareProject(project)">Share project</button>
                             <button @onclick="() => DeleteProjectAsync(project.Id)">Delete project</button>
                         </div>
-                        } 
-                    </div>
+                    } 
                 </div>
+            </div>
         }
     }
     @if (IsAddingProject)
     {
-    <div class="new-project">
-        <input type="text" @bind="_newProjectName" placeholder="Project Name"/>
-        <button @onclick="CreateProjectAsync">Create Project</button>
-        <button @onclick="() => IsAddingProject = false">Cancel</button>
-    </div>
+        <div class="new-project">
+            <input type="text" @bind="_newProjectName" placeholder="Project Name"/>
+            <button @onclick="CreateProjectAsync">Create Project</button>
+            <button @onclick="() => IsAddingProject = false">Cancel</button>
+        </div>
     }
     else
     {
-    <button class="new-project" @onclick="ShowInputProject">Create new project</button>
+        <button class="new-project" @onclick="ShowInputProject">Create new project</button>
     }
     
 </div>
-@if (_showError)
-{
-<b class="error-message">
-    @_errorMessage
-</b>
-}
+
+
+<StatusMessageComponent 
+    Message="@_statusMessage" 
+    IsError="@_isError" 
+    IsVisible = "@_viewStatusComponent"
+    IsVisibleChanged="@HandleStatusMessageVisibility"/>
 
 @if (_selectedProject != null)
 {
@@ -81,14 +82,18 @@
     [Parameter] public bool IsAddingProject { get; set; }
     private string _newProjectName = ""; // Used too name the new project created
     private List<ProjectDto>? _projects;
-    private bool _showError = false;
-    private string _errorMessage = "";
+
+    
     private ProjectDto? CurrentDropdownMenu { get; set; }
     
     private bool _viewSharedProjectComponent { get; set; } = false;
     private ProjectDto? _selectedProject;
+    
+    private bool _isError = false;
+    private string _statusMessage = "";
+    private bool _viewStatusComponent { get; set; } = false;
 
-    // Get all the project for the given user
+    
     protected override async Task OnInitializedAsync()
     {
         _projects = await ProjectService.GetAllProjectsAsync();
@@ -98,7 +103,7 @@
     {
         if (string.IsNullOrEmpty(_newProjectName) || string.IsNullOrWhiteSpace(_newProjectName))
         {
-            await ShowErrorMessage("Failed to create project. Please try again.");
+            await ShowStatusMessage("Failed to create project. Please try again.");
             return;
         }
 
@@ -114,10 +119,12 @@
         {
             //Load all projects again
             _projects = await ProjectService.GetAllProjectsAsync();
+            
+            await ShowStatusMessage("Project created", false);
         }
         else
         {
-            await ShowErrorMessage("Failed to create project. Please try again.");
+            await ShowStatusMessage("Failed to create project. Please try again.");
         }
 
         _newProjectName = "";
@@ -126,7 +133,6 @@
 
     private void NavigateToProject(int projectId)
     {
-        Console.WriteLine($"Navigating to project {projectId}");
         NavigationManager.NavigateTo($"/project/{projectId}");
     }
 
@@ -135,15 +141,7 @@
         IsAddingProject = true;
     }
     
-    private async Task ShowErrorMessage(string message)
-    {
-        _errorMessage = message;
-        _showError = true;
 
-        await Task.Delay(1000);
-        _errorMessage = "";
-        _showError = false;
-    }
     private void DropdownMenu(ProjectDto project)
     {
     CurrentDropdownMenu = CurrentDropdownMenu == project ? null : project;
@@ -156,10 +154,11 @@
         if (isDeleted)
         {
             _projects = _projects.Where(p => p.Id != projectId).ToList();
+            await ShowStatusMessage("Delete project.", false);
         }
         else
         {
-            await ShowErrorMessage("Failed to delete project. Please try again.");
+            await ShowStatusMessage("Failed to delete project. Please try again.");
         }
     }
     
@@ -179,4 +178,15 @@
         _viewSharedProjectComponent = true;
     }
     
+    private async Task ShowStatusMessage(string message, bool isError = true)
+    {
+        _statusMessage = message;
+        _isError = isError;
+        _viewStatusComponent = true;
+    }
+
+    private async Task HandleStatusMessageVisibility(bool isVisible)
+    {
+        _viewStatusComponent = isVisible;
+    }
 }

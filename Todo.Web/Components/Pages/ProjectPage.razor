@@ -65,12 +65,11 @@ else
             }
         </div>
     </div>
-    @if (_showError)
-    {
-        <b class="error-message">
-            @_errorMessage
-        </b>
-    }
+    <StatusMessageComponent 
+        Message="@_statusMessage" 
+        IsError="@_isError" 
+        IsVisible = "@_viewStatusComponent"
+        IsVisibleChanged="@HandleStatusMessageVisibility"/>
 
     <div class="todo-lists-container">
         @if (CurrentProject.TodoLists.Count != 0)
@@ -308,6 +307,12 @@ else
     private bool IsAdmin { get; set; } = true;
     /*-----END: User Role-----*/
     
+    /*-----BEGIN: Status Message-----*/
+    private bool _isError = false;
+    private string _statusMessage = "";
+    private bool _viewStatusComponent { get; set; } = false;
+    /*-----END: Status Message-----*/
+    
     private string _removingUserByEmail { get; set;}
     private bool _showRemoveUserInput { get; set; } = false;
     
@@ -360,7 +365,7 @@ else
     {
         if (string.IsNullOrEmpty(_newTodoItemName))
         {
-            await ShowErrorMessage("Failed to create TodoItem. Please try again.");
+            await ShowStatusMessage("Failed to create TodoItem. Please try again.");
             return;
         }
 
@@ -372,13 +377,12 @@ else
         var isCreated = await TodoItemService.CreateTodoItemAsync(todoList.Id, createTodoItemDto);
         if (isCreated)
         {
-            Console.WriteLine($"Created {_newTodoItemName} TodoItem");
             CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
+            await ShowStatusMessage($"Created {_newTodoItemName} TodoItem",false);
         }
         else
         {
-            Console.WriteLine("Failed to create TodoItem");
-            await ShowErrorMessage("Failed to create TodoItem. Please try again.");
+            await ShowStatusMessage("Failed to create TodoItem. Please try again.");
         }
 
         _newTodoItemName = "";
@@ -389,7 +393,7 @@ else
     {
         if (IsViewer)
         {
-            await ShowErrorMessage("Permission denied");
+            await ShowStatusMessage("Permission denied");
             return;
         }
         DraggedItem = item;
@@ -400,7 +404,7 @@ else
     {
         if (IsViewer)
         {
-            await ShowErrorMessage("Permission denied");
+            await ShowStatusMessage("Permission denied");
             return;
         }
         DraggedItem = null;
@@ -411,7 +415,7 @@ else
     {
         if (IsViewer)
         {
-            await ShowErrorMessage("Permission denied");
+            await ShowStatusMessage("Permission denied");
             return;
         }
         if (DraggedItem == null || SourceList == null) return;
@@ -424,6 +428,7 @@ else
 
         // Refresh the project
         CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
+        await ShowStatusMessage($"{DraggedItem.Title} moved to {targetList.Name} ",false);
         StateHasChanged();
     }
 
@@ -450,10 +455,11 @@ else
     {
         if (IsViewer)
         {
-            await ShowErrorMessage("Permission denied");
+            await ShowStatusMessage("Permission denied");
             return;
         }
         CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
+        await ShowStatusMessage("TodoItem deleted",false);
         StateHasChanged();
     }
 
@@ -462,7 +468,7 @@ else
     {
         if (IsViewer)
         {
-            await ShowErrorMessage("Permission denied");
+            await ShowStatusMessage("Permission denied");
             return;
         }
         if (!IsAddingTodoList)
@@ -473,7 +479,7 @@ else
         
         if (string.IsNullOrEmpty(_newTodoListName) || string.IsNullOrWhiteSpace(_newTodoListName))
         {
-            await ShowErrorMessage("Failed to create TodoList. Please try again.");
+            await ShowStatusMessage("Failed to create TodoList. Please try again.");
             return;
         }
 
@@ -485,13 +491,12 @@ else
         var isCreated = await TodoListService.CreateTodoListAsync(ProjectId, createTodoListDto);
         if (isCreated)
         {
-            Console.WriteLine($"Created {_newTodoListName} TodoList");
             CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
+            await ShowStatusMessage($"Created {_newTodoListName} TodoList",false);
         }
         else
         {
-            Console.WriteLine("Failed to create TodoList");
-            await ShowErrorMessage("Failed to create TodoList. Please try again.");
+            await ShowStatusMessage("Failed to create TodoList. Please try again.");
         }
 
         _newTodoListName = "";
@@ -504,12 +509,12 @@ else
         var isDeleted =  await TodoListService.DeleteTodoListAsync(todoListId);
         if (isDeleted)
         {
-            Console.WriteLine($"Deleted TodoList with ID: {todoListId}");
             CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
+            await ShowStatusMessage("Deleted TodoList",false);
         }
         else
         {
-            await ShowErrorMessage("Failed to delete TodoList. Please try again.");
+            await ShowStatusMessage("Failed to delete TodoList. Please try again.");
         }
     }
 
@@ -517,13 +522,13 @@ else
     {
         if (IsViewer)
         {
-            await ShowErrorMessage("Permission denied");
+            await ShowStatusMessage("Permission denied");
             return;
         }
 
         if (string.IsNullOrEmpty(_editedTodoListTitle) || string.IsNullOrWhiteSpace(_editedTodoListTitle))
         {
-            await ShowErrorMessage("TodoList Title is empty");
+            await ShowStatusMessage("TodoList Title is empty");
             return;
         }
 
@@ -536,30 +541,21 @@ else
         {
             todoList.Name = _editedTodoListTitle;
             CurrentProject = await ProjectService.GetProjectByIdAsync(ProjectId);
+            await ShowStatusMessage("Renamed TodoList",false);
         }
         else
         {
-            await ShowErrorMessage("Failed to update TodoList");
+            await ShowStatusMessage("Failed to update TodoList");
         }
         _editTodoListId = null;
         
-    }
-
-    private async Task ShowErrorMessage(string message)
-    {
-        _errorMessage = message;
-        _showError = true;
-        await Task.Delay(1500);
-
-        _errorMessage = "";
-        _showError = false;
     }
 
     private async void HandleIsModifier(TodoItemDto todoItem)
     {
         if (IsViewer)
         {
-            await ShowErrorMessage("Permission denied");
+            await ShowStatusMessage("Permission denied");
             return;
         }
         CurrentTodoItem = CurrentTodoItem == todoItem ? null : todoItem;
@@ -590,7 +586,7 @@ else
             _newTodoItemName = "";
             SelectedColor = "4A90E2";
             IsHandleLabel = false;
-            await ShowErrorMessage("Label name cannot be empty.");
+            await ShowStatusMessage("Label name cannot be empty.");
             return;
         }
 
@@ -601,7 +597,7 @@ else
             _newTodoItemName = "";
             SelectedColor = "4A90E2";
             IsHandleLabel = false;
-            await ShowErrorMessage("A label with this name already exists.");
+            await ShowStatusMessage("A label with this name already exists.");
             return;
         }
 
@@ -616,18 +612,18 @@ else
         {
             ProjectLabels = await LabelService.GetAllLabelsForProject(ProjectId);
             CurrentTodoItem = await TodoItemService.GetTodoItemByIdAsync(todoItem.Id);
-
+            
             var newLabel = ProjectLabels.FirstOrDefault(l => l?.Name == _newLabelName);
             if (newLabel != null)
             {
-                Console.WriteLine($"Created A new Label: {_newLabelName} with Color: {SelectedColor}");
                 await ApplyExistingLabel(todoItem, newLabel);
+                await ShowStatusMessage($"Created A new Label: {_newLabelName} with Color: {SelectedColor}",false);
+
             }
         }
         else
         {
-            Console.WriteLine("Failed to create a label");
-            await ShowErrorMessage("Failed to create label. Please try again.");
+            await ShowStatusMessage("Failed to create label. Please try again.");
         }
 
         _newTodoItemName = "";
@@ -641,11 +637,12 @@ else
         if (success)
         {
             ProjectLabels = await LabelService.GetAllLabelsForProject(ProjectId);
+            await ShowStatusMessage("",false);
             StateHasChanged();
         }
         else
         {
-            await ShowErrorMessage("Failed to delete label.");
+            await ShowStatusMessage("Failed to delete label.");
         }
     }
 
@@ -656,11 +653,12 @@ else
         {
             todoItem.Labels.RemoveAll(l => l.Id == label.Id);
             label.TodoCount--;
+            await ShowStatusMessage("Label removed",false);
             StateHasChanged();
         }
         else
         {
-            await ShowErrorMessage("Failed to remove label.");
+            await ShowStatusMessage("Failed to remove label.");
         }
 
         todoItem.Labels.Remove(label);
@@ -674,7 +672,7 @@ else
     {
         if (todoItem.Labels.Any(l => l.Id == label.Id))
         {
-            await ShowErrorMessage("Label is already applied to this task.");
+            await ShowStatusMessage("Label is already applied to this task.");
             return;
         }
 
@@ -683,12 +681,11 @@ else
         {
             todoItem.Labels.Add(label);
             label.TodoCount++;
-            Console.WriteLine($"Label {label.Name} (ID: {label.Id}) successfully added to TodoItem {todoItem.Title} (ID: {todoItem.Id})");
+            await ShowStatusMessage($"Label {label.Name} (ID: {label.Id}) successfully added to TodoItem {todoItem.Title} (ID: {todoItem.Id})",false);
         }
         else
         {
-            Console.WriteLine($"Failed to attach label {label.Name} (ID: {label.Id}) to TodoItem {todoItem.Title} (ID: {todoItem.Id})");
-            await ShowErrorMessage("Failed to apply label to task.");
+            await ShowStatusMessage("Failed to apply label to task.");
         }
 
         IsLabelVisible = false;
@@ -699,37 +696,40 @@ else
         var success = await ProjectCollaboratorService.RemoveSelfFromProjectAsync(ProjectId);
         if (success)
         {
+            await ShowStatusMessage("You have been removed from project",false);
             NavigationManager.NavigateTo("/");
         }
         else
         {
-            await ShowErrorMessage($"Failed to remove you from the project {CurrentProject?.Name}");
+            await ShowStatusMessage($"Failed to remove you from the project {CurrentProject?.Name}");
         }
 
     }
 
     private async Task RemoveUser()
     {
-        if(IsViewer || IsMember) return;
-        var userEmail = await UserService.GetUserEmailFromNameAsync(_removingUserByEmail);
-        if (userEmail == null)
+        if (IsViewer || IsMember)
         {
+            await ShowStatusMessage("Permission denied");
             return;
         }
-        var userId = await UserService.GetUserIdFromEmailAsync(userEmail);
+
+
+        var userId = await UserService.GetUserIdFromEmailAsync(_removingUserByEmail);
         if (userId == null)
         {
+            await ShowStatusMessage($"Failed to remove {_removingUserByEmail} {CurrentProject?.Name}");
             return;
             
         }
         var success = await ProjectCollaboratorService.RemoveCollaboratorFromProjectAsync(ProjectId, userId);
         if (success)
         {
-           /*TODO*/
+            await ShowStatusMessage($"{_removingUserByEmail} has been removed",false);
         }
         else
         {
-            await ShowErrorMessage($"Failed to remove you from the project {CurrentProject?.Name}");
+            await ShowStatusMessage($"Failed to remove {_removingUserByEmail} {CurrentProject?.Name}");
         }
     }
     
@@ -739,13 +739,12 @@ else
         var success = await ProjectService.DeleteProjectAsync(ProjectId);
         if (success)
         {
-            Console.WriteLine("deleted project");
+            await ShowStatusMessage("Project Delete",false);
             NavigationManager.NavigateTo("/");
         }
         else
         {
-            Console.WriteLine("didn't delete Project");
-            await ShowErrorMessage($"Failed to delete project {CurrentProject?.Name}");
+            await ShowStatusMessage($"Failed to delete project {CurrentProject?.Name}");
         }
     }
     
@@ -782,5 +781,17 @@ else
     {
         _showRemoveUserInput = !_showRemoveUserInput;
         _removingUserByEmail = string.Empty;
+    }
+    
+    private async Task ShowStatusMessage(string message, bool isError = true)
+    {
+        _statusMessage = message;
+        _isError = isError;
+        _viewStatusComponent = true;
+    }
+
+    private async Task HandleStatusMessageVisibility(bool isVisible)
+    {
+        _viewStatusComponent = isVisible;
     }
 }

@@ -24,6 +24,20 @@ h5 {
     cursor: pointer;
 }
 
+.remove-user-dropdown {
+    position: absolute;
+    left: 10px;
+    top: 80%;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    z-index: 105;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-width: 200px;
+}
+
+
 .todolist-dropdown {
     position: relative;
 }

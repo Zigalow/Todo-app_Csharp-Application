@@ -1,7 +1,6 @@
 @page "/project/{projectId:int}"
 @using Microsoft.AspNetCore.Authorization
 @using Todo.Core.Dtos.LabelDtos
-@using Todo.Core.Dtos.ProjectCollaboratorDtos
 @using Todo.Core.Dtos.ProjectDtos
 @using Todo.Core.Dtos.TodoItemDtos
 @using Todo.Core.Dtos.TodoListDtos
@@ -38,17 +37,29 @@ else
             @if (CurrentProjectDropdownMenu == CurrentProject && !IsViewer)
             {
                 <div class="todo-list-dropdown">
-                    <button @onclick="RemoveSelf">Leave Project</button>
-
-                    @if (!IsOwner && !IsViewer && !IsMember)
-                    {
-                        <button @onclick="DeleteProject">Delete Project</button>
-                    }
                     @if (!IsViewer && !IsMember)
                     {
-                        <input type="text" @bind="_removingUserByEmail" placeholder="Enter Users email..."/>
-                        <button @onclick="RemoveUser">Remove User</button>
+                        <div class="todolist-dropdown" @onclick:stopPropagation>
+                                @if (_showRemoveUserInput)
+                                {
+                                    <div class="remove-user-dropdown">
+                                        <input type="text" @bind="_removingUserByEmail" placeholder="Enter User's email..." style="margin-bottom: 1.2%"/>
+                                        <button @onclick="RemoveUser" style="background-color: #dc3545; color: white;">Confirm Remove User</button>
+                                        <button @onclick="ToggleRemoveUserInput">Cancel</button>
+                                    </div>
+                                }
+                                <button @onclick="ToggleRemoveUserInput">Remove User</button>
+                                
+                        </div>
                         <button @onclick="ToggleShareProject">Add user</button>
+                    }
+                    @if (!IsAdmin)
+                    {
+                        <button @onclick="RemoveSelf">Leave Project</button>
+                    }
+                    @if (!IsOwner && !IsViewer && !IsMember)
+                    {
+                        <button @onclick="DeleteProject" style="background-color: #dc3545; color: white;">Delete Project</button>
                     }
                 </div>
             }
@@ -298,10 +309,11 @@ else
     private bool IsViewer { get; set; } = false;
     private bool IsOwner { get; set; } = false;
     private bool IsMember { get; set; } = false;
+    private bool IsAdmin { get; set; } = true;
     /*-----END: User Role-----*/
     
     private string _removingUserByEmail { get; set;}
-   
+    private bool _showRemoveUserInput { get; set; } = false;
     
    private bool _viewSharedProjectComponent { get; set; } = false;
     
@@ -330,7 +342,8 @@ else
             return;
         }
 
-        if (!user.Username.Equals(CurrentProject.AdminName))
+        IsAdmin = user.Username.Equals(CurrentProject.AdminName);
+        if (!IsAdmin)
         {
             var userRole = await ProjectCollaboratorService.GetCurrentUserRoleInProjectAsync(ProjectId);
             IsViewer = userRole == ProjectRole.Viewer;
@@ -766,5 +779,11 @@ else
     private void ToggleDropdownMenu(ProjectDto project)
     {
         CurrentProjectDropdownMenu = CurrentProjectDropdownMenu == project ? null : project;
+    }
+    
+    private void ToggleRemoveUserInput()
+    {
+        _showRemoveUserInput = !_showRemoveUserInput;
+        _removingUserByEmail = string.Empty;
     }
 }

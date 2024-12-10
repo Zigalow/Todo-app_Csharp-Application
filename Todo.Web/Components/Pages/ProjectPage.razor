@@ -36,7 +36,7 @@ else
             </button>
             @if (CurrentProjectDropdownMenu == CurrentProject)
             {
-                <div class="todo-list-dropdown">
+                <div class="project-dropdown">
                     @if (!IsViewer && !IsMember)
                     {
                         <div class="todolist-dropdown" @onclick:stopPropagation>
@@ -773,6 +773,9 @@ else
     private void ToggleDropdownMenu(ProjectDto project)
     {
         CurrentProjectDropdownMenu = CurrentProjectDropdownMenu == project ? null : project;
+        if (!_showRemoveUserInput) return;
+        _removingUserByEmail = string.Empty;
+        _showRemoveUserInput = false;
     }
     
     private void ToggleRemoveUserInput()

@@ -8,4 +8,10 @@ public interface IAuthService
     Task<AuthResult> RegisterAsync(RegisterRequest request);
     Task LogoutAsync();
     Task<bool> IsAuthenticatedAsync();
+    Task<AuthResult> ResendConfirmationEmailAsync(string email);
+    string? GetUserEmail();
+    public Task<bool> IsEmailConfirmedAsync(string email);
+
+
+
 }

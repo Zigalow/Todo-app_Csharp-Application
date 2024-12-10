@@ -6,7 +6,14 @@
 @code {
     protected override async Task OnInitializedAsync()
     {
-        await AuthService.LogoutAsync();
-        NavigationManager.NavigateTo("/Account/Login");
-    }
+        try
+        {
+            await AuthService.LogoutAsync();
+            NavigationManager.NavigateTo("/Account/Login", true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Logout failed: {ex.Message}");
+        }
+    }   
 }

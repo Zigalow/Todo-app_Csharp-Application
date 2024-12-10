@@ -58,7 +58,7 @@
                     <a href="Account/Register">Register as a new user</a>
                 </p>
                 <p>
-                    <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
+                    <a href="Account/RegisterConfirmation">Resend confirmation email</a>
                 </p>
             </div>
         </EditForm>
@@ -75,6 +75,8 @@
 
 @code {
     private string errorMessage = "";
+    private string successMessage = "";
+
     private bool isLoading;
 
     [SupplyParameterFromForm]
@@ -117,7 +119,7 @@
             StateHasChanged();
         }
     }
-
+    
     private sealed class InputModel
     {
         [Required]

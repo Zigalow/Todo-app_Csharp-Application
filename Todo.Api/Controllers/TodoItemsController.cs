@@ -1,19 +1,23 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Todo.Api.Dtos.TodoItemDtos;
 using Todo.Api.Interfaces;
 using Todo.Api.Mappers;
+using Todo.Api.Repositories.Interfaces;
+using Todo.Core.Dtos.TodoItemDtos;
 
 namespace Todo.Api.Controllers;
 
+[Authorize]
 [Route("api/todo-items")]
-[ApiController]
-public class TodoItemsController : ControllerBase
+public class TodoItemsController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAuthorizationRepository _authorizationRepository;
 
-    public TodoItemsController(IUnitOfWork unitOfWork)
+    public TodoItemsController(IUnitOfWork unitOfWork, IAuthorizationRepository authorizationRepository)
     {
         _unitOfWork = unitOfWork;
+        _authorizationRepository = authorizationRepository;
     }
 
     [HttpGet]
@@ -24,9 +28,9 @@ public class TodoItemsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var todoItems = await _unitOfWork.TodoItems.GetAllAsync();
+        var userId = GetCurrentUserId();
 
-        var todoItemsDto = todoItems.Select(todoItem => todoItem.ToTodoItemDto());
+        var todoItems = await _unitOfWork.TodoItems.GetAllAsync(userId);
 
         return Ok(todoItems.ToListedTodoItemsDtos());
     }
@@ -44,6 +48,13 @@ public class TodoItemsController : ControllerBase
         if (todoItems == null)
         {
             return NotFound("Project not found");
+        }
+
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanAccessProjectAsync(userId, projectId))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to this project");
         }
 
         return Ok(todoItems.ToListedTodoItemsDtos());
@@ -64,6 +75,13 @@ public class TodoItemsController : ControllerBase
             return NotFound("TodoList not found");
         }
 
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanAccessTodoListAsync(userId, todoListId))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to this todo list");
+        }
+
         return Ok(todoItems.ToListedTodoItemsDtos());
     }
 
@@ -76,7 +94,20 @@ public class TodoItemsController : ControllerBase
         }
 
         var todoItem = await _unitOfWork.TodoItems.GetByIdAsync(id);
-        return todoItem == null ? NotFound() : Ok(todoItem.ToTodoItemDto());
+
+        if (todoItem == null)
+        {
+            return NotFound("Todo item not found");
+        }
+
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanAccessTodoItemAsync(userId, id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to this todo item");
+        }
+
+        return Ok(todoItem.ToTodoItemDto());
     }
 
     [HttpPost("for-list/{todoListId:int}")]
@@ -91,7 +122,15 @@ public class TodoItemsController : ControllerBase
 
         if (!todoListExists)
         {
-            return NotFound("TodoList not found");
+            return NotFound("Todo-list not found");
+        }
+
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanCreateTodoItemAsync(userId, todoListId))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden,
+                "User does not have access to create todo item for this todo list");
         }
 
         var todoItem = createTodoItemDto.ToTodoItemFromCreateDto(todoListId);
@@ -117,6 +156,13 @@ public class TodoItemsController : ControllerBase
             return NotFound("Todo item not found");
         }
 
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanModifyTodoItemAsync(userId, id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to modify this todo item");
+        }
+
         todoItem.UpdateTodoItemFromUpdateDto(updateTodoItemDto);
 
         await _unitOfWork.TodoItems.UpdateAsync(todoItem);
@@ -131,6 +177,13 @@ public class TodoItemsController : ControllerBase
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
+        }
+
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanModifyTodoItemAsync(userId, id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to delete this todo item");
         }
 
         var todoItem = await _unitOfWork.TodoItems.GetByIdAsync(id);
@@ -152,6 +205,28 @@ public class TodoItemsController : ControllerBase
         {
             return BadRequest(ModelState);
         }
+
+        var todoItemExists = await _unitOfWork.TodoItems.ExistsAsync(todoItemId);
+
+        if (!todoItemExists)
+        {
+            return NotFound("Todo item not found");
+        }
+
+        var labelExists = await _unitOfWork.Labels.ExistsAsync(labelId);
+
+        if (!labelExists)
+        {
+            return NotFound("Label not found");
+        }
+
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanModifyTodoItemAsync(userId, todoItemId))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to modify this todo item");
+        }
+
         var result = await _unitOfWork.TodoItems.AttachLabelToItem(todoItemId, labelId);
 
         if (!result.IsSuccess)
@@ -170,6 +245,28 @@ public class TodoItemsController : ControllerBase
         {
             return BadRequest(ModelState);
         }
+
+        var todoItemExists = await _unitOfWork.TodoItems.ExistsAsync(todoItemId);
+
+        if (!todoItemExists)
+        {
+            return NotFound("Todo item not found");
+        }
+
+        var labelExists = await _unitOfWork.Labels.ExistsAsync(labelId);
+
+        if (!labelExists)
+        {
+            return NotFound("Label not found");
+        }
+
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanModifyTodoItemAsync(userId, todoItemId))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to modify this todo item");
+        }
+
         var result = await _unitOfWork.TodoItems.DetachLabelFromItem(todoItemId, labelId);
 
         if (!result.IsSuccess)
@@ -179,5 +276,33 @@ public class TodoItemsController : ControllerBase
 
         await _unitOfWork.SaveChangesAsync();
         return Ok(result.Value!.ToTodoItemDto());
+    }
+    [HttpPut("{todoItemId:int}/move")]
+    public async Task<IActionResult> MoveTodoItem(int todoItemId, [FromBody] int targetTodoListId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        var todoListExists = await _unitOfWork.TodoLists.ExistsAsync(targetTodoListId);
+        if (!todoListExists)
+        {
+            return NotFound("Target TodoList is not found");
+        }
+        
+        var todoItem = await _unitOfWork.TodoItems.GetByIdAsync(todoItemId);
+        if (todoItem == null)
+        {
+            return NotFound("TodoItem not found from id");
+        }
+
+        // Update the TodoListId in TodoItem
+        todoItem.TodoListId = targetTodoListId;
+        
+        await _unitOfWork.TodoItems.UpdateAsync(todoItem);
+        
+        await _unitOfWork.SaveChangesAsync();
+        return Ok(todoItem.ToTodoItemDto());
     }
 }

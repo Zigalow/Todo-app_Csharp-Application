@@ -1,19 +1,22 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Todo.Api.Dtos.LabelDto;
 using Todo.Api.Interfaces;
 using Todo.Api.Mappers;
+using Todo.Api.Repositories.Interfaces;
+using Todo.Core.Dtos.LabelDtos;
 
 namespace Todo.Api.Controllers;
 
-[Route("api/labels")]
-[ApiController]
-public class LabelsController : ControllerBase
+[Authorize]
+public class LabelsController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAuthorizationRepository _authorizationRepository;
 
-    public LabelsController(IUnitOfWork unitOfWork)
+    public LabelsController(IUnitOfWork unitOfWork, IAuthorizationRepository authorizationRepository)
     {
         _unitOfWork = unitOfWork;
+        _authorizationRepository = authorizationRepository;
     }
 
     [HttpGet]
@@ -24,7 +27,9 @@ public class LabelsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var labels = await _unitOfWork.Labels.GetAllAsync();
+        var userId = GetCurrentUserId();
+
+        var labels = await _unitOfWork.Labels.GetAllAsync(userId);
         return Ok(labels.ToListedLabelDtos());
     }
 
@@ -37,7 +42,20 @@ public class LabelsController : ControllerBase
         }
 
         var label = await _unitOfWork.Labels.GetByIdAsync(id);
-        return label == null ? NotFound() : Ok(label.ToLabelDto());
+
+        if (label == null)
+        {
+            return NotFound("Label not found");
+        }
+
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanAccessLabelAsync(userId, id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to this label");
+        }
+
+        return Ok(label.ToLabelDto());
     }
 
     [HttpGet("by-project/{projectId:int}")]
@@ -55,12 +73,20 @@ public class LabelsController : ControllerBase
             return NotFound("Project not found");
         }
 
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanAccessProjectAsync(userId, projectId))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden ,"User does not have access to this project");
+        }
+
         return Ok(labels.ToListedLabelDtos());
     }
 
     [HttpPost("for-project/{projectId:int}")]
     public async Task<IActionResult> CreateLabel(int projectId, CreateLabelDto createLabelDto)
     {
+        Console.WriteLine("Label begin");
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -73,16 +99,23 @@ public class LabelsController : ControllerBase
             return NotFound("Project not found");
         }
 
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanCreateLabelAsync(userId, projectId))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to this project");
+        }
+
         var label = createLabelDto.ToLabelFromCreateDto(projectId);
 
-        if (await _unitOfWork.Labels.ExistsAsync(label))
+        if (await _unitOfWork.Labels.ExistsAsync(projectId, createLabelDto.Name))
         {
             return BadRequest("Label already exists");
         }
 
         await _unitOfWork.Labels.AddAsync(label);
         await _unitOfWork.SaveChangesAsync();
-
+        Console.WriteLine("Label Created");
         return CreatedAtAction(nameof(GetLabelById), new { id = label.Id }, label.ToLabelDto());
     }
 
@@ -101,7 +134,19 @@ public class LabelsController : ControllerBase
             return NotFound("Label not found");
         }
 
+        var userId = GetCurrentUserId();
+
+        if (!await _authorizationRepository.CanModifyLabelAsync(userId, id))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "User does not have access to modify this label");
+        }
+
         label.UpdateLabelFromUpdateDto(updateLabelDto);
+
+        if (!await _unitOfWork.Labels.ExistsAsync(label.ProjectId, label.Name))
+        {
+            return BadRequest("Label already exists");
+        }
 
         await _unitOfWork.Labels.UpdateAsync(label);
         await _unitOfWork.SaveChangesAsync();

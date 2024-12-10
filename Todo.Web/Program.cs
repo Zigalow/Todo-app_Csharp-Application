@@ -1,10 +1,9 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Todo.Api.Data;
+using Todo.Web.Auth;
 using Todo.Web.Components;
-using Todo.Web.Components.Account;
-using Todo.Core.Entities;
+using Todo.Web.Services;
+using Todo.Web.Services.interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,42 +11,43 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-
-builder.Services.AddScoped<IdentityUserAccessor>();
-builder.Services.AddScoped<IdentityRedirectManager>();
-builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-
-builder.Services.AddAuthentication()
+// Add authentication and authorization
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    })
     .AddCookie(options =>
     {
-        options.LoginPath = "/Account/Unauthorized/";
-        options.AccessDeniedPath = "/Account/Forbidden/";
+        options.Cookie.Name = "TodoApp.Auth";
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
     });
-
 builder.Services.AddAuthorization();
 
-builder.Services.AddCascadingAuthenticationState();
+// Add custom auth state provider and auth service
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<IProjectCollaboratorService, ProjectCollaboratorService>();
+builder.Services.AddScoped<ITodoListService, TodoListService>();
+builder.Services.AddScoped<ITodoItemService, TodoItemService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ILabelService, LabelService>();
+builder.Services.AddScoped<AuthHeaderHandler>();
+builder.Services.AddTransient<AuthenticationInterceptor>();
 
-// Add Identity configuration
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
-    {
-        options.SignIn.RequireConfirmedAccount = false; /*TODO: Change to True, when conformation is in place*/
-    })
-    .AddEntityFrameworkStores<TodoDbContext>()
-    .AddSignInManager()
-    .AddDefaultTokenProviders()
-    .AddApiEndpoints();
-
+builder.Services.AddAntiforgery();
 
 //Connect with todoApi
-builder.Services.AddHttpClient("TodoApi", client => { client.BaseAddress = new Uri("http://localhost:5118"); });
+builder.Services
+    .AddHttpClient("TodoApi", client => { client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!); })
+    .AddHttpMessageHandler<AuthHeaderHandler>()
+    .AddHttpMessageHandler<AuthenticationInterceptor>();
 
-builder.Services.AddDbContext<TodoDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
-
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
@@ -65,14 +65,12 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.MapAdditionalIdentityEndpoints();
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseAntiforgery();
-app.MapIdentityApi<ApplicationUser>();
 
 app.Run();

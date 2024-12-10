@@ -1,59 +1,164 @@
 html, body {
     background-color: #DED7D7;
+    width: 100%;
+    overflow-x: hidden;
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
-.todo-list-title{
-    display: grid;
-    grid-template-columns: 80% 20%;
+.project-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-h5{
+.todo-list-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 16px; /*TODO - MAYBE REMOVE*/
+}
+
+h5 {
     font-weight: bold;
     grid-column: 1;
-    color:#000000;
-}
-
-.todo-list-title img {
-    width: 26px;
-    height: 26px;
+    color: #000000;
     cursor: pointer;
-    grid-column: 2;
 }
 
-span{
+.remove-user-dropdown {
+    position: absolute;
+    top: 80%;
+    right: 10px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    z-index: 105;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+}
+
+.project-dropdown {
+    position: absolute;
+    right: 25px;
+    top: 10%;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+}
+
+.project-dropdown button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.project-dropdown button:hover {
+    background-color: #f0f0f0;
+}
+
+.todolist-dropdown {
+    position: relative;
+}
+
+.todolist-dropdown-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.todolist-dropdown-button img {
+    width: 30px;
+    height: 30px;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+.todolist-dropdown-button img:hover {
+    opacity: 1;
+}
+
+.todo-list-dropdown {
+    position: absolute;
+    left: 10px;
+    top: 80%;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+}
+
+.todo-list-dropdown button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.todo-list-dropdown button:hover {
+    background-color: #f0f0f0;
+}
+
+span {
     font-weight: bold;
 }
 
 .todo-lists-container {
     display: flex;
-    gap: 2%;
+    box-sizing: border-box;
+    gap: 1%;
     padding: 20px;
-    border-radius: 5px;
-    /*Scroll machenism*/
-    overflow-x: auto;
-    width: 100%;
+    width: 1200px;
+    min-height: 500px;
+    overflow-x: auto; /* Prevent horizontal scroll */
 }
 
 .todo-list-container {
-    margin-top: 2%;
     display: inline-block;
-    border-right: 2px solid #000000;
-    padding: 15px;
-    min-width: fit-content;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 16px;
+    min-width: 300px;
+    min-height: 500px;
+    max-height: 90%;
+
 }
 
 .task-container {
-    padding: 10px;
-    width: auto;
-    background-color: #f1ecec;
-    border-radius: 5px;
-    margin-bottom: 5%;
+    background-color: white;
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 8px;
     cursor: pointer;
+    user-select: none;
 }
 
-.task-container:hover{
+.task-container.dragging {
+    opacity: 0.5;
+}
+
+.task-container:hover {
     stroke: #000000;
     background-color: #ece6e6;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .todo-date {
@@ -66,7 +171,7 @@ span{
     width: auto;
 }
 
-.task-lower-part{
+.task-lower-part {
     display: grid;
     grid-template-columns: auto auto;
 }
@@ -74,6 +179,208 @@ span{
 .task-lower-part p {
     grid-column: 1;
 }
-.task-lower-part button{
+
+.task-lower-part button {
     grid-column: 2;
+}
+
+/* Updated modifiymenu styles */
+.modifiymenu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+}
+
+.modifiymenu button {
+    width: 100%;
+    background: none;
+    border: 1px solid #000000;
+    color: rgb(0, 0, 0);
+    text-align: left;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background-color 0.2s, border-color 0.2s;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.modifiymenu button:last-child {
+    margin-bottom: 0;
+}
+
+.modifiymenu button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: #ffffff;
+}
+
+/* Updated Label Editor Styling */
+.label-editor {
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    background-color: white;
+    border: 1px solid #000000;
+    border-radius: 4px;
+    padding: 16px;
+    z-index: 1100;
+    min-width: 250px;
+    max-width: 300px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.label-editor input {
+    width: 100%;
+    color: #000;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    margin: 5px 0;
+}
+
+/* Updated Create Label Section */
+.create-label-section {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    width: 100%;
+}
+
+.create-label-section button {
+    background: none;
+    border: 1px solid #000000;
+    color: #000000;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    background-color: lightgray;
+    border-color: #000;
+}
+
+/* Rest of the styles remain the same */
+.color-picker {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0;
+    flex-wrap: wrap;
+}
+
+.color-picker input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    margin: 5px 0;
+}
+
+.color-option {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.color-option:hover {
+    transform: scale(1.1);
+}
+
+.color-option.selected {
+    border: 2px solid #000;
+}
+
+.dropdown-container {
+    position: relative;
+}
+
+
+.modify-button {
+    background: none;
+    border: 1px solid #000000;
+    color: #000000;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.modify-button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-color: #ffffff;
+}
+
+.label {
+    font-size: 12px;
+    font-weight: 500;
+    margin: 4px 0;
+    display: inline-block;
+}
+
+.task-label {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    margin-bottom: 8px;
+    color: white;
+}
+
+.saved-labels {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+}
+
+.saved-label-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin: 5px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+}
+
+.saved-label-item:hover {
+    opacity: 0.9;
+}
+
+.remove-label {
+    color: black;
+    border-radius: 4px;
+}
+
+.delete-label {
+    color: red;
+    border-radius: 4px;
+
+}
+
+.error-message {
+    display: flex;
+    position: fixed;
+    background-color: #0C2364;
+    bottom: 1.5%;
+    right: 1.5%;
+    width: 250px;
+    height: 150px;
+    color: white;
+    border-radius: 5%;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.x-icon {
+    width: 16px;
+    height: 16px;
 }

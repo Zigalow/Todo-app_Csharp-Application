@@ -1,27 +1,23 @@
 ﻿@page "/Account/Login"
-
 @using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Identity
-@using Todo.Core.Entities
-
-
-@inject SignInManager<ApplicationUser> SignInManager
-@inject ILogger<Login> Logger
+@using Microsoft.AspNetCore.Authorization
+@using Todo.Web.Auth
+@using Todo.Web.Auth.Models
+@inject IAuthService AuthService
 @inject NavigationManager NavigationManager
-@inject IdentityRedirectManager RedirectManager
+@attribute [AllowAnonymous]
 
 <PageTitle>Log in</PageTitle>
 
 <div class="container">
-    @*<div class="col-md-4">*@
     <h2>Log in</h2>
     <section>
-        <StatusMessage Message="@errorMessage"/>
+        @if (errorMessage != "")
+        {
+            <p>@errorMessage</p>
+        }
         <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
             <DataAnnotationsValidator/>
-            @*<h2>Use a local account to log in.</h2>
-                <hr/>*@
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
                 <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com"/>
@@ -34,7 +30,7 @@
                 <ValidationMessage For="() => Input.Password" class="text-danger"/>
             </div>
             <div class="checkbox mb-3">
-                <label class="form-label">
+                <label class="form-label" id="rememberMe">
                     <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input"/>
                     Remember me
                 </label>
@@ -59,77 +55,75 @@
                     <a href="Account/ForgotPassword">Forgot your password?</a>
                 </p>
                 <p>
-                    <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
+                    <a href="Account/Register">Register as a new user</a>
                 </p>
                 <p>
-                    <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
+                    <a href="Account/RegisterConfirmation">Resend confirmation email</a>
                 </p>
             </div>
         </EditForm>
     </section>
-    @*</div>*@
-    @*<div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to log in.</h3>
-            <hr/>
-            <ExternalLoginPicker/>
-        </section>
-    </div>*@
 </div>
 
 @code {
-    private string? errorMessage;
+    private string errorMessage = "";
+    private string successMessage = "";
 
-    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+    private bool isLoading;
 
-    [SupplyParameterFromForm] private InputModel Input { get; set; } = new();
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
 
-    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
-
-    protected override async Task OnInitializedAsync()
+    private async Task LoginUser()
     {
-        if (HttpMethods.IsGet(HttpContext.Request.Method))
+        try
         {
-            // Clear the existing external cookie to ensure a clean login process
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            if (isLoading) return;
+            isLoading = true;
+            errorMessage = "";
+            StateHasChanged();
+
+            var loginRequest = new LoginRequest
+            {
+                Email = Input.Email,
+                Password = Input.Password
+            };
+
+            var isAuthenticated = await AuthService.LoginAsync(loginRequest);
+
+            if (isAuthenticated)
+            {
+                NavigationManager.NavigateTo("/", true);
+            }
+            else
+            {
+                errorMessage = "Invalid login attempt. Please check your credentials.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An error occurred while logging in. Please try again.";
+            Console.WriteLine($"Login error: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
         }
     }
-
-    public async Task LoginUser()
-    {
-        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-        if (result.Succeeded)
-        {
-            Logger.LogInformation("User logged in.");
-            RedirectManager.RedirectTo(ReturnUrl);
-        }
-        else if (result.RequiresTwoFactor)
-        {
-            RedirectManager.RedirectTo(
-                "Account/LoginWith2fa",
-                new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
-        }
-        else if (result.IsLockedOut)
-        {
-            Logger.LogWarning("User account locked out.");
-            RedirectManager.RedirectTo("Account/Lockout");
-        }
-        else
-        {
-            errorMessage = "Error: Invalid login attempt.";
-        }
-    }
-
-
+    
     private sealed class InputModel
     {
-        [Required] [EmailAddress] public string Email { get; set; } = "";
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
 
         [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; } = "";
 
-        [Display(Name = "Remember me?")] public bool RememberMe { get; set; }
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
     }
 
 }

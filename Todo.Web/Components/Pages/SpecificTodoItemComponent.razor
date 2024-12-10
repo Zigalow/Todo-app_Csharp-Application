@@ -1,0 +1,316 @@
+@using Microsoft.AspNetCore.Authorization
+@using Todo.Core.Dtos.ProjectDtos
+@using Todo.Core.Dtos.TodoItemDtos
+@using Todo.Core.Entities
+@using Todo.Web.Auth
+@using Todo.Web.Services.interfaces
+@inject ITodoItemService TodoItemService
+@inject IProjectCollaboratorService ProjectCollaboratorService
+@inject IUserService UserService
+
+@attribute [Authorize]
+
+@*div for the outter *@
+<div class="page-overlay @(_isVisible ? "visible" : "")" @onclick="CloseView">
+    @if (TodoItem != null)
+    {
+        <div class="todo-item-container" @onclick:stopPropagation>
+            <div class="todo-item-header">
+                <div class="todo-item-title">
+                    @if (_isEditingTitle)
+                    {
+                        <input class="title-input" type="text" @bind="_editedTitle" @onblur="SaveTitle"/>
+                    }
+                    else
+                    {
+                        <h2 @onclick="() => { if (!IsViewer) _isEditingTitle = true; }">@TodoItem.Title</h2>
+                    }
+                </div>
+                <img class="x-icon" src="images/x-icon.png" alt="" @onclick="CloseView"/>
+            </div>
+
+            <div class="todo-item-info">
+                <div class="description-section">
+                    <h5>Description</h5>
+                    @if (_isEditingDescription)
+                    {
+                        <textarea class="description-input" @bind="TodoItem.Description"
+                            placeholder="Add a more detailed description..."></textarea>
+                        
+                        <button class="save-button" @onclick="SaveDescription">Save</button>
+                        <button class="cancel-button" @onclick="() => { _isEditingDescription = false; }">Cancel</button>
+                    }
+                    else
+                    {
+                        <p @onclick="() => { if (!IsViewer) _isEditingDescription = true; }" class="description-text">
+                            @(string.IsNullOrWhiteSpace(TodoItem.Description) ? "Add a more detailed description..." : TodoItem.Description)
+                        </p>
+                    }
+                </div>
+
+                <div class="labels-section">
+                    <h5>Labels</h5>
+                    <div class="labels-container">
+                        @foreach (var label in TodoItem.Labels)
+                        {
+                            <div class="label" style="background-color: @label.Color">
+                                @label.Name
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h5>Details</h5>
+                    <div class="detail-container">
+                        <span class="detail-label">Priority:</span>
+                        @if (!IsViewer)
+                        {
+                            <select @bind="Priority">
+                                <option value="@Priority.VeryLow">VeryLow</option>
+                                <option value="@Priority.Low">Low</option>
+                                <option value="@Priority.Medium">Medium</option>
+                                <option value="@Priority.High">High</option>
+                                <option value="@Priority.VeryHigh">VeryHigh</option>
+                            </select>
+                        }
+                        else
+                        {
+                            <span>@Priority</span>
+                        }
+                    </div>
+
+                    <div class="detail-container">
+                        <span class="detail-label">Due Date:</span>
+                        @if (!IsViewer)
+                        {
+                            <input type="date" @bind="DueDate"/>
+                        }
+                        else
+                        {
+                            <span>@(DueDate?.ToString("mm/dd/yyyy") ?? "No due date")</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="bottom-section">
+                    @if (!IsViewer)
+                    {
+                        <button class="delete-button" @onclick="DeleteTodoItemAsync">Delete Task</button>
+                    }
+                    else
+                    {
+                        <button class="delete-button" @onclick="DeleteTodoItemAsync" disabled>Delete Task</button>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<StatusMessageComponent Message="@_statusMessage" IsError="@_isError" IsVisible = "@_viewStatusComponent"IsVisibleChanged="@HandleStatusMessageVisibility"/>
+
+@code {
+    [Parameter] public TodoItemDto TodoItem { get; set; }
+    [Parameter] public bool IsViewer { get; set; }
+    [Parameter] public bool IsVisible { get; set; }
+    
+    /*Learned this way from here:https://stackoverflow.com/questions/56831266/passing-method-to-component*/
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public EventCallback OnTodoItemDeleted { get; set; }
+
+    private Priority Priority { get => TodoItem.Priority;
+        set
+        {
+            if (TodoItem.Priority != value)
+            {
+                TodoItem.Priority = value;
+                _ = SavePriority();
+            }
+        }
+    }
+
+    private DateTime? DueDate
+    {
+        get => TodoItem.DueDate;
+        set
+        {
+            TodoItem.DueDate = value;
+            _ = SaveDueDate();
+        }
+    }
+    private bool _isVisible;
+    private bool _isEditingTitle;
+    private bool _isEditingDescription;
+    private string _editedTitle;
+    private string _editedDescription;
+
+    private bool _isError = false;
+    private string _statusMessage = "";
+    private bool _viewStatusComponent { get; set; } = false;
+    
+    
+    protected override void OnParametersSet()
+    {
+        _isVisible = IsVisible;
+        if (TodoItem != null)
+        {
+            _editedTitle = TodoItem.Title;
+            _editedDescription = TodoItem.Description;
+            Priority = TodoItem.Priority;
+            DueDate = TodoItem.DueDate;
+        }
+        else
+        {
+            _editedTitle = string.Empty;
+            _editedDescription = string.Empty;
+        }
+    }
+    
+    private async Task CloseView()
+    {
+        _isVisible = false;
+        
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+
+    private async Task SaveTitle()
+    {
+        if (IsViewer)
+        {
+            await ShowStatusMessage("Permission denied");
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(_editedTitle)) return;
+
+        var updateDto = new UpdateTodoItemDto
+        {
+            Title = _editedTitle,
+            Description = TodoItem.Description,
+            Priority = Priority,
+            DueDate = TodoItem.DueDate
+        };
+
+        var success = await TodoItemService.UpdateTodoItemAsync(TodoItem.Id, updateDto);
+        if (success)
+        {
+            TodoItem.Title = _editedTitle;
+            await ShowStatusMessage("Updated Title", false);
+        }
+        _isEditingTitle = false;
+    }
+
+    private async Task SaveDescription()
+    {
+        if (IsViewer)
+        {
+            await ShowStatusMessage("Permission denied");
+            return;
+        }
+        var updateDto = new UpdateTodoItemDto
+        {
+            Title = TodoItem.Title,
+            Description = TodoItem.Description,
+            Priority = Priority,
+            DueDate = TodoItem.DueDate
+        };
+
+        var success = await TodoItemService.UpdateTodoItemAsync(TodoItem.Id, updateDto);
+        if (success)
+        {
+            await TodoItemService.GetTodoItemByIdAsync(TodoItem.Id);
+            await ShowStatusMessage("Updated Description", false);
+        }
+        else
+        {
+            await ShowStatusMessage("Failed to updated Description");
+        }
+        _isEditingDescription = false;
+    }
+
+    private async Task SavePriority()
+    {
+        if (IsViewer)
+        {
+            await ShowStatusMessage("Permission denied");
+            return;
+        }
+        var updateDto = new UpdateTodoItemDto
+        {
+            Title = TodoItem.Title,
+            Description = TodoItem.Description,
+            Priority = Priority,
+            DueDate = TodoItem.DueDate
+        };
+
+        var success = await TodoItemService.UpdateTodoItemAsync(TodoItem.Id, updateDto);
+        if (success)
+        {
+            await TodoItemService.GetTodoItemByIdAsync(TodoItem.Id);
+            await ShowStatusMessage("Updated Priority", false);
+        }
+        else
+        {
+            await ShowStatusMessage("Failed to updated Priority");
+        }
+    }
+
+    private async Task SaveDueDate()
+    {
+        if (IsViewer)
+        {
+            await ShowStatusMessage("Permission denied");
+            return;
+        }
+        var updateDto = new UpdateTodoItemDto
+        {
+            Title = TodoItem.Title,
+            Description = TodoItem.Description,
+            Priority = Priority,
+            DueDate = TodoItem.DueDate
+        };
+
+        var success = await TodoItemService.UpdateTodoItemAsync(TodoItem.Id, updateDto);
+        if (success)
+        {
+            await TodoItemService.GetTodoItemByIdAsync(TodoItem.Id);
+        } 
+        else
+        {
+            await ShowStatusMessage("Failed to updated DueDate");
+        }
+    }
+
+    private async Task DeleteTodoItemAsync()
+    {
+        if (IsViewer)
+        {
+            await ShowStatusMessage("Permission denied");
+            return;
+        }
+        var success = await TodoItemService.DeleteTodoItemAsync(TodoItem.Id);
+        if (success)
+        {
+            await OnTodoItemDeleted.InvokeAsync();
+            await CloseView();
+        }
+        else
+        {
+            await ShowStatusMessage("Failed to get delete TodoItem. Please try again.");
+        }
+    }
+    
+    private Task ShowStatusMessage(string message, bool isError = true)
+    {
+        _statusMessage = message;
+        _isError = isError;
+        _viewStatusComponent = true;
+        return Task.CompletedTask;
+    }
+
+    private Task HandleStatusMessageVisibility(bool isVisible)
+    {
+        _viewStatusComponent = isVisible;
+        return Task.CompletedTask;
+    }
+}

@@ -1,14 +1,11 @@
 ﻿@page "/Account/Manage"
 
 @using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Identity
-@using Todo.Core.Entities
+@using Todo.Web.Auth
+@using Todo.Web.Auth.Models
 
-
-@inject UserManager<ApplicationUser> UserManager
-@inject SignInManager<ApplicationUser> SignInManager
-@inject IdentityUserAccessor UserAccessor
-@inject IdentityRedirectManager RedirectManager
+@inject IUserService UserService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Profile</PageTitle>
 
@@ -19,9 +16,14 @@
     <div class="col-md-6">
         <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
             <DataAnnotationsValidator/>
+            @* Display status message *@
+            @if (!string.IsNullOrEmpty(StatusMessage))
+            {
+            <div class="alert alert-info">@StatusMessage</div>
+            }
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
-                <input type="text" value="@username" class="form-control" placeholder="Please choose your username." disabled/>
+                <input type="text" value="@_username" class="form-control" placeholder="Please choose your username." disabled/>
                 <label for="username" class="form-label">Username</label>
             </div>
             <div class="form-floating mb-3">
@@ -35,9 +37,10 @@
 </div>
 
 @code {
-    private ApplicationUser user = default!;
-    private string? username;
-    private string? phoneNumber;
+    private UserInfoResponse? _user = default!;
+    private string? _username;
+    private string? _phoneNumber;
+    private string StatusMessage { get; set; } = "";
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -47,31 +50,46 @@
 
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        username = await UserManager.GetUserNameAsync(user);
-        phoneNumber = await UserManager.GetPhoneNumberAsync(user);
-
-        Input.PhoneNumber ??= phoneNumber;
+        //Get userinformation
+        _user = await UserService.GetUserInfoAsync();
+        if (_user != null)
+        {
+            _username = _user.Username;
+            _phoneNumber = _user.PhoneNumber;
+            Console.WriteLine("Phone number: " + _phoneNumber);
+            // Set the current phone number in Input model
+            Input.PhoneNumber ??= _phoneNumber;
+        }
     }
 
     private async Task OnValidSubmitAsync()
     {
-        if (Input.PhoneNumber != phoneNumber)
+        if (Input.PhoneNumber != _phoneNumber)
         {
-            var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-            if (!setPhoneResult.Succeeded)
+            var updateSuccess = Input.PhoneNumber != null && await UserService.UpdatePhoneNumberAsync(Input.PhoneNumber);
+            if (!updateSuccess)
             {
-                RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
+                StatusMessage = "Error: Failed to set phone number.";
+                return;
+            }
+
+            // Refresh user information to get the updated phone number
+            _user = await UserService.GetUserInfoAsync();
+            if (_user != null)
+            {
+                _phoneNumber = _user.PhoneNumber;
             }
         }
-
-        await SignInManager.RefreshSignInAsync(user);
-        RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
+        
+        StatusMessage = "Your profile has been updated";
     }
+
 
     private sealed class InputModel
     {
         [Phone]
+        [StringLength(12)]
+        [MinLength(6)]
         [Display(Name = "Phone number")]
         public string? PhoneNumber { get; set; }
     }

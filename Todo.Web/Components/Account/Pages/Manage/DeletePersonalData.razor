@@ -56,13 +56,11 @@
             message = "Error: Failed to delete account. Please check your password if provided.";
             return;
         }
-
-        // Assuming you have a way to handle authentication state
+        
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         if (authState.User.Identity?.IsAuthenticated == true)
         {
-            // Handle sign out - you might need to implement this based on your auth setup
-            // For example, you might need to call an API endpoint or clear local storage
+           
         }
 
         NavigationManager.NavigateTo("/");

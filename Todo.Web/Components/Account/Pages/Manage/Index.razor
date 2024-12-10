@@ -23,7 +23,7 @@
             }
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
-                <input type="text" value="@username" class="form-control" placeholder="Please choose your username." disabled/>
+                <input type="text" value="@_username" class="form-control" placeholder="Please choose your username." disabled/>
                 <label for="username" class="form-label">Username</label>
             </div>
             <div class="form-floating mb-3">
@@ -37,9 +37,9 @@
 </div>
 
 @code {
-    private UserInfoResponse? user = default!;
-    private string? username;
-    private string? phoneNumber;
+    private UserInfoResponse? _user = default!;
+    private string? _username;
+    private string? _phoneNumber;
     private string StatusMessage { get; set; } = "";
 
     [CascadingParameter]
@@ -51,20 +51,20 @@
     protected override async Task OnInitializedAsync()
     {
         //Get userinformation
-        user = await UserService.GetUserInfoAsync();
-        if (user != null)
+        _user = await UserService.GetUserInfoAsync();
+        if (_user != null)
         {
-            username = user.Username;
-            phoneNumber = user.PhoneNumber;
-            Console.WriteLine("Phone number: " + phoneNumber);
+            _username = _user.Username;
+            _phoneNumber = _user.PhoneNumber;
+            Console.WriteLine("Phone number: " + _phoneNumber);
             // Set the current phone number in Input model
-            Input.PhoneNumber ??= phoneNumber;
+            Input.PhoneNumber ??= _phoneNumber;
         }
     }
 
     private async Task OnValidSubmitAsync()
     {
-        if (Input.PhoneNumber != phoneNumber)
+        if (Input.PhoneNumber != _phoneNumber)
         {
             var updateSuccess = Input.PhoneNumber != null && await UserService.UpdatePhoneNumberAsync(Input.PhoneNumber);
             if (!updateSuccess)
@@ -74,10 +74,10 @@
             }
 
             // Refresh user information to get the updated phone number
-            user = await UserService.GetUserInfoAsync();
-            if (user != null)
+            _user = await UserService.GetUserInfoAsync();
+            if (_user != null)
             {
-                phoneNumber = user.PhoneNumber;
+                _phoneNumber = _user.PhoneNumber;
             }
         }
         

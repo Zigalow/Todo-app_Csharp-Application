@@ -63,10 +63,11 @@
     
 </div>
 
-
-<StatusMessageComponent Message="@_statusMessage" IsError="@_isError" IsVisible = "@_viewStatusComponent"IsVisibleChanged="@HandleStatusMessageVisibility"/>
-
-@if (_selectedProject != null)
+@if (_viewStatusComponent && string.IsNullOrWhiteSpace(_statusMessage))
+{
+    <StatusMessageComponent Message="@_statusMessage" IsError="@_isError" IsVisible="@_viewStatusComponent"IsVisibleChanged="@HandleStatusMessageVisibility"/>
+}
+@if (_selectedProject != null && _viewSharedProjectComponent)
 {
     <ShareProjectComponent Project="@_selectedProject" IsVisible="@_viewSharedProjectComponent" IsVisibleChanged="@HandleViewSharedProjectComponent"/>
 }

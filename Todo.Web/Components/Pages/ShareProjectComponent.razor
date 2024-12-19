@@ -65,9 +65,10 @@
     
 </div>
 
-
-<StatusMessageComponent Message="@_statusMessage" IsError="@_isError" IsVisible = "@_viewStatusComponent"IsVisibleChanged="@HandleStatusMessageVisibility"/>
-
+@if (_viewStatusComponent && string.IsNullOrWhiteSpace(_statusMessage))
+{
+    <StatusMessageComponent Message="@_statusMessage" IsError="@_isError" IsVisible="@_viewStatusComponent"IsVisibleChanged="@HandleStatusMessageVisibility"/>
+}
 
 @code {
     [Parameter] public ProjectDto Project { get; set; }
@@ -88,18 +89,31 @@
     
     private bool _isVisible;
     
-    protected override async void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
         try
         {
             _isVisible = IsVisible;
-            ProjectCollaborators = await ProjectCollaboratorService.GetCollaboratorsFromProjectAsync(Project.Id);
-            
-            await UpdateCollaboratorsEmail();
+            if (_isVisible)
+            {
+                
+                ProjectCollaborators = await ProjectCollaboratorService.GetCollaboratorsFromProjectAsync(Project.Id);
+
+                if (ProjectCollaborators != null && ProjectCollaborators.Any())
+                {
+                    await UpdateCollaboratorsEmail();
+                }
+                else
+                {
+                    ProjectCollaborators = [];
+                }
+            }
+
             StateHasChanged();
         }
         catch (Exception e)
         {
+            Console.WriteLine("Here");
             await ShowStatusMessage("Failed to get collaborators. Please try again.");   
         }
     }

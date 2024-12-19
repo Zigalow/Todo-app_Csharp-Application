@@ -77,9 +77,12 @@ else
     <p>No Tasks</p>
 }
 
-<SpecificTodoItemComponent TodoItem="@_specificTodoItem" IsViewer="@IsViewer" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged"
-                           OnTodoItemDeleted="@HandleTodoItemDeleted"/>
+@if (_specificTodoItem != null && ViewTask)
+{
+    <SpecificTodoItemComponent TodoItem="@_specificTodoItem" IsViewer="@IsViewer" IsVisible="@ViewTask" IsVisibleChanged="@HandleViewTaskChanged"
+                               OnTodoItemDeleted="@HandleTodoItemDeleted"/>
 
+}
 
 @code {
     [Parameter] public List<TodoItemDto> TodoItems { get; set; }
